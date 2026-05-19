@@ -1,7 +1,7 @@
 // FieldApp Service Worker — Offline + Sync
-const CACHE = 'schnellr-v2';
+const CACHE = 'schnellr-v3';
 const SHELL = [
-  './FieldApp_SHK_v2.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -56,7 +56,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }
         return res;
-      }).catch(() => caches.match('./FieldApp_SHK_v2.html'));
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });
