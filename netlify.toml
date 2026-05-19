@@ -29,7 +29,18 @@
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
-# ── SPA-Fallback: alle Pfade → index.html ────────────────────
+# ── /app → App (SPA-Rewrite) ─────────────────────────────────
+[[redirects]]
+  from = "/app"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/app/*"
+  to = "/app.html"
+  status = 200
+
+# ── Alles andere → Landing Page ───────────────────────────────
 [[redirects]]
   from = "/*"
   to = "/index.html"

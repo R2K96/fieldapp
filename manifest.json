@@ -2,7 +2,7 @@
   "name": "SchnellR",
   "short_name": "SchnellR",
   "description": "Außendienst. Einfach gemacht.",
-  "start_url": "/",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#0d1520",
   "theme_color": "#00c4a8",
