@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldApp · Außendienst</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg: #0d1520;
+  --bg2: #111d2b;
+  --bg3: #172333;
+  --card: #1a2840;
+  --card2: #1f3050;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --teal: #00c4a8;
+  --teal2: #00a88f;
+  --teal-dim: rgba(0,196,168,0.12);
+  --gold: #f0a500;
+  --gold-dim: rgba(240,165,0,0.12);
+  --red: #ff5f5f;
+  --red-dim: rgba(255,95,95,0.12);
+  --green: #3dd68c;
+  --green-dim: rgba(61,214,140,0.12);
+  --blue: #5aabff;
+  --blue-dim: rgba(90,171,255,0.12);
+  --purple: #b97cf5;
+  --purple-dim: rgba(185,124,245,0.12);
+  --text: #dde8f4;
+  --text2: #8aa4be;
+  --text3: #4a6278;
+  --r: 10px;
+  --sh: 0 4px 24px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+
+/* nav replaced */
+
+/* ── PAGE ── */
+.page{display:none;flex:1;padding:20px 16px 80px;max-width:960px;margin:0 auto;width:100%;}
+.page.active{display:block;}
+
+/* ── SHARED COMPONENTS ── */
+.section-title{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:700;
+  margin-bottom:4px;
+}
+.section-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
+
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:20px;margin-bottom:14px;}
+.card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text);}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+
+label.lbl{
+  display:block;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.08em;color:var(--text3);margin-bottom:5px;margin-top:14px;
+}
+label.lbl:first-of-type{margin-top:0;}
+
+input.inp,select.inp,textarea.inp{
+  width:100%;padding:10px 12px;
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:8px;color:var(--text);
+  font-family:'Inter',sans-serif;font-size:14px;
+  outline:none;transition:border-color 0.15s;-webkit-appearance:none;
+}
+input.inp:focus,select.inp:focus,textarea.inp:focus{border-color:var(--teal);}
+textarea.inp{resize:vertical;min-height:80px;line-height:1.5;}
+select.inp option{background:var(--bg3);}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.chip{
+  padding:6px 12px;border-radius:16px;border:1px solid var(--border2);
+  background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all 0.15s;user-select:none;
+}
+.chip:hover{border-color:var(--teal);color:var(--teal);}
+.chip.on{background:var(--teal);border-color:var(--teal);color:#0d1520;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 18px;border:none;border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.15s;
+}
+.btn-teal{background:var(--teal);color:#0d1520;}
+.btn-teal:hover{background:var(--teal2);}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--card2);}
+.btn-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,95,95,0.2);}
+.btn-full{width:100%;}
+.btn-row{display:flex;gap:8px;}
+.btn-row .btn{flex:1;}
+
+/* STAT CARDS */
+.stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;
+}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--teal);}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.stat.gold .stat-val{color:var(--gold);}
+.stat.green .stat-val{color:var(--green);}
+.stat.red .stat-val{color:var(--red);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{
+  text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.08em;color:var(--text3);padding:8px 12px;
+  border-bottom:1px solid var(--border);
+}
+.tbl td{
+  padding:11px 12px;font-size:13px;border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(255,255,255,0.02);}
+.tbl-empty{text-align:center;padding:32px;color:var(--text3);font-size:13px;}
+
+/* BADGE */
+.badge{
+  display:inline-block;padding:3px 8px;border-radius:10px;
+  font-size:10px;font-weight:700;letter-spacing:0.05em;
+}
+.badge-teal{background:var(--teal-dim);color:var(--teal);}
+.badge-gold{background:var(--gold-dim);color:var(--gold);}
+.badge-green{background:var(--green-dim);color:var(--green);}
+.badge-red{background:var(--red-dim);color:var(--red);}
+.badge-blue{background:var(--blue-dim);color:var(--blue);}
+.badge-purple{background:var(--purple-dim);color:var(--purple);}
+
+/* ALERT */
+.alert{border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.55;display:flex;gap:10px;margin-bottom:12px;}
+.alert-icon{font-size:18px;flex-shrink:0;}
+.alert-body{}
+.alert-title{font-weight:700;margin-bottom:2px;}
+.alert-teal{background:var(--teal-dim);border:1px solid rgba(0,196,168,0.2);color:var(--teal);}
+.alert-gold{background:var(--gold-dim);border:1px solid rgba(240,165,0,0.2);color:var(--gold);}
+.alert-red{background:var(--red-dim);border:1px solid rgba(255,95,95,0.2);color:var(--red);}
+
+/* PROGRESS BAR */
+.prog-wrap{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.3s,background 0.3s;}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:16px;}
+.search-wrap input{padding-left:36px;}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;}
+
+/* MODAL */
+.modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.7);z-index:500;
+  align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(6px);
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--card2);border-radius:16px 16px 0 0;
+  border:1px solid var(--border2);border-bottom:none;
+  padding:22px 20px 40px;width:100%;max-width:500px;
+  max-height:90vh;overflow-y:auto;
+  animation:mup 0.25s ease;
+}
+@keyframes mup{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:18px;}
+.modal-close{
+  float:right;background:none;border:none;color:var(--text2);
+  font-size:20px;cursor:pointer;margin-top:-4px;
+}
+
+/* DETAIL PANEL */
+.detail-panel{
+  display:none;position:fixed;right:0;top:54px;bottom:0;
+  width:360px;background:var(--bg2);border-left:1px solid var(--border);
+  z-index:100;overflow-y:auto;padding:20px;
+  animation:dpIn 0.2s ease;
+}
+.detail-panel.open{display:block;}
+@keyframes dpIn{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.dp-close{
+  float:right;background:none;border:none;color:var(--text2);
+  font-size:18px;cursor:pointer;
+}
+.dp-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;}
+.dp-sub{font-size:12px;color:var(--text2);margin-bottom:16px;}
+.dp-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
+.dp-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:10px;}
+.dp-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);}
+.dp-row:last-child{border-bottom:none;}
+.dp-key{color:var(--text2);}
+.dp-val{color:var(--text);font-weight:500;text-align:right;}
+
+/* TIMELINE */
+.timeline-item{
+  display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);
+}
+.timeline-item:last-child{border-bottom:none;}
+.tl-dot{
+  width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;
+}
+.tl-body{flex:1;}
+.tl-title{font-size:13px;font-weight:600;color:var(--text);}
+.tl-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* WOCHENPLAN IN APP */
+.day-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.day-col2{
+  background:var(--card);border-radius:var(--r);border:1px solid var(--border);
+  overflow:hidden;
+}
+.day-col2.today{border-color:var(--teal);}
+.day-col2.over{border-color:var(--red);}
+.day-head2{
+  padding:10px 10px 8px;border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+.day-name2{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;}
+.day-date2{font-size:9px;color:var(--text3);margin-top:1px;}
+.day-list{padding:6px;min-height:60px;}
+.day-item{
+  border-radius:6px;padding:6px 8px;margin-bottom:4px;
+  font-size:11px;position:relative;cursor:pointer;
+}
+.day-item-name{font-weight:600;color:var(--text);margin-bottom:1px;}
+.day-item-meta{font-size:10px;color:var(--text2);}
+.day-add{
+  width:calc(100%-12px);margin:0 6px 6px;padding:5px;
+  border-radius:6px;border:1px dashed var(--border);
+  background:none;color:var(--text3);font-size:11px;font-weight:600;
+  cursor:pointer;transition:all 0.15s;width:calc(100% - 12px);
+}
+.day-add:hover{border-color:var(--teal);color:var(--teal);}
+.day-prog{padding:4px 8px 6px;border-bottom:1px solid var(--border);}
+.day-prog-track{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.day-prog-fill{height:100%;border-radius:2px;transition:all 0.3s;}
+
+@media(max-width:640px){
+  .grid4{grid-template-columns:1fr 1fr;}
+  .grid3{grid-template-columns:1fr 1fr;}
+  .grid2{grid-template-columns:1fr;}
+  .day-grid{grid-template-columns:1fr;}
+  .detail-panel{width:100%;top:54px;}
+  nav{overflow-x:auto;}
+}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,0,0.4);}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.nav-gem{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--teal),var(--teal2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#0d1520;}
+.nav-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.burger-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;}
+/* ── SIDE MENU ── */
+.side-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;backdrop-filter:blur(4px);}
+.side-overlay.open{display:block;}
+.side-menu{position:fixed;right:0;top:0;bottom:0;width:250px;background:var(--bg2);border-left:1px solid var(--border);z-index:301;padding:20px 14px;overflow-y:auto;transform:translateX(100%);transition:transform 0.25s ease;}
+.side-menu.open{transform:translateX(0);}
+.side-menu-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text);padding:0 8px;}
+.side-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:all 0.15s;margin-bottom:3px;font-size:13px;font-weight:600;color:var(--text2);}
+.side-item:hover{background:var(--bg3);color:var(--text);}
+.side-item.active{background:var(--teal-dim);color:var(--teal);}
+.side-item-icon{font-size:18px;width:22px;text-align:center;}
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg2);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);height:60px;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:all 0.15s;color:var(--text3);border:none;background:none;font-family:'Inter',sans-serif;padding:0;}
+.bnav-item.active{color:var(--teal);}
+.bnav-item:hover{color:var(--text2);}
+.bnav-icon{font-size:20px;}
+.bnav-label{font-size:10px;font-weight:600;letter-spacing:0.02em;}
+.bnav-primary{background:var(--teal);border-radius:12px;margin:6px 4px;color:#0d1520!important;}
+/* ── DASHBOARD TILES ── */
+.tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.tile-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.tile{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px 14px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:6px;}
+.tile:hover{border-color:var(--teal);background:var(--card2);transform:translateY(-1px);}
+.tile:active{transform:scale(0.97);}
+.tile-wide{grid-column:1/-1;flex-direction:row;align-items:center;gap:14px;background:var(--teal);border-color:var(--teal);padding:18px 16px;}
+.tile-wide:hover{background:var(--teal2);border-color:var(--teal2);}
+.tile-icon{font-size:26px;}
+.tile-label{font-size:13px;font-weight:700;color:var(--text);}
+.tile-wide .tile-label{color:#0d1520;font-size:15px;}
+.tile-sub{font-size:11px;color:var(--text3);}
+.tile-wide .tile-sub{color:rgba(13,21,32,0.6);}
+/* ── PAGE padding fix for bottom nav ── */
+.page{padding-bottom:72px!important;}
+
+
+/* ── MISSING CSS ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateX(-50%) translateY(12px); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0);   }
+}
+@keyframes recPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(255,95,95,0.5); }
+  70%  { box-shadow: 0 0 0 12px rgba(255,95,95,0);   }
+  100% { box-shadow: 0 0 0 0   rgba(255,95,95,0);   }
+}
+.recording { animation: recPulse 1.2s infinite !important; }
+
+/* Voice UI */
+#ntLiveBox {
+  background:var(--bg3);border-left:3px solid var(--teal);border-radius:8px;
+  padding:12px;font-size:13px;color:var(--text2);font-style:italic;
+  line-height:1.6;margin-bottom:8px;display:none;
+}
+#ntLiveBox .interim { color:var(--text3); }
+#ntLiveBox .final   { color:var(--text);  }
+
+/* voice status bar */
+#voiceStatus {
+  display:none;align-items:center;gap:8px;padding:8px 12px;
+  background:var(--red-dim);border:1px solid rgba(255,95,95,0.25);
+  border-radius:8px;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--red);
+}
+.rec-dot {
+  width:8px;height:8px;border-radius:50%;background:var(--red);
+  animation:recPulse 1s infinite;flex-shrink:0;
+}
+
+</style>
+</head>
+<body>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="nav-gem" id="appGem">F</div>
+    <span class="nav-name" id="appBrandName">FieldApp</span>
+  </div>
+  <div class="topbar-right">
+    <button class="burger-btn" onclick="toggleMenu()">&#9776;</button>
+  </div>
+</div>
+<!-- SIDE MENU -->
+<div class="side-overlay" id="sideOverlay" onclick="toggleMenu()"></div>
+<div class="side-menu" id="sideMenu">
+  <div class="side-menu-title" id="sideMenuTitle">FieldApp</div>
+  <div class="side-item active" id="smenu-dashboard" onclick="showPage('dashboard');toggleMenu()"><span class="side-item-icon">🏠</span>Dashboard</div>
+  <div class="side-item" id="smenu-kunden" onclick="showPage('kunden');toggleMenu()"><span class="side-item-icon">👤</span>Kunden</div>
+  <div class="side-item" id="smenu-auftraege" onclick="showPage('auftraege');toggleMenu()"><span class="side-item-icon">📋</span>Aufträge</div>
+  <div class="side-item" id="smenu-wochenplan" onclick="showPage('wochenplan');toggleMenu()"><span class="side-item-icon">📅</span>Wochenplan</div>
+  <div class="side-item" id="smenu-route" onclick="showPage('route');toggleMenu()"><span class="side-item-icon">🗺</span>Tagesroute</div>
+  <div class="side-item" id="smenu-auswertung" onclick="showPage('auswertung');toggleMenu()"><span class="side-item-icon">📈</span>Auswertung</div>
+  <div style="height:1px;background:var(--border);margin:10px 0;"></div>
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);padding:4px 10px;"><span id="appRegion">Region</span></div>
+</div>
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="bnav-item bnav-primary" onclick="openModal('modalAuftrag')">
+    <span class="bnav-icon">&#10133;</span>
+    <span class="bnav-label">Auftrag</span>
+  </button>
+  <button class="bnav-item active" id="bnav-dashboard" onclick="showPage('dashboard')">
+    <span class="bnav-icon">🏠</span>
+    <span class="bnav-label">Home</span>
+  </button>
+  <button class="bnav-item" id="bnav-nachtermin" onclick="showPage('nachtermin')">
+    <span class="bnav-icon">🎙</span>
+    <span class="bnav-label">Nachtermin</span>
+  </button>
+  <button class="bnav-item" id="bnav-rechnung" onclick="showPage('rechnung')">
+    <span class="bnav-icon">🧾</span>
+    <span class="bnav-label">Rechnung</span>
+  </button>
+</div>
+
+<div class="page active" id="page-dashboard">
+  <div style="margin-bottom:14px;">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:2px;" id="dashGreeting">Guten Morgen</div>
+    <div style="font-size:12px;color:var(--text3);" id="dashDate">--</div>
+  </div>
+  <div class="grid4" style="margin-bottom:14px;">
+    <div class="stat"><div class="stat-lbl">Kunden</div><div class="stat-val" id="dKunden">0</div></div>
+    <div class="stat gold"><div class="stat-lbl">Offen</div><div class="stat-val" id="dOffen">0</div></div>
+    <div class="stat green"><div class="stat-lbl">Umsatz</div><div class="stat-val" id="dUmsatz">0 €</div></div>
+    <div class="stat"><div class="stat-lbl">Rg. offen</div><div class="stat-val" id="dFolge">0</div></div>
+  </div>
+  <div class="tile-grid" style="margin-bottom:12px;">
+    <div class="tile tile-wide" onclick="openModal('modalAuftrag')">
+      <span class="tile-icon">+</span>
+      <div><div class="tile-label">Neuer Auftrag</div><div class="tile-sub">Kunde, Leistung, Datum</div></div>
+    </div>
+  </div>
+  <div class="tile-grid">
+    <div class="tile" onclick="showPage('nachtermin')">
+      <span class="tile-icon">🎙</span>
+      <div class="tile-label">Nachtermin</div>
+      <div class="tile-sub">Diktat & Dokumentation</div>
+    </div>
+    <div class="tile" onclick="showPage('rechnung');openModal('modalRechnung')">
+      <span class="tile-icon">🧾</span>
+      <div class="tile-label">Rechnung stellen</div>
+      <div class="tile-sub">Vor Ort abrechnen</div>
+    </div>
+    <div class="tile" onclick="showPage('kunden')">
+      <span class="tile-icon">👤</span>
+      <div class="tile-label">Kunden</div>
+      <div class="tile-sub" id="dashKundenSub">0 erfasst</div>
+    </div>
+    <div class="tile" onclick="showPage('route');initRoute();renderRoute()">
+      <span class="tile-icon">🗺</span>
+      <div class="tile-label">Tagesroute</div>
+      <div class="tile-sub">Navigation & Fahrtenbuch</div>
+    </div>
+    <div class="tile" onclick="showPage('wochenplan')">
+      <span class="tile-icon">📅</span>
+      <div class="tile-label">Wochenplan</div>
+      <div class="tile-sub">Kapazität & Termine</div>
+    </div>
+    <div class="tile" onclick="showPage('auftraege')">
+      <span class="tile-icon">📋</span>
+      <div class="tile-label">Aufträge</div>
+      <div class="tile-sub" id="dashOffenSub">0 offen</div>
+    </div>
+  </div>
+  <div class="tile-grid-3">
+    <div class="tile" onclick="openModal('modalKunde')">
+      <span class="tile-icon">+</span>
+      <div class="tile-label">Neuer Kunde</div>
+    </div>
+    <div class="tile" onclick="showPage('rechnung')">
+      <span class="tile-icon">📊</span>
+      <div class="tile-label">Rechnungen</div>
+    </div>
+    <div class="tile" onclick="showPage('auswertung')">
+      <span class="tile-icon">📈</span>
+      <div class="tile-label">Auswertung</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Heute geplant</div>
+    <div id="dashHeute"><div class="tbl-empty">Keine Aufträge für heute.</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Cross-Selling Hinweise</div>
+    <div id="dashCrossSell"><div class="tbl-empty">Keine offenen Hinweise.</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Letzte Aktivitäten</div>
+    <div id="dashAktivitaet"><div class="tbl-empty">Noch keine Aktivitäten.</div></div>
+  </div>
+</div>
+<div class="page" id="page-kunden">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <div class="section-title">Kunden</div>
+    <button class="btn btn-teal" onclick="openModal('modalKunde')">+ Neuer Kunde</button>
+  </div>
+  <div class="section-sub" id="kundenCount">0 Kunden erfasst</div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="inp" type="text" placeholder="Suche nach Name, Adresse..." oninput="renderKunden(this.value)">
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr>
+        <th>Name</th><th>Leistung</th><th>Letzter Kontakt</th><th>Potenzial</th><th>Umsatz</th>
+      </tr></thead>
+      <tbody id="kundenTbody"><tr><td colspan="5" class="tbl-empty">Noch keine Kunden erfasst.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: AUFTRÄGE
+══════════════════════════════════════════ -->
+<div class="page" id="page-auftraege">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <div class="section-title">Aufträge</div>
+    <button class="btn btn-teal" onclick="openModal('modalAuftrag')">+ Neuer Auftrag</button>
+  </div>
+  <div class="section-sub">Alle erfassten Aufträge</div>
+
+  <div class="grid3" style="margin-bottom:16px;">
+    <div class="stat"><div class="stat-lbl">Offen</div><div class="stat-val" id="aOffen">0</div></div>
+    <div class="stat green"><div class="stat-lbl">Abgeschlossen</div><div class="stat-val" id="aErledigt">0</div></div>
+    <div class="stat gold"><div class="stat-lbl">Folgetermin</div><div class="stat-val" id="aFolge">0</div></div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr>
+        <th>Kunde</th><th>Leistung</th><th>Datum</th><th>Mitarbeiter</th><th>Status</th><th>Betrag</th>
+      </tr></thead>
+      <tbody id="auftragTbody"><tr><td colspan="6" class="tbl-empty">Noch keine Aufträge erfasst.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: WOCHENPLAN
+══════════════════════════════════════════ -->
+<div class="page" id="page-wochenplan">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div>
+      <div class="section-title">Wochenplan</div>
+      <div class="section-sub" id="wpWeekLabel">–</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="wpChangeWeek(-1)">‹ Vorwoche</button>
+      <button class="btn btn-ghost" onclick="wpChangeWeek(1)">Nächste ›</button>
+    </div>
+  </div>
+
+  <div class="grid4" style="margin-bottom:16px;">
+    <div class="stat"><div class="stat-lbl">Aufträge</div><div class="stat-val" id="wpAuftraege">0</div></div>
+    <div class="stat"><div class="stat-lbl">Stunden</div><div class="stat-val" id="wpStunden">0h</div></div>
+    <div class="stat gold"><div class="stat-lbl">Umsatz-Schätzung</div><div class="stat-val" id="wpUmsatz">0 €</div></div>
+    <div class="stat"><div class="stat-lbl">Ø Auslastung</div><div class="stat-val" id="wpAuslastung">0%</div></div>
+  </div>
+
+  <div class="day-grid" id="wpGrid"></div>
+
+  <div class="alert alert-gold" style="margin-top:14px;">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-body"><div class="alert-title">80%-Regel</div>Max. 6,4h pro Mitarbeiter/Tag einplanen. Rot = Grenze überschritten.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: NACHTERMIN
+══════════════════════════════════════════ -->
+<div class="page" id="page-nachtermin">
+  <div class="section-title">Nachtermin-Dokumentation</div>
+  <div class="section-sub">Diktat nach dem Kundentermin – alles wird automatisch gespeichert</div>
+
+  <div class="grid2" style="margin-bottom:0;">
+    <div>
+      <div class="card">
+        <div class="card-title">① Auftrag auswählen</div>
+        <label class="lbl">Auftrag</label>
+        <select class="inp" id="ntAuftrag" onchange="loadNtAuftrag()">
+          <option value="">– Auftrag wählen –</option>
+        </select>
+        <div id="ntAuftragInfo" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">② Sprachdiktat</div>
+        <div id="voiceStatus" style="display:none;align-items:center;gap:8px;padding:8px 12px;background:var(--red-dim);border:1px solid rgba(255,95,95,0.25);border-radius:8px;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--red);"><div class="rec-dot"></div>Aufnahme läuft …</div>
+        <button class="btn btn-full" id="ntVoiceBtn" onclick="ntToggleRecording()" style="background:var(--bg3);border:2px dashed var(--border2);color:var(--text2);margin-bottom:8px;font-size:14px;">
+          🎙 Aufnahme starten
+        </button>
+        <div id="ntLiveBox" style="display:none;background:var(--bg3);border-left:3px solid var(--teal);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;margin-bottom:8px;"><span id="ntFinalText" style="color:var(--text);"></span><span id="ntInterimText" style="color:var(--text3);font-style:italic;"></span></div>
+        <label class="lbl">Diktat / Notiz</label>
+        <textarea class="inp" id="ntDiktat" placeholder="Was wurde gemacht? Was bleibt offen? Beobachtungen?" style="min-height:100px;"></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="document.getElementById('ntDiktat').value='';document.getElementById('ntFinalText').textContent='';document.getElementById('ntLiveBox').style.display='none';">✕ Löschen</button>
+          <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="navigator.clipboard.writeText(document.getElementById('ntDiktat').value).then(()=>showToast('Kopiert ✓'))">📋 Kopieren</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">③ Zeiten &amp; Leistungen</div>
+
+        <!-- Vorbereitung & Nachbereitung global -->
+        <div class="grid2" style="margin-bottom:14px;">
+          <div><label class="lbl">Vorbereitung (Min.)</label><input class="inp" type="number" id="ntZeitVor" value="0" min="0" oninput="ntUpdateGesamt()"></div>
+          <div><label class="lbl">Nachbereitung (Min.)</label><input class="inp" type="number" id="ntZeitNach" value="0" min="0" oninput="ntUpdateGesamt()"></div>
+        </div>
+        <input type="hidden" id="ntZeitOrt" value="0">
+
+        <!-- Leistungsblöcke vor Ort -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);">Leistungen vor Ort</div>
+          <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="ntAddBlock()">+ Block</button>
+        </div>
+        <div id="ntLeistungsBlocks" style="margin-bottom:8px;"></div>
+
+        <!-- Zusammenfassung -->
+        <div style="background:var(--bg3);border-radius:8px;padding:11px 13px;margin-bottom:4px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+            <span style="color:var(--text2);">Vor Ort gesamt</span>
+            <span style="color:var(--teal);font-weight:700;" id="ntZeitOrtAnzeige">0 Min.</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding-top:5px;border-top:1px solid var(--border);">
+            <span style="color:var(--text2);">Gesamt abrechenbar</span>
+            <span style="color:var(--teal);font-weight:800;" id="ntGesamtAnzeige">0 Min.</span>
+          </div>
+        </div>
+        <label class="lbl" style="margin-top:14px;">Status</label>
+        <div class="chips" id="ntStatusChips">
+          <div class="chip" onclick="ntPick(this,'status')">✅ Erledigt</div>
+          <div class="chip" onclick="ntPick(this,'status')">⏳ Teilweise offen</div>
+          <div class="chip" onclick="ntPick(this,'status')">📅 Folgetermin nötig</div>
+        </div>
+        <div id="ntFolgetermindiv" style="display:none;margin-top:10px;">
+          <label class="lbl">Folgetermin Datum</label>
+          <input class="inp" type="date" id="ntFolgeDate">
+          <label class="lbl">Leistung Folgetermin</label>
+          <div class="chips" id="ntFolgeLeistungChips">
+            <div class="chip" onclick="ntPick(this,'folgeLeistung')">🔧 Handwerk</div>
+            <div class="chip" onclick="ntPick(this,'folgeLeistung')">📋 Bürokratie</div>
+            <div class="chip" onclick="ntPick(this,'folgeLeistung')">💰 Steuer</div>
+            <div class="chip" onclick="ntPick(this,'folgeLeistung')">📱 Digital</div>
+          </div>
+        </div>
+        <label class="lbl" style="margin-top:14px;">Interne Notiz</label>
+        <textarea class="inp" id="ntNotiz" placeholder="Nur für das Team..." style="min-height:60px;"></textarea>
+        <button class="btn btn-teal btn-full" style="margin-top:14px;" onclick="saveNachtermin()">✓ Dokumentation speichern</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" id="ntOutputCard" style="display:none;">
+        <div class="card-title">📋 Gespeicherte Dokumentation</div>
+        <div id="ntOutput"></div>
+      </div>
+      <div class="card" style="background:var(--bg2);border-color:var(--border);">
+        <div class="card-title" style="color:var(--text2);">💡 Tipp</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.65;">
+          Diktat direkt nach dem Termin sprechen – noch im Auto vor der Abfahrt.<br><br>
+          Wichtig: Was war offen? Was hat der Kunde noch erwähnt? Was ist für den Folgetermin wichtig?<br><br>
+          Die Dokumentation wird automatisch mit dem Auftrag und der Kundenkarte verknüpft.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: AUSWERTUNG
+══════════════════════════════════════════ -->
+<div class="page" id="page-auswertung">
+  <div class="section-title">Auswertung</div>
+  <div class="section-sub">Übersicht aller Kennzahlen</div>
+
+  <div class="grid4" style="margin-bottom:16px;">
+    <div class="stat green"><div class="stat-lbl">Umsatz gesamt</div><div class="stat-val" id="awUmsatz">0 €</div></div>
+    <div class="stat"><div class="stat-lbl">Ø Auftragswert</div><div class="stat-val" id="awAvg">0 €</div></div>
+    <div class="stat gold"><div class="stat-lbl">Cross-Selling Rate</div><div class="stat-val" id="awXsell">0%</div></div>
+    <div class="stat"><div class="stat-lbl">Kunden mit Folge</div><div class="stat-val" id="awFolge">0</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Leistungen nach Häufigkeit</div>
+      <div id="awLeistungen"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Kundengewinnung nach Kanal</div>
+      <div id="awKanaele"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Umsatz je Mitarbeiter</div>
+    <div id="awMitarbeiter"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Break-even Status</div>
+    <div id="awBreakeven"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════ -->
+
+<!-- MODAL: NEUER KUNDE -->
+<div class="modal-bg" id="modalKunde" onclick="closeModalBg(event,'modalKunde')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalKunde')">✕</button>
+    <div class="modal-title">Neuer Kunde</div>
+    <label class="lbl">Name</label>
+    <input class="inp" id="mkName" placeholder="z.B. Frau Elisabeth Müller">
+    <label class="lbl">Adresse</label>
+    <input class="inp" id="mkAdresse" placeholder="Straße, PLZ Ort">
+    <label class="lbl">Telefon</label>
+    <input class="inp" id="mkTelefon" placeholder="0511 – ...">
+    <label class="lbl">Kontaktkanal</label>
+    <div class="chips" id="mkKanalChips">
+      <div class="chip" onclick="modalChip(this,'mkKanal')">📞 Telefon</div>
+      <div class="chip" onclick="modalChip(this,'mkKanal')">💬 WhatsApp</div>
+      <div class="chip" onclick="modalChip(this,'mkKanal')">📮 Post</div>
+    </div>
+    <label class="lbl">Bekannt über</label>
+    <div class="chips" id="mkHerkunftChips">
+      <div class="chip" onclick="modalChip(this,'mkHerkunft')">💊 Apotheke</div>
+      <div class="chip" onclick="modalChip(this,'mkHerkunft')">🏥 Arztpraxis</div>
+      <div class="chip" onclick="modalChip(this,'mkHerkunft')">🤝 Empfehlung</div>
+      <div class="chip" onclick="modalChip(this,'mkHerkunft')">🔍 Google</div>
+      <div class="chip" onclick="modalChip(this,'mkHerkunft')">📰 Zeitung</div>
+      <div class="chip" onclick="modalChip(this,'mkHerkunft')">⛪ Kirchengemeinde</div>
+    </div>
+    <label class="lbl">Notiz</label>
+    <textarea class="inp" id="mkNotiz" placeholder="Besonderheiten, erste Einschätzung..." style="min-height:60px;"></textarea>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modalKunde')">Abbrechen</button>
+      <button class="btn btn-teal" onclick="saveKunde()">Kunde speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NEUER AUFTRAG -->
+<div class="modal-bg" id="modalAuftrag" onclick="closeModalBg(event,'modalAuftrag')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalAuftrag')">✕</button>
+    <div class="modal-title">Neuer Auftrag</div>
+    <label class="lbl">Kunde</label>
+    <select class="inp" id="mAKunde"><option value="">– Kunde wählen –</option></select>
+    <label class="lbl">Leistung</label>
+    <div class="chips" id="mALeistungChips">
+      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">🔧 Handwerk</div>
+      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">📋 Bürokratie</div>
+      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">💰 Steuer</div>
+      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">📱 Digital</div>
+      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">🛵 Botendienst</div>
+      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">🌿 Garten</div>
+    </div>
+    <div class="grid2">
+      <div><label class="lbl">Datum</label><input class="inp" type="date" id="mADatum"></div>
+      <div><label class="lbl">Dauer (Min.)</label><input class="inp" type="number" id="mADauer" value="60" min="15" oninput="updateMAPreis()"></div>
+    </div>
+    <label class="lbl">Mitarbeiter</label>
+    <div class="chips" id="mAMaChips">
+      <div class="chip" onclick="modalChip(this,'mAMa')">👤 Gründer A</div>
+      <div class="chip" onclick="modalChip(this,'mAMa')">👤 Gründer B</div>
+      <div class="chip" onclick="modalChip(this,'mAMa')">👥 Angest. 1</div>
+      <div class="chip" onclick="modalChip(this,'mAMa')">👥 Angest. 2</div>
+    </div>
+    <label class="lbl">Preis-Schätzung</label>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--teal);font-weight:700;" id="mAPreisInfo">– Leistung + Dauer wählen</div>
+    <label class="lbl">Notiz</label>
+    <textarea class="inp" id="mANotiz" placeholder="Kundenwunsch, Besonderheiten..." style="min-height:60px;"></textarea>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modalAuftrag')">Abbrechen</button>
+      <button class="btn btn-teal" onclick="saveAuftrag()">Auftrag speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL: KUNDE -->
+<div class="detail-panel" id="detailPanel">
+  <button class="dp-close" onclick="closeDetail()">✕</button>
+  <div id="detailContent"></div>
+</div>
+
+<!-- WOCHENPLAN MODAL -->
+<div class="modal-bg" id="modalWP" onclick="closeModalBg(event,'modalWP')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalWP')">✕</button>
+    <div class="modal-title" id="modalWPTitle">Auftrag hinzufügen</div>
+    <label class="lbl">Kunde</label>
+    <select class="inp" id="wpMKunde"><option value="">– Kunde wählen –</option></select>
+    <label class="lbl">Leistung</label>
+    <div class="chips" id="wpMLeistungChips">
+      <div class="chip" onclick="modalChip(this,'wpMLeistung')">🔧 Handwerk</div>
+      <div class="chip" onclick="modalChip(this,'wpMLeistung')">📋 Bürokratie</div>
+      <div class="chip" onclick="modalChip(this,'wpMLeistung')">💰 Steuer</div>
+      <div class="chip" onclick="modalChip(this,'wpMLeistung')">📱 Digital</div>
+      <div class="chip" onclick="modalChip(this,'wpMLeistung')">🛵 Botendienst</div>
+      <div class="chip" onclick="modalChip(this,'wpMLeistung')">🌿 Garten</div>
+    </div>
+    <label class="lbl">Dauer (Min.)</label>
+    <input class="inp" type="number" id="wpMDauer" value="60" min="15">
+    <label class="lbl">Mitarbeiter</label>
+    <div class="chips" id="wpMMaChips">
+      <div class="chip" onclick="modalChip(this,'wpMMa')">👤 Gründer A</div>
+      <div class="chip" onclick="modalChip(this,'wpMMa')">👤 Gründer B</div>
+      <div class="chip" onclick="modalChip(this,'wpMMa')">👥 Angest. 1</div>
+    </div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modalWP')">Abbrechen</button>
+      <button class="btn btn-teal" onclick="saveWPAuftrag()">Hinzufügen</button>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-route">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <div class="section-title">Tagesroute</div>
+    <input type="date" id="routeDatum" class="inp" style="width:auto;padding:7px 12px;font-size:13px;" onchange="renderRoute()">
+  </div>
+  <div class="section-sub" id="routeSub">Alle Aufträge des Tages</div>
+  <div class="grid3" style="margin-bottom:14px;">
+    <div class="stat"><div class="stat-lbl">Aufträge</div><div class="stat-val" id="routeAnzahl">0</div></div>
+    <div class="stat gold"><div class="stat-lbl">~km</div><div class="stat-val" id="routeKm">--</div></div>
+    <div class="stat green"><div class="stat-lbl">Umsatz</div><div class="stat-val" id="routeUmsatz">0</div></div>
+  </div>
+  <div class="card" style="margin-bottom:12px;padding:12px 14px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">🏠</span>
+      <div style="flex:1;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:4px;">Startpunkt</div>
+      <input class="inp" id="routeStart" placeholder="z.B. Hauptstr. 1, Region" style="padding:7px 10px;font-size:13px;" oninput="updateRouteLink()"></div>
+    </div>
+  </div>
+  <div id="routeList"></div>
+  <div class="card" style="margin-bottom:12px;padding:12px 14px;">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:8px;">Manuellen Stopp hinzufügen</div>
+    <div style="display:flex;gap:7px;">
+      <input class="inp" id="routeManuelAdresse" placeholder="Adresse" style="flex:1;padding:8px 10px;font-size:13px;">
+      <input class="inp" id="routeManuelLabel" placeholder="Bezeichnung" style="width:110px;padding:8px 10px;font-size:13px;">
+      <button onclick="addManuellerStopp()" style="background:var(--teal);border:none;border-radius:8px;padding:8px 12px;color:#0d1520;font-size:13px;font-weight:700;cursor:pointer;">+</button>
+    </div>
+  </div>
+  <div style="display:none;gap:10px;margin-bottom:14px;" id="routeActions">
+    <a id="routeMapsLink" href="#" target="_blank" style="flex:2;background:var(--teal);border-radius:10px;padding:13px;text-align:center;font-size:13px;font-weight:700;color:#0d1520;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:7px;">🗺 Google Maps</a>
+    <button onclick="copyRouteAddresses()" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;">📋 Kopieren</button>
+  </div>
+  <div class="card" style="padding:14px 16px;">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:10px;">📒 Fahrtenbuch</div>
+    <div class="grid2">
+      <div><label class="lbl">Start-km</label><input class="inp" type="number" id="fbStart" placeholder="45230"></div>
+      <div><label class="lbl">End-km</label><input class="inp" type="number" id="fbEnde" placeholder="45278" oninput="calcFahrtkosten()"></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:12px;color:var(--text2);">km × 0,30 €/km (steuerlich)</div>
+      <div style="font-size:15px;font-weight:700;color:var(--teal);" id="fbErgebnis">-- km</div>
+    </div>
+    <button onclick="saveFahrtenbuch()" style="width:100%;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;">Eintrag speichern</button>
+  </div>
+  <div style="margin-top:10px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:8px;">Letzte Einträge</div><div id="fbHistorie"></div></div>
+</div>
+
+<div class="page" id="page-rechnung">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <div class="section-title">Rechnungen</div>
+    <button class="btn btn-teal" onclick="openModal('modalRechnung')">+ Neue Rechnung</button>
+  </div>
+  <div class="grid3" style="margin-bottom:14px;">
+    <div class="stat"><div class="stat-lbl">Offen</div><div class="stat-val" id="rOffen">0</div></div>
+    <div class="stat green"><div class="stat-lbl">Bezahlt heute</div><div class="stat-val" id="rHeute">0 €</div></div>
+    <div class="stat gold"><div class="stat-lbl">Monat</div><div class="stat-val" id="rMonat">0 €</div></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl"><thead><tr><th>Kunde</th><th>Leistung</th><th>Datum</th><th>Betrag</th><th>Status</th><th></th></tr></thead>
+    <tbody id="rechnungTbody"><tr><td colspan="6" class="tbl-empty">Noch keine Rechnungen.</td></tr></tbody></table>
+  </div>
+</div>
+
+
+<div class="modal-bg" id="modalRechnung" onclick="closeModalBg(event,'modalRechnung')">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-close" onclick="closeModal('modalRechnung')">x</button>
+    <div id="rStep1">
+      <div class="modal-title">Neue Rechnung</div>
+      <label class="lbl">Auftrag / Kunde</label>
+      <select class="inp" id="rAuftragSel" onchange="loadRechnungAuftrag()"><option value="">- Auftrag wählen (optional) -</option></select>
+      <div id="rAutoInfo" style="display:none;background:#0d1f14;border:1px solid #1a5c30;border-radius:8px;padding:10px 13px;margin-top:8px;margin-bottom:4px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#3dd68c;margin-bottom:4px;">✅ Daten aus Nachtermin-Dokumentation übernommen</div>
+        <div style="font-size:12px;color:#8aa4be;" id="rAutoInfoText"></div>
+        <div style="font-size:11px;color:#4a6278;margin-top:4px;" id="rAutoInfoDiktat"></div>
+      </div>
+      <input type="hidden" id="rDiktatHidden">
+      <input class="inp" id="rKundeName" placeholder="oder: Kundenname manuell" style="margin-top:8px;">
+      <div class="grid2" style="margin-top:8px;">
+        <div><label class="lbl">Mitarbeiter</label><select class="inp" id="rMitarbeiter"><option>Gründer A</option><option>Gründer B</option><option>Angest. 1</option><option>Angest. 2</option></select></div>
+        <div><label class="lbl">Datum</label><input class="inp" type="date" id="rDatum"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:8px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Leistungspositionen</div>
+        <button onclick="addPosition()" style="background:var(--teal-dim);border:1px solid rgba(0,196,168,0.3);border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;">+ Position</button>
+      </div>
+      <div id="rPositionen"></div>
+      <div style="background:var(--bg3);border-radius:10px;padding:13px;margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px;"><span>Positionen</span><span id="rGesamtPos">0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:700;color:var(--teal);padding-top:8px;border-top:1px solid var(--border);"><span>Gesamt</span><span id="rVorBetrag">0,00 €</span></div>
+        <div style="margin-top:8px;"><label class="lbl">Betrag überschreiben</label><input class="inp" type="number" id="rBetragManual" placeholder="Leer = automatisch" oninput="rManualOverride(this.value)" style="margin-top:4px;"></div>
+      </div>
+      <button class="btn btn-teal btn-full" style="margin-top:14px;" onclick="goRStep(2)">Weiter zur Rechnung →</button>
+    </div>
+    <div id="rStep2" style="display:none;">
+      <div class="modal-title">Rechnung</div>
+      <div id="rechnungPreview" style="background:white;border-radius:10px;padding:18px;color:#1a1f1c;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #00c4a8;">
+          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#1a1f1c;" id="invoiceBrand">FieldApp</div><div style="font-size:11px;color:#7a9088;font-style:italic;">Damit zuhause zuhause bleibt.</div></div>
+          <div style="text-align:right;"><div style="font-size:10px;color:#7a9088;font-weight:700;text-transform:uppercase;">Rechnung</div><div style="font-size:14px;font-weight:700;color:#00c4a8;" id="rNummer">--</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;font-size:12px;">
+          <div><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-bottom:3px;">Empfänger</div><div style="font-weight:600;" id="rPreviewKunde">--</div></div>
+          <div style="text-align:right;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-bottom:3px;">Datum</div><div style="font-weight:600;" id="rPreviewDatum">--</div><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-top:5px;margin-bottom:3px;">Mitarbeiter</div><div id="rPreviewMA">--</div></div>
+        </div>
+        <div style="background:#f7f6f2;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px;"><span style="font-weight:700;" id="rPreviewLeistung">--</span><span style="color:#7a9088;" id="rPreviewZeit">--</span></div>
+          <div style="font-size:11px;color:#4a5550;line-height:1.55;" id="rPreviewBeschreibung">--</div>
+        </div>
+        <div id="rPreviewNotizenBlock" style="display:none;background:#f0faf5;border-radius:8px;padding:9px 12px;margin-bottom:12px;border-left:3px solid #00c4a8;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-bottom:4px;">Dokumentation / Notizen</div>
+          <div style="font-size:11px;color:#3a5048;line-height:1.6;" id="rPreviewDiktat"></div>
+        </div>
+        <div style="background:#00c4a8;border-radius:8px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:11px;color:rgba(13,21,32,0.75);">Gesamt (netto, §19 UStG)</div>
+          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#0d1520;" id="rPreviewBetrag">-- €</div>
+        </div>
+        <div style="margin-top:10px;font-size:10px;color:#9aada6;line-height:1.6;">[FIRMENNAME] · [ADRESSE] · [TELEFON] · [E-Mail]<br>Gemäß §19 UStG wird keine Umsatzsteuer berechnet.</div>
+      </div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px;">Zahlungsart</div>
+      <div class="chips" id="rZahlungChips" style="margin-bottom:12px;">
+        <div class="chip" onclick="modalChip(this,'rZahlung');showZahlungDetails('bar')">💵 Bar</div>
+        <div class="chip" onclick="modalChip(this,'rZahlung');showZahlungDetails('iban')">🏦 Überweisung</div>
+        <div class="chip" onclick="modalChip(this,'rZahlung');showZahlungDetails('paypal')">📱 PayPal/Revolut</div>
+      </div>
+      <div id="zDetailBar" style="display:none;background:var(--green-dim);border:1px solid var(--green);border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px;">💵 Barzahlung</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Bitte <strong id="rBarBetrag">--</strong> entgegennehmen.</div>
+        <div class="grid2"><div><label class="lbl">Erhalten (EUR)</label><input class="inp" type="number" id="rBarErhalten" oninput="calcWechsel()"></div><div><label class="lbl">Wechselgeld</label><div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:16px;font-weight:700;color:var(--teal);margin-top:5px;" id="rWechsel">-- €</div></div></div>
+      </div>
+      <div id="zDetailIban" style="display:none;background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">🏦 Überweisung</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:2px;font-weight:700;text-transform:uppercase;">IBAN</div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:6px;">[DE XX XXXX XXXX XXXX XXXX XX]</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:2px;font-weight:700;text-transform:uppercase;">Verwendungszweck</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);" id="rIbanVwz">Rechnung --</div>
+      </div>
+      <div id="zDetailPaypal" style="display:none;background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">📱 PayPal / Revolut</div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal);">[[E-Mail]]</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:6px;">Verwendungszweck: Rechnung <span id="rPaypalNr">--</span></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="goRStep(1)">← Zurück</button><button class="btn btn-teal" onclick="bezahltBestaetigen()">✓ Bezahlt</button></div>
+      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="offenLassen()">Offen lassen</button>
+    </div>
+    <div id="rStep3" style="display:none;text-align:center;padding:16px 0;">
+      <div style="font-size:44px;margin-bottom:14px;">✅</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--teal);margin-bottom:8px;">Abgeschlossen!</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:18px;" id="rBestaetigungText">--</div>
+      <button class="btn btn-teal btn-full" onclick="closeModal('modalRechnung');renderRechnung();renderDashboard();">Fertig</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ╔══════════════════════════════════════════════════════════════╗
+// ║               FIELDAPP — KONFIGURATION                       ║
+// ║  Alle branchen-spezifischen Einstellungen hier anpassen.     ║
+// ║  Kein weiterer Code muss verändert werden.                   ║
+// ╚══════════════════════════════════════════════════════════════╝
+const CONFIG = {
+
+  // ── FIRMA ──────────────────────────────────────────────────
+  firma: {
+    name:     'FieldApp',          // Anzeigename in der App
+    kuerzel:  'F',                 // Einzelbuchstabe für das Icon oben links
+    tagline:  'Außendienst-Tool',  // Unterzeile / Claim
+    region:   'Region',            // Angezeigter Einsatzbereich
+    adresse:  '[Straße, PLZ Ort]', // Für Rechnungsfußzeile
+    telefon:  '[Telefonnummer]',   // Für Rechnungsfußzeile
+    email:    '[E-Mail]',          // Für Rechnungsfußzeile
+    iban:     '[DE XX XXXX...]',   // Für Überweisungsdetails
+    paypal:   '[PayPal-E-Mail]',   // Für PayPal-Details
+    rg_prefix:'RG',                // Rechnungsnummer-Präfix z.B. "RG-2026-001"
+    storage:  'fa',                // Prefix für localStorage (einmalig setzen, nie ändern)
+  },
+
+  // ── FARBEN ─────────────────────────────────────────────────
+  // Hex-Farben für Primär- und Akzentfarbe
+  farben: {
+    primary:  '#00c4a8',  // Hauptfarbe (Buttons, Highlights)
+    primary2: '#00a88f',  // Hover-Zustand
+    accent:   '#f0a500',  // Akzentfarbe (Gold, Warnungen)
+  },
+
+  // ── MITARBEITER ────────────────────────────────────────────
+  mitarbeiter: [
+    'Inhaber',
+    'Mitarbeiter 1',
+    'Mitarbeiter 2',
+    'Mitarbeiter 3',
+  ],
+
+  // ── LEISTUNGSKATALOG ───────────────────────────────────────
+  // emoji: Anzeige-Icon
+  // label: Anzeigename
+  // satz:  Stundensatz in EUR (0 = Pauschale)
+  // flat:  true = Pauschalbetrag statt Stundensatz
+  // pause: Rechnungs-Pauschale wenn flat=true
+  // puffer: Zeitpuffer in Minuten für Wochenplanung
+  // color: CSS-Farbe für Kalender/Karte
+  leistungen: [
+    { emoji:'🔧', label:'Handwerk & Reparatur',   satz:61,  flat:false, puffer:30, color:'var(--blue)'   },
+    { emoji:'📋', label:'Büro & Verwaltung',       satz:72,  flat:false, puffer:30, color:'var(--purple)' },
+    { emoji:'📱', label:'IT & Digital',             satz:65,  flat:false, puffer:30, color:'var(--teal)'   },
+    { emoji:'🚗', label:'Fahrt & Lieferung',        satz:0,   flat:true,  pause:15,  puffer:20, color:'var(--green)'  },
+    { emoji:'🌿', label:'Außenarbeiten',            satz:55,  flat:false, puffer:45, color:'#82c850'       },
+    { emoji:'💼', label:'Beratung',                 satz:85,  flat:false, puffer:15, color:'var(--gold)'   },
+  ],
+
+  // ── ABRECHNUNG ─────────────────────────────────────────────
+  abrechnung: {
+    mindestMinuten:  60,   // Mindestbuchung in Minuten
+    taktMinuten:     15,   // Abrechnungstakt ab Mindestbuchung
+    kmPauschale:     0.30, // EUR pro km (Fahrtenbuch)
+  },
+
+  // ── TEXTE ──────────────────────────────────────────────────
+  texte: {
+    rechnungsFusszeile: 'Gemäß §19 UStG wird keine Umsatzsteuer berechnet.',
+    willkommen:         'Willkommen zurück',
+  },
+};
+
+// ── CONFIG ANWENDEN ────────────────────────────────────────────
+// Wird automatisch beim Start ausgeführt — nichts ändern.
+function applyConfig() {
+  // Farben
+  document.documentElement.style.setProperty('--teal',  CONFIG.farben.primary);
+  document.documentElement.style.setProperty('--teal2', CONFIG.farben.primary2);
+  document.documentElement.style.setProperty('--gold',  CONFIG.farben.accent);
+  // Texte
+  const els = {
+    appBrandName:  CONFIG.firma.name,
+    appGem:        CONFIG.firma.kuerzel,
+    appTagline:    CONFIG.firma.tagline,
+    appRegion:     CONFIG.firma.region,
+    sideMenuTitle: CONFIG.firma.name,
+    invoiceBrand:  CONFIG.firma.name,
+  };
+  Object.entries(els).forEach(([id,val]) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  });
+  document.title = CONFIG.firma.name + ' · App';
+  // Mitarbeiter-Selects
+  document.querySelectorAll('.ma-select').forEach(sel => {
+    sel.innerHTML = CONFIG.mitarbeiter.map(m => '<option>'+m+'</option>').join('');
+  });
+  // Leistungs-Chips in Modals
+  buildLeistungChips();
+}
+
+// Leistungskatalog aus CONFIG aufbauen
+function buildLeistungChips() {
+  const leistungStr = l => l.emoji + ' ' + l.label;
+  // Auftrag-Modal
+  const mAL = document.getElementById('mALeistungChips');
+  if(mAL) mAL.innerHTML = CONFIG.leistungen.map(l =>
+    `<div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">${leistungStr(l)}</div>`
+  ).join('');
+  // WP-Modal
+  const wpL = document.getElementById('wpMLeistungChips');
+  if(wpL) wpL.innerHTML = CONFIG.leistungen.map(l =>
+    `<div class="chip" onclick="modalChip(this,'wpMLeistung')">${leistungStr(l)}</div>`
+  ).join('');
+}
+
+// CONFIG-basierte calcPreis + LC Kompatibilität
+function getLeistungConfig(label) {
+  return CONFIG.leistungen.find(l => (l.emoji+' '+l.label) === label || l.label === label) || {satz:65,puffer:30,color:'var(--teal)',flat:false};
+}
+
+// DATABASE (localStorage)
+// ════════════════════════════════
+const DB = {
+  get(key){ try{ return JSON.parse(localStorage.getItem(CONFIG.firma.storage+'_'+key)||'[]'); }catch(e){ return []; } },
+  set(key,val){ localStorage.setItem(CONFIG.firma.storage+'_'+key, JSON.stringify(val)); },
+  kunden(){    return this.get('kunden'); },
+  auftraege(){ return this.get('auftraege'); },
+  docs(){      return this.get('docs'); },
+  wpItems(){   return this.get('wp'); },
+  saveKunden(d){    this.set('kunden',d); },
+  saveAuftraege(d){ this.set('auftraege',d); },
+  saveDocs(d){      this.set('docs',d); },
+  saveWP(d){        this.set('wp',d); },
+};
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function today(){ return new Date().toISOString().split('T')[0]; }
+function fmtDate(s){ if(!s)return'–'; return new Date(s+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+function fmtDateShort(s){ if(!s)return'–'; return new Date(s+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); }
+
+// LEISTUNG CONFIG
+const LC = {
+  '🔧 Handwerk':   {cls:'day-item-hw',  color:'var(--blue)',   satz:61, puffer:30},
+  '📋 Bürokratie': {cls:'day-item-bk',  color:'var(--purple)', satz:76, puffer:30},
+  '💰 Steuer':     {cls:'day-item-st',  color:'var(--gold)',   satz:86, puffer:30},
+  '📱 Digital':    {cls:'day-item-dg',  color:'var(--teal)',   satz:65, puffer:30},
+  '🛵 Botendienst':{cls:'day-item-bo',  color:'var(--green)',  satz:0,  puffer:15, flat:true},
+  '🌿 Garten':     {cls:'day-item-ga',  color:'#82c850',       satz:58, puffer:20},
+};
+
+function calcPreis(leistung, dauer){
+  const cfg = LC[leistung]||{};
+  if(cfg.flat) return 16;
+  const abrMin = Math.max(60, Math.ceil(dauer/15)*15);
+  return (abrMin/60)*(cfg.satz||65);
+}
+
+// ════════════════════════════════
+// MODAL STATE
+// ════════════════════════════════
+const mState = {};
+function modalChip(el, key){
+  el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  mState[key] = el.textContent.trim();
+}
+
+// ════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════
+function toggleMenu(){
+  document.getElementById('sideOverlay').classList.toggle('open');
+  document.getElementById('sideMenu').classList.toggle('open');
+}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  ['dashboard','nachtermin','rechnung'].forEach(t=>{
+    const el=document.getElementById('bnav-'+t);
+    if(el) el.classList.toggle('active',t===id);
+  });
+  document.querySelectorAll('.side-item').forEach(el=>el.classList.remove('active'));
+  const sm=document.getElementById('smenu-'+id);
+  if(sm) sm.classList.add('active');
+  closeDetail();
+  if(id==='dashboard') renderDashboard();
+  if(id==='kunden') renderKunden();
+  if(id==='auftraege') renderAuftraege();
+  if(id==='wochenplan') renderWochenplan();
+  if(id==='route'){ initRoute(); renderRoute(); renderFbHistorie(); }
+  if(id==='nachtermin') loadNtSelects();
+  if(id==='auswertung') renderAuswertung();
+  if(id==='rechnung'){ renderRechnung(); populateRechnungSelect(); }
+}
+
+// ════════════════════════════════
+// MODAL HELPERS
+// ════════════════════════════════
+function openModal(id){
+  if(id==='modalAuftrag') populateKundenSelect('mAKunde');
+  if(id==='modalWP') populateKundenSelect('wpMKunde');
+  if(id==='modalRechnung'){ resetRModal(); populateRechnungSelect(); }
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function closeModalBg(e,id){ if(e.target.id===id) closeModal(id); }
+
+function populateKundenSelect(selId){
+  const sel = document.getElementById(selId);
+  const kunden = DB.kunden();
+  sel.innerHTML = '<option value="">– Kunde wählen –</option>';
+  kunden.forEach(k=>{ const o=document.createElement('option'); o.value=k.id; o.textContent=k.name; sel.appendChild(o); });
+}
+
+// ════════════════════════════════
+// KUNDEN
+// ════════════════════════════════
+function saveKunde(){
+  const name = document.getElementById('mkName').value.trim();
+  if(!name){ alert('Bitte Name eingeben'); return; }
+  const kunden = DB.kunden();
+  const k = {
+    id: uid(), name,
+    adresse: document.getElementById('mkAdresse').value,
+    telefon: document.getElementById('mkTelefon').value,
+    kanal: mState.mkKanal||'',
+    herkunft: mState.mkHerkunft||'',
+    notiz: document.getElementById('mkNotiz').value,
+    erstellt: today(),
+    crossSell: [],
+  };
+  kunden.push(k);
+  DB.saveKunden(kunden);
+  closeModal('modalKunde');
+  resetModalKunde();
+  showToast('Kunde gespeichert ✓');
+  renderKunden();
+  renderDashboard();
+}
+
+function resetModalKunde(){
+  ['mkName','mkAdresse','mkTelefon','mkNotiz'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#modalKunde .chip').forEach(c=>c.classList.remove('on'));
+  delete mState.mkKanal; delete mState.mkHerkunft;
+}
+
+function renderKunden(filter=''){
+  let kunden = DB.kunden();
+  if(filter) kunden = kunden.filter(k=>k.name.toLowerCase().includes(filter.toLowerCase())||k.adresse.toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('kundenCount').textContent = kunden.length+' Kunden erfasst';
+  const auftraege = DB.auftraege();
+  const tbody = document.getElementById('kundenTbody');
+  if(!kunden.length){ tbody.innerHTML='<tr><td colspan="5" class="tbl-empty">Noch keine Kunden erfasst.</td></tr>'; return; }
+  tbody.innerHTML = kunden.map(k=>{
+    const ka = auftraege.filter(a=>a.kundeId===k.id);
+    const letzteLeistung = ka.length ? ka[ka.length-1].leistung : '–';
+    const letzterKontakt = ka.length ? ka[ka.length-1].datum : k.erstellt;
+    const umsatz = ka.reduce((s,a)=>s+calcPreis(a.leistung,a.dauer||60),0);
+    const xsell = k.crossSell&&k.crossSell.length ? `<span class="badge badge-gold">${k.crossSell[0]}</span>` : '<span style="color:var(--text3);font-size:12px;">–</span>';
+    return `<tr onclick="showDetail('${k.id}')" style="cursor:pointer;">
+      <td><strong>${k.name}</strong><br><span style="font-size:11px;color:var(--text2);">${k.adresse||'–'}</span></td>
+      <td>${letzteLeistung}</td>
+      <td>${fmtDate(letzterKontakt)}</td>
+      <td>${xsell}</td>
+      <td style="color:var(--green);font-weight:700;">${Math.round(umsatz)} €</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// AUFTRÄGE
+// ════════════════════════════════
+function updateMAPreis(){
+  const l = mState.mALeistung||'';
+  const d = parseInt(document.getElementById('mADauer').value)||60;
+  if(!l){ document.getElementById('mAPreisInfo').textContent='– Leistung + Dauer wählen'; return; }
+  const preis = calcPreis(l,d);
+  const cfg = LC[l]||{};
+  const abrMin = Math.max(60,Math.ceil(d/15)*15);
+  document.getElementById('mAPreisInfo').innerHTML = `~${Math.round(preis)} € · ${abrMin} Min. abgerechnet (inkl. Mindestbuchung)`;
+}
+
+function saveAuftrag(){
+  const kundeId = document.getElementById('mAKunde').value;
+  const leistung = mState.mALeistung||'';
+  if(!kundeId||!leistung){ alert('Bitte Kunde und Leistung wählen'); return; }
+  const auftraege = DB.auftraege();
+  const dauer = parseInt(document.getElementById('mADauer').value)||60;
+  const a = {
+    id: uid(), kundeId, leistung,
+    datum: document.getElementById('mADatum').value||today(),
+    dauer, ma: mState.mAMa||'–',
+    preis: calcPreis(leistung,dauer),
+    notiz: document.getElementById('mANotiz').value,
+    status: 'offen',
+    erstellt: today(),
+  };
+  auftraege.push(a);
+  DB.saveAuftraege(auftraege);
+
+  // Cross-Selling Update
+  const kunden = DB.kunden();
+  const ki = kunden.findIndex(k=>k.id===kundeId);
+  if(ki>=0){
+    if(!kunden[ki].crossSell) kunden[ki].crossSell=[];
+    kunden[ki].crossSell = kunden[ki].crossSell.filter(x=>x!==leistung);
+    DB.saveKunden(kunden);
+  }
+
+  closeModal('modalAuftrag');
+  resetModalAuftrag();
+  showToast('Auftrag gespeichert ✓');
+  renderAuftraege();
+  renderDashboard();
+}
+
+function resetModalAuftrag(){
+  ['mANotiz'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mADatum').value='';
+  document.getElementById('mADauer').value=60;
+  document.querySelectorAll('#modalAuftrag .chip').forEach(c=>c.classList.remove('on'));
+  delete mState.mALeistung; delete mState.mAMa;
+  document.getElementById('mAPreisInfo').textContent='– Leistung + Dauer wählen';
+}
+
+function renderAuftraege(){
+  const auftraege = DB.auftraege().slice().reverse();
+  const kunden = DB.kunden();
+  const offen = auftraege.filter(a=>a.status==='offen').length;
+  const erledigt = auftraege.filter(a=>a.status==='erledigt').length;
+  const folge = auftraege.filter(a=>a.folgetermin).length;
+  document.getElementById('aOffen').textContent=offen;
+  document.getElementById('aErledigt').textContent=erledigt;
+  document.getElementById('aFolge').textContent=folge;
+
+  const tbody = document.getElementById('auftragTbody');
+  if(!auftraege.length){ tbody.innerHTML='<tr><td colspan="6" class="tbl-empty">Noch keine Aufträge erfasst.</td></tr>'; return; }
+  tbody.innerHTML = auftraege.map(a=>{
+    const k = kunden.find(k=>k.id===a.kundeId);
+    const sBadge = a.status==='erledigt'?'badge-green':a.status==='offen'?'badge-gold':'badge-blue';
+    const sLabel = a.status==='erledigt'?'Erledigt':a.status==='offen'?'Offen':'Folgetermin';
+    return `<tr onclick="showAuftragDetail('${a.id}')" style="cursor:pointer;">
+      <td><strong>${k?k.name:'Unbekannt'}</strong></td>
+      <td>${a.leistung}</td>
+      <td>${fmtDate(a.datum)}</td>
+      <td style="color:var(--text2);">${a.ma||'–'}</td>
+      <td><span class="badge ${sBadge}">${sLabel}</span></td>
+      <td style="color:var(--green);font-weight:700;">~${Math.round(a.preis||0)} €</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// DETAIL PANEL
+// ════════════════════════════════
+function showDetail(kundeId){
+  const k = DB.kunden().find(k=>k.id===kundeId);
+  if(!k) return;
+  const auftraege = DB.auftraege().filter(a=>a.kundeId===kundeId);
+  const docs = DB.docs().filter(d=>d.kundeId===kundeId);
+  const umsatz = auftraege.reduce((s,a)=>s+(a.preis||0),0);
+
+  const panel = document.getElementById('detailPanel');
+  document.getElementById('detailContent').innerHTML = `
+    <div class="dp-name">${k.name}</div>
+    <div class="dp-sub">${k.adresse||'–'} · ${k.telefon||'–'}</div>
+    <button class="btn btn-teal btn-full" onclick="openModal('modalAuftrag');document.getElementById('mAKunde').value='${k.id}'">+ Neuer Auftrag</button>
+    <div class="dp-section">
+      <div class="dp-section-title">Kundendaten</div>
+      ${[
+        {k:'Kontakt', v:k.kanal||'–'},
+        {k:'Bekannt über', v:k.herkunft||'–'},
+        {k:'Kunde seit', v:fmtDate(k.erstellt)},
+        {k:'Aufträge gesamt', v:auftraege.length},
+        {k:'Umsatz gesamt', v:'~'+Math.round(umsatz)+' €'},
+        {k:'Notiz', v:k.notiz||'–'},
+      ].map(r=>`<div class="dp-row"><span class="dp-key">${r.k}</span><span class="dp-val">${r.v}</span></div>`).join('')}
+    </div>
+    <div class="dp-section">
+      <div class="dp-section-title">Auftragshistorie (${auftraege.length})</div>
+      ${auftraege.length===0?'<div style="color:var(--text3);font-size:13px;">Keine Aufträge</div>':
+        auftraege.slice().reverse().map(a=>`
+          <div class="timeline-item">
+            <div class="tl-dot" style="background:${(LC[a.leistung]||{}).color||'var(--teal)'}"></div>
+            <div class="tl-body">
+              <div class="tl-title">${a.leistung}</div>
+              <div class="tl-meta">${fmtDate(a.datum)} · ${a.ma||'–'} · ~${Math.round(a.preis||0)} €</div>
+            </div>
+          </div>`).join('')}
+    </div>
+    ${docs.length>0?`<div class="dp-section">
+      <div class="dp-section-title">Dokumentationen (${docs.length})</div>
+      ${docs.slice().reverse().map(d=>`
+        <div class="timeline-item">
+          <div class="tl-dot" style="background:var(--text3)"></div>
+          <div class="tl-body">
+            <div class="tl-title">${d.status||'Dokumentiert'}</div>
+            <div class="tl-meta">${fmtDate(d.datum)} · ${d.diktat?d.diktat.slice(0,60)+'…':''}</div>
+          </div>
+        </div>`).join('')}
+    </div>`:''}
+    <div style="margin-top:16px;">
+      <button class="btn btn-red btn-full" onclick="deleteKunde('${k.id}')">Kunde löschen</button>
+    </div>
+  `;
+  panel.classList.add('open');
+}
+
+function showAuftragDetail(auftragId){
+  const a = DB.auftraege().find(a=>a.id===auftragId);
+  if(!a) return;
+  const k = DB.kunden().find(k=>k.id===a.kundeId);
+  const panel = document.getElementById('detailPanel');
+  document.getElementById('detailContent').innerHTML = `
+    <div class="dp-name">${a.leistung}</div>
+    <div class="dp-sub">${k?k.name:'–'} · ${fmtDate(a.datum)}</div>
+    ${[
+      {k:'Mitarbeiter', v:a.ma||'–'},
+      {k:'Dauer', v:(a.dauer||60)+' Min.'},
+      {k:'Preis', v:'~'+Math.round(a.preis||0)+' €'},
+      {k:'Status', v:a.status||'offen'},
+      {k:'Folgetermin', v:a.folgetermin?fmtDate(a.folgetermin):'–'},
+      {k:'Notiz', v:a.notiz||'–'},
+    ].map(r=>`<div class="dp-row"><span class="dp-key">${r.k}</span><span class="dp-val">${r.v}</span></div>`).join('')}
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="btn btn-teal" style="flex:1;" onclick="setAuftragStatus('${a.id}','erledigt')">✅ Erledigt</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="showPage('nachtermin');setTimeout(()=>{document.getElementById('ntAuftrag').value='${a.id}';loadNtAuftrag();},100)">🎙 Dokumentieren</button>
+    </div>
+    <div style="margin-top:8px;">
+      <button class="btn btn-red btn-full" onclick="deleteAuftrag('${a.id}')">Auftrag löschen</button>
+    </div>
+  `;
+  panel.classList.add('open');
+}
+
+function setAuftragStatus(id, status){
+  const auftraege = DB.auftraege();
+  const i = auftraege.findIndex(a=>a.id===id);
+  if(i>=0){ auftraege[i].status=status; DB.saveAuftraege(auftraege); }
+  closeDetail(); renderAuftraege(); renderDashboard(); showToast('Status aktualisiert ✓');
+}
+
+function deleteKunde(id){
+  if(!confirm('Kunde wirklich löschen? Alle Aufträge bleiben erhalten.')) return;
+  DB.saveKunden(DB.kunden().filter(k=>k.id!==id));
+  closeDetail(); renderKunden(); renderDashboard();
+}
+function deleteAuftrag(id){
+  if(!confirm('Auftrag wirklich löschen?')) return;
+  DB.saveAuftraege(DB.auftraege().filter(a=>a.id!==id));
+  closeDetail(); renderAuftraege(); renderDashboard();
+}
+function closeDetail(){ document.getElementById('detailPanel').classList.remove('open'); }
+
+// ════════════════════════════════
+// WOCHENPLAN
+// ════════════════════════════════
+let wpCurrentMonday = getMonday(new Date());
+
+function getMonday(d){
+  const r=new Date(d); const day=r.getDay();
+  r.setDate(r.getDate()+(day===0?-6:1-day)); r.setHours(0,0,0,0); return r;
+}
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function isoDate(d){ return d.toISOString().split('T')[0]; }
+
+function wpChangeWeek(dir){
+  wpCurrentMonday = addDays(wpCurrentMonday, dir*7);
+  renderWochenplan();
+}
+
+let wpDayKey = null;
+function openWPModal(key){
+  wpDayKey=key;
+  populateKundenSelect('wpMKunde');
+  document.querySelectorAll('#modalWP .chip').forEach(c=>c.classList.remove('on'));
+  delete mState.wpMLeistung; delete mState.wpMMa;
+  document.getElementById('wpMDauer').value=60;
+  const d=new Date(key+'T12:00:00');
+  document.getElementById('modalWPTitle').textContent='Auftrag – '+d.toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long'});
+  openModal('modalWP');
+}
+
+function saveWPAuftrag(){
+  const kundeId=document.getElementById('wpMKunde').value;
+  const leistung=mState.wpMLeistung||'';
+  if(!leistung){ alert('Bitte Leistung wählen'); return; }
+  const wp=DB.wpItems();
+  wp.push({
+    id:uid(), dayKey:wpDayKey, kundeId,
+    leistung, dauer:parseInt(document.getElementById('wpMDauer').value)||60,
+    ma:mState.wpMMa||'–',
+  });
+  DB.saveWP(wp); closeModal('modalWP'); renderWochenplan();
+}
+
+function renderWochenplan(){
+  const todayKey=isoDate(new Date());
+  const kunden=DB.kunden();
+  const wp=DB.wpItems();
+  const grid=document.getElementById('wpGrid');
+  grid.innerHTML='';
+  const FAHR=15, MAX=480*0.8;
+  let totA=0,totMin=0,totU=0;
+
+  for(let i=0;i<5;i++){
+    const d=addDays(wpCurrentMonday,i);
+    const key=isoDate(d);
+    const items=wp.filter(w=>w.dayKey===key);
+    const usedMin=items.reduce((s,w)=>{
+      const cfg=LC[w.leistung]||{}; return s+w.dauer+(cfg.puffer||30)+FAHR;
+    },0);
+    const pct=usedMin/MAX; const isToday=key===todayKey; const isOver=pct>1;
+    totA+=items.length; totMin+=usedMin;
+    totU+=items.reduce((s,w)=>s+calcPreis(w.leistung,w.dauer),0);
+
+    const col=document.createElement('div');
+    col.className='day-col2'+(isToday?' today':'')+(isOver?' over':'');
+    const barColor=isOver?'var(--red)':pct>0.8?'var(--gold)':'var(--teal)';
+    col.innerHTML=`
+      <div class="day-head2">
+        <div class="day-name2">${d.toLocaleDateString('de-DE',{weekday:'short'})}</div>
+        <div class="day-date2">${fmtDateShort(key)}${isToday?' · Heute':''}</div>
+      </div>
+      <div class="day-prog">
+        <div class="day-prog-track"><div class="day-prog-fill" style="width:${Math.min(100,pct*100)}%;background:${barColor};"></div></div>
+        <div style="font-size:9px;color:var(--text3);margin-top:3px;">${Math.round(pct*100)}% · ${Math.round(usedMin/60*10)/10}h</div>
+      </div>
+      <div class="day-list">
+        ${items.map(w=>{
+          const k=kunden.find(k=>k.id===w.kundeId);
+          const cfg=LC[w.leistung]||{};
+          return `<div class="day-item" style="background:${cfg.color}18;border:1px solid ${cfg.color}30;">
+            <div class="day-item-name">${k?k.name:'Gast'}</div>
+            <div class="day-item-meta">${w.leistung} · ${w.ma}</div>
+            <button onclick="deleteWPItem('${w.id}')" style="position:absolute;top:3px;right:4px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;">✕</button>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="day-add" onclick="openWPModal('${key}')">+ Auftrag</button>
+    `;
+    grid.appendChild(col);
+  }
+
+  const fri=addDays(wpCurrentMonday,4);
+  document.getElementById('wpWeekLabel').textContent=fmtDateShort(isoDate(wpCurrentMonday))+' – '+fmtDateShort(isoDate(fri));
+  document.getElementById('wpAuftraege').textContent=totA;
+  document.getElementById('wpStunden').textContent=Math.round(totMin/60*10)/10+'h';
+  document.getElementById('wpUmsatz').textContent=Math.round(totU).toLocaleString('de-DE')+' €';
+  const avgAusl=5>0?Math.round((totMin/(480*5))*100):0;
+  document.getElementById('wpAuslastung').textContent=avgAusl+'%';
+}
+
+function deleteWPItem(id){
+  DB.saveWP(DB.wpItems().filter(w=>w.id!==id));
+  renderWochenplan();
+}
+
+// ════════════════════════════════
+// NACHTERMIN
+// ════════════════════════════════
+let ntState={status:'',folgeLeistung:''};
+let ntRecording=false, ntRecognition=null;
+
+function loadNtSelects(){
+  // Alle nicht-abgeschlossenen Aufträge anzeigen (offen + folgetermin)
+  const auftraege=DB.auftraege().filter(a=>a.status!=='erledigt').slice().reverse();
+  const kunden=DB.kunden();
+  const sel=document.getElementById('ntAuftrag');
+  sel.innerHTML='<option value="">– Auftrag wählen –</option>';
+  if(!auftraege.length){
+    const o=document.createElement('option'); o.disabled=true;
+    o.textContent='Keine offenen Aufträge vorhanden'; sel.appendChild(o);
+    // Still add starter block
+    document.getElementById('ntLeistungsBlocks').innerHTML=''; _ntBlockN=0; ntAddBlock(); return;
+  }
+  auftraege.forEach(a=>{
+    const k=kunden.find(k=>k.id===a.kundeId);
+    const st=a.status==='folgetermin'?'📅 ':'🔵 ';
+    const o=document.createElement('option');
+    o.value=a.id;
+    o.textContent=st+(k?k.name:'?')+' – '+a.leistung+' ('+fmtDate(a.datum)+')';
+    sel.appendChild(o);
+  });
+  // Auto-add starter block if blocks container is empty
+  if(!document.querySelectorAll('[id^="ntBlock_nb"]').length){
+    document.getElementById('ntLeistungsBlocks').innerHTML=''; _ntBlockN=0; ntAddBlock();
+  }
+}
+
+function loadNtAuftrag(){
+  const id=document.getElementById('ntAuftrag').value;
+  if(!id){ document.getElementById('ntAuftragInfo').innerHTML=''; return; }
+  const a=DB.auftraege().find(a=>a.id===id);
+  const k=a?DB.kunden().find(k=>k.id===a.kundeId):null;
+  document.getElementById('ntAuftragInfo').innerHTML=`
+    <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:13px;">
+      <div style="font-weight:700;color:var(--text);">${k?k.name:'–'}</div>
+      <div style="color:var(--text2);margin-top:3px;">${a?a.leistung:'–'} · ${a?fmtDate(a.datum):'–'}</div>
+    </div>`;
+}
+
+function ntPick(el,key){
+  el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  ntState[key]=el.textContent.trim();
+  if(key==='status'){
+    document.getElementById('ntFolgetermindiv').style.display=el.textContent.includes('Folgetermin')?'block':'none';
+  }
+}
+
+function ntToggleRecording(){
+  if(!ntRecording) ntStartRec(); else ntStopRec();
+}
+function ntStartRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    showToast('⚠ Spracherkennung nur in Chrome verfügbar');
+    document.getElementById('ntDiktat').focus();
+    return;
+  }
+  ntRecognition=new SR();
+  ntRecognition.lang='de-DE';
+  ntRecognition.continuous=true;
+  ntRecognition.interimResults=true;
+  ntRecognition.maxAlternatives=1;
+
+  let finalBuffer='';
+
+  ntRecognition.onresult=e=>{
+    let interim='';
+    let newFinal='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal){ newFinal+=t+' '; }
+      else { interim+=t; }
+    }
+    if(newFinal){
+      finalBuffer+=newFinal;
+      document.getElementById('ntDiktat').value=finalBuffer;
+      document.getElementById('ntFinalText').textContent=finalBuffer;
+    }
+    document.getElementById('ntInterimText').textContent=interim;
+    const lb=document.getElementById('ntLiveBox');
+    if(lb) lb.style.display=(finalBuffer||interim)?'block':'none';
+  };
+  ntRecognition.onerror=ev=>{
+    if(ev.error==='not-allowed'){ showToast('⚠ Mikrofon-Zugriff verweigert – bitte Berechtigung erteilen'); ntStopRec(); }
+    else if(ev.error==='no-speech'){ /* ignorieren, läuft weiter */ }
+    else { ntStopRec(); }
+  };
+  ntRecognition.onend=()=>{ if(ntRecording) ntRecognition.start(); };
+  ntRecognition.start();
+  ntRecording=true;
+  finalBuffer=document.getElementById('ntDiktat').value;
+
+  const btn=document.getElementById('ntVoiceBtn');
+  btn.classList.add('recording');
+  btn.style.cssText='background:var(--red-dim);border:2px solid var(--red);color:var(--red);width:100%;font-size:14px;';
+  btn.innerHTML='⏹ Aufnahme stoppen';
+  const vs=document.getElementById('voiceStatus');
+  if(vs)vs.style.display='flex';
+}
+function ntStopRec(){
+  if(ntRecognition){ try{ntRecognition.stop();}catch(e){} ntRecognition=null; }
+  ntRecording=false;
+  const btn=document.getElementById('ntVoiceBtn');
+  btn.classList.remove('recording');
+  btn.style.cssText='background:var(--bg3);border:2px dashed var(--border2);color:var(--text2);width:100%;font-size:14px;';
+  btn.innerHTML='🎙 Aufnahme starten';
+  const vs=document.getElementById('voiceStatus');
+  if(vs)vs.style.display='none';
+  document.getElementById('ntInterimText').textContent='';
+  showToast('Aufnahme gestoppt – Text prüfen ✓');
+}
+
+// ════════════════════════════════
+// LEISTUNGSBLÖCKE (Nachtermin)
+// ════════════════════════════════
+let _ntBlockN = 0;
+
+function ntAddBlock(leistung, dauer){
+  _ntBlockN++;
+  const id = 'nb'+_ntBlockN;
+  const dur = dauer || 30;
+  const chips = Object.keys(LC_SATZ).map(l => {
+    const on = (l === (leistung||'')) ? ' on' : '';
+    return '<div class="chip'+on+'" onclick="ntSelectBlockLeistung(this,\''+id+'\')" data-l="'+l+'">'+l+'</div>';
+  }).join('');
+  const div = document.createElement('div');
+  div.id = 'ntBlock_'+id;
+  div.style.cssText = 'background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:8px;';
+  div.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+    +'<div style="font-size:10px;color:var(--text2);font-weight:700;letter-spacing:.5px;">LEISTUNGSART</div>'
+    +'<button onclick="ntRemoveBlock(\''+id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:0;" title="Block entfernen">✕</button>'
+    +'</div>'
+    +'<div class="chips" id="ntBlockChips_'+id+'" style="flex-wrap:wrap;gap:5px;margin-bottom:10px;">'+chips+'</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;">'
+    +'<label style="font-size:12px;color:var(--text2);white-space:nowrap;">Zeit (Min.)</label>'
+    +'<input type="number" class="inp" value="'+dur+'" min="0" style="width:80px;" oninput="ntUpdateGesamt()" id="ntBlockDauer_'+id+'">'
+    +'</div>';
+  document.getElementById('ntLeistungsBlocks').appendChild(div);
+  ntUpdateGesamt();
+}
+
+function ntRemoveBlock(id){
+  const el = document.getElementById('ntBlock_'+id);
+  if(el) el.remove();
+  ntUpdateGesamt();
+}
+
+function ntSelectBlockLeistung(el, blockId){
+  document.querySelectorAll('#ntBlockChips_'+blockId+' .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  ntUpdateGesamt();
+}
+
+function ntUpdateGesamt(){
+  const vor = parseInt(document.getElementById('ntZeitVor').value)||0;
+  const nach = parseInt(document.getElementById('ntZeitNach').value)||0;
+  let ort = 0;
+  document.querySelectorAll('[id^="ntBlockDauer_"]').forEach(inp=>{
+    ort += parseInt(inp.value)||0;
+  });
+  document.getElementById('ntZeitOrt').value = ort;
+  document.getElementById('ntZeitOrtAnzeige').textContent = ort+' Min.';
+  const gesamt = vor+ort+nach;
+  document.getElementById('ntGesamtAnzeige').textContent = gesamt+' Min.';
+}
+
+function ntCollectBlocks(){
+  const blocks = [];
+  document.querySelectorAll('[id^="ntBlock_nb"]').forEach(div=>{
+    const blockId = div.id.replace('ntBlock_','');
+    const onChip = div.querySelector('.chip.on');
+    const leistung = onChip ? onChip.getAttribute('data-l') : '';
+    const dauer = parseInt((document.getElementById('ntBlockDauer_'+blockId)||{}).value)||0;
+    blocks.push({leistung, dauer});
+  });
+  return blocks;
+}
+
+
+function saveNachtermin(){
+  const auftragId=document.getElementById('ntAuftrag').value;
+  if(!auftragId){ alert('Bitte Auftrag auswählen'); return; }
+  const diktat=document.getElementById('ntDiktat').value;
+  ntUpdateGesamt();
+  const vor=parseInt(document.getElementById('ntZeitVor').value)||0;
+  const nach=parseInt(document.getElementById('ntZeitNach').value)||0;
+  const blocks=ntCollectBlocks();
+  const ort=blocks.reduce((s,b)=>s+b.dauer,0);
+  const gesamt=vor+ort+nach;
+  const abrMin=Math.max(60,Math.ceil(gesamt/15)*15);
+
+  const auftraege=DB.auftraege();
+  const ai=auftraege.findIndex(a=>a.id===auftragId);
+  if(ai>=0){
+    auftraege[ai].status=ntState.status&&ntState.status.includes('Erledigt')?'erledigt':ntState.status&&ntState.status.includes('Folgetermin')?'folgetermin':'offen';
+    auftraege[ai].folgetermin=document.getElementById('ntFolgeDate').value||null;
+    auftraege[ai].zeitGesamt=gesamt;
+    const cfg=LC[auftraege[ai].leistung]||{};
+    auftraege[ai].preis=(abrMin/60)*(cfg.satz||65);
+    DB.saveAuftraege(auftraege);
+  }
+
+  const a=auftraege[ai];
+  const docs=DB.docs();
+  const doc={
+    id:uid(), auftragId, kundeId:a?a.kundeId:'',
+    datum:today(), diktat,
+    zeitVor:vor, zeitOrt:ort, zeitNach:nach, zeitGesamt:gesamt, abrMin,
+    leistungsBlocks:blocks,
+    status:ntState.status||'', folgeLeistung:ntState.folgeLeistung||'',
+    folgeDate:document.getElementById('ntFolgeDate').value||'',
+    notiz:document.getElementById('ntNotiz').value,
+    preis:auftraege[ai]?auftraege[ai].preis:0,
+  };
+  docs.push(doc);
+  DB.saveDocs(docs);
+
+  // Cross-Sell Update
+  if(ntState.folgeLeistung&&a){
+    const kunden=DB.kunden();
+    const ki=kunden.findIndex(k=>k.id===a.kundeId);
+    if(ki>=0){
+      if(!kunden[ki].crossSell) kunden[ki].crossSell=[];
+      if(!kunden[ki].crossSell.includes(ntState.folgeLeistung)) kunden[ki].crossSell.push(ntState.folgeLeistung);
+      DB.saveKunden(kunden);
+    }
+  }
+
+  // Show output
+  const k=DB.kunden().find(k=>k.id===doc.kundeId);
+  document.getElementById('ntOutputCard').style.display='block';
+  document.getElementById('ntOutput').innerHTML=`
+    ${[
+      {k:'Kunde', v:k?k.name:'–'},
+      {k:'Datum', v:fmtDate(today())},
+      {k:'Leistung', v:a?a.leistung:'–'},
+      {k:'Zeit gesamt', v:gesamt+' Min. → abgerechnet: '+abrMin+' Min.'},
+      {k:'Betrag', v:'~'+Math.round(doc.preis||0)+' €'},
+      {k:'Status', v:doc.status||'–'},
+      {k:'Folgetermin', v:doc.folgeDate?fmtDate(doc.folgeDate)+' · '+doc.folgeLeistung:'–'},
+      {k:'Diktat', v:diktat?diktat.slice(0,120)+(diktat.length>120?'…':''):'–'},
+    ].map(r=>`<div class="dp-row"><span class="dp-key">${r.k}</span><span class="dp-val">${r.v}</span></div>`).join('')}
+  `;
+
+  showToast('Dokumentation gespeichert ✓');
+  document.getElementById('ntDiktat').value='';
+  const ntLB=document.getElementById('ntLiveBox');if(ntLB)ntLB.style.display='none';
+  const ntFT=document.getElementById('ntFinalText');if(ntFT)ntFT.textContent='';
+  const ntIT=document.getElementById('ntInterimText');if(ntIT)ntIT.textContent='';
+  ['ntZeitVor','ntZeitNach'].forEach(id=>document.getElementById(id).value=0);
+  document.getElementById('ntZeitOrt').value=0;
+  document.getElementById('ntZeitOrtAnzeige').textContent='0 Min.';
+  document.getElementById('ntGesamtAnzeige').textContent='0 Min.';
+  document.getElementById('ntLeistungsBlocks').innerHTML='';
+  _ntBlockN=0;
+  ntAddBlock();
+  document.querySelectorAll('#page-nachtermin .chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('ntFolgetermindiv').style.display='none';
+  ntState={};
+  renderDashboard();
+}
+
+// ════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════
+function renderDashboard(){
+  const kunden=DB.kunden();
+  const auftraege=DB.auftraege();
+  const todayKey=isoDate(new Date());
+
+  document.getElementById('dKunden').textContent=kunden.length;
+  document.getElementById('dOffen').textContent=auftraege.filter(a=>a.status==='offen').length;
+  const monthUmsatz=auftraege.filter(a=>a.status==='erledigt'&&a.datum&&a.datum.startsWith(todayKey.slice(0,7))).reduce((s,a)=>s+(a.preis||0),0);
+  document.getElementById('dUmsatz').textContent=Math.round(monthUmsatz)+' €';
+  const offRg=rechnungen.filter(r=>!r.bezahlt).length;
+  document.getElementById('dFolge').textContent=offRg>0?String(offRg):'--';
+  const kdSub=document.getElementById('dashKundenSub');if(kdSub)kdSub.textContent=kunden.length+' erfasst';
+  const ofSub=document.getElementById('dashOffenSub');if(ofSub)ofSub.textContent=auftraege.filter(a=>a.status==='offen').length+' offen';
+
+  // Heute
+  const heuteA=auftraege.filter(a=>a.datum===todayKey);
+  const hEl=document.getElementById('dashHeute');
+  if(!heuteA.length){ hEl.innerHTML='<div class="tbl-empty">Keine Aufträge für heute geplant.</div>'; }
+  else {
+    hEl.innerHTML=heuteA.map(a=>{
+      const k=kunden.find(k=>k.id===a.kundeId);
+      return `<div class="timeline-item">
+        <div class="tl-dot" style="background:${(LC[a.leistung]||{}).color||'var(--teal)'}"></div>
+        <div class="tl-body"><div class="tl-title">${k?k.name:'?'} – ${a.leistung}</div>
+        <div class="tl-meta">${a.ma||'–'} · ~${Math.round(a.preis||0)} €</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Cross-Selling
+  const csEl=document.getElementById('dashCrossSell');
+  const csKunden=kunden.filter(k=>k.crossSell&&k.crossSell.length>0);
+  if(!csKunden.length){ csEl.innerHTML='<div class="tbl-empty">Keine offenen Cross-Selling-Hinweise.</div>'; }
+  else {
+    csEl.innerHTML=csKunden.slice(0,4).map(k=>`
+      <div class="timeline-item">
+        <div class="tl-dot" style="background:var(--gold)"></div>
+        <div class="tl-body"><div class="tl-title">${k.name}</div>
+        <div class="tl-meta">Potenzial: ${k.crossSell.join(', ')}</div></div>
+      </div>`).join('');
+  }
+
+  // Aktivitäten
+  const docs=DB.docs().slice().reverse().slice(0,5);
+  const aEl=document.getElementById('dashAktivitaet');
+  if(!docs.length){ aEl.innerHTML='<div class="tbl-empty">Noch keine Aktivitäten.</div>'; }
+  else {
+    aEl.innerHTML=docs.map(d=>{
+      const k=kunden.find(k=>k.id===d.kundeId);
+      return `<div class="timeline-item">
+        <div class="tl-dot" style="background:var(--text3)"></div>
+        <div class="tl-body"><div class="tl-title">Dokumentation: ${k?k.name:'–'}</div>
+        <div class="tl-meta">${fmtDate(d.datum)} · ~${Math.round(d.preis||0)} €</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  const hr=new Date().getHours();
+  const greet=hr<12?'Guten Morgen 👋':hr<18?'Guten Tag 👋':'Guten Abend 👋';
+  const gEl=document.getElementById('dashGreeting');if(gEl)gEl.textContent=greet;
+  document.getElementById('dashDate').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
+
+// ════════════════════════════════
+// AUSWERTUNG
+// ════════════════════════════════
+function renderAuswertung(){
+  const auftraege=DB.auftraege();
+  const kunden=DB.kunden();
+  const umsatz=auftraege.reduce((s,a)=>s+(a.preis||0),0);
+  const avg=auftraege.length?umsatz/auftraege.length:0;
+  const mitFolge=auftraege.filter(a=>a.folgetermin).length;
+  const xsellRate=auftraege.length?Math.round(mitFolge/auftraege.length*100):0;
+
+  document.getElementById('awUmsatz').textContent=Math.round(umsatz).toLocaleString('de-DE')+' €';
+  document.getElementById('awAvg').textContent=Math.round(avg)+' €';
+  document.getElementById('awXsell').textContent=xsellRate+'%';
+  document.getElementById('awFolge').textContent=mitFolge;
+
+  // Leistungen
+  const lCount={};
+  auftraege.forEach(a=>{ lCount[a.leistung]=(lCount[a.leistung]||0)+1; });
+  const lSorted=Object.entries(lCount).sort((a,b)=>b[1]-a[1]);
+  const lMax=lSorted.length?lSorted[0][1]:1;
+  document.getElementById('awLeistungen').innerHTML=lSorted.length?lSorted.map(([l,c])=>`
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span>${l}</span><span style="color:var(--teal);font-weight:700;">${c}x</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${c/lMax*100}%;background:${(LC[l]||{}).color||'var(--teal)'};"></div></div>
+    </div>`).join(''):'<div class="tbl-empty">Keine Daten</div>';
+
+  // Kanäle
+  const kCount={};
+  kunden.forEach(k=>{ if(k.herkunft) kCount[k.herkunft]=(kCount[k.herkunft]||0)+1; });
+  const kSorted=Object.entries(kCount).sort((a,b)=>b[1]-a[1]);
+  const kMax=kSorted.length?kSorted[0][1]:1;
+  document.getElementById('awKanaele').innerHTML=kSorted.length?kSorted.map(([k,c])=>`
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span>${k}</span><span style="color:var(--blue);font-weight:700;">${c}x</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${c/kMax*100}%;background:var(--blue);"></div></div>
+    </div>`).join(''):'<div class="tbl-empty">Keine Daten</div>';
+
+  // Mitarbeiter
+  const maCount={};
+  auftraege.forEach(a=>{ if(a.ma){ maCount[a.ma]=(maCount[a.ma]||{count:0,umsatz:0}); maCount[a.ma].count++; maCount[a.ma].umsatz+=(a.preis||0); } });
+  document.getElementById('awMitarbeiter').innerHTML=Object.entries(maCount).length?
+    `<table class="tbl"><thead><tr><th>Mitarbeiter</th><th>Aufträge</th><th>Umsatz</th></tr></thead><tbody>
+    ${Object.entries(maCount).map(([ma,d])=>`<tr><td>${ma}</td><td>${d.count}</td><td style="color:var(--green);font-weight:700;">~${Math.round(d.umsatz)} €</td></tr>`).join('')}
+    </tbody></table>`:'<div class="tbl-empty">Keine Daten</div>';
+
+  // Break-even
+  const monthKey=isoDate(new Date()).slice(0,7);
+  const monthU=auftraege.filter(a=>a.datum&&a.datum.startsWith(monthKey)).reduce((s,a)=>s+(a.preis||0),0);
+  const ziel=3500;
+  const pct=Math.min(1,monthU/ziel);
+  const color=pct>=1?'var(--green)':pct>=0.6?'var(--gold)':'var(--red)';
+  document.getElementById('awBreakeven').innerHTML=`
+    <div style="margin-bottom:10px;display:flex;justify-content:space-between;font-size:13px;">
+      <span>Monatsumsatz vs. Tagesziel (3.500 €/Monat)</span>
+      <span style="color:${color};font-weight:700;">${Math.round(monthU)} € / ${ziel} €</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:${pct*100}%;background:${color};height:10px;border-radius:5px;"></div></div>
+    <div style="font-size:12px;color:var(--text2);margin-top:8px;">${pct>=1?'✅ Tagesziel erreicht – auf Kurs Richtung Break-even':pct>=0.6?'⚠️ Auf dem Weg – weiter Gas geben':'🔴 Unter Tagesziel – Maßnahmen prüfen'}</div>
+  `;
+}
+
+// ════════════════════════════════
+// TOAST
+// ════════════════════════════════
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{
+    position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',
+    background:'var(--teal)',color:'#0d1520',padding:'10px 20px',
+    borderRadius:'20px',fontWeight:'700',fontSize:'13px',zIndex:'9999',
+    boxShadow:'0 4px 20px rgba(0,0,0,0.4)',
+    animation:'fadeInUp 0.2s ease',
+  });
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+// ════════════════════════════════
+
+
+// ════ RECHNUNG ════
+let rechnungen = JSON.parse(localStorage.getItem(CONFIG.firma.storage+'_rechnungen')||'[]');
+function saveRechnungen(){ localStorage.setItem(CONFIG.firma.storage+'_rechnungen', JSON.stringify(rechnungen)); }
+function nextRNr(){ const y=new Date().getFullYear(); const n=rechnungen.filter(r=>r.nummer&&r.nummer.startsWith(CONFIG.firma.rg_prefix+'-'+y)).length+1; return CONFIG.firma.rg_prefix+'-'+y+'-'+String(n).padStart(3,'0'); }
+let rCurrentBetrag=0, rCurrentNummer='';
+const LC_SATZ={'🔧 Handwerk':61,'📋 Bürokratie':76,'💰 Steuer/Finanzen':86,'📱 Digital':65,'🛵 Botendienst':0,'🌿 Garten':58};
+function calcPosBetrag(l,vor,ort,nach){ if(l==='🛵 Botendienst')return 12; const g=(vor||0)+(ort||0)+(nach||0); const a=Math.max(60,Math.ceil(g/15)*15); return Math.round((a/60)*(LC_SATZ[l]||65)*100)/100; }
+function addPosition(lPre,orPre,vorPre,nachPre,beschrPre){
+  const id='pos_'+Date.now();
+  const d=document.createElement('div');
+  d.id=id; d.style.cssText='background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid var(--border);';
+  d.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);">Position</div>'
+    +'<button onclick="removePosition(\''+id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;">x</button></div>'
+    +'<div class="chips" style="margin-bottom:8px;">'
+    +Object.keys(LC_SATZ).map(l=>'<div class="chip'+(l===(lPre||'')?'  on':'')+'" onclick="selectPosL(this,\''+id+'\')" data-l="'+l+'">'+l+'</div>').join('')
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:7px;">'
+    +'<div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">Vorber.</div>'
+    +'<input class="inp" type="number" value="'+(vorPre||0)+'" min="0" data-f="vor" oninput="updPos(\''+id+'\')" style="padding:7px 9px;font-size:13px;"></div>'
+    +'<div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">Vor Ort</div>'
+    +'<input class="inp" type="number" value="'+(orPre||60)+'" min="0" data-f="ort" oninput="updPos(\''+id+'\')" style="padding:7px 9px;font-size:13px;"></div>'
+    +'<div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">Nachber.</div>'
+    +'<input class="inp" type="number" value="'+(nachPre||0)+'" min="0" data-f="nach" oninput="updPos(\''+id+'\')" style="padding:7px 9px;font-size:13px;"></div></div>'
+    +'<input class="inp" type="text" placeholder="Beschreibung / Diktat (optional)" data-f="beschr" value="'+(beschrPre||'').replace(/"/g,'&quot;').slice(0,220)+'" style="margin-bottom:7px;padding:7px 9px;font-size:12px;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;padding-top:7px;border-top:1px solid var(--border);">'
+    +'<div style="font-size:11px;color:var(--text2);" id="'+id+'_i">Leistung wählen</div>'
+    +'<div style="font-size:15px;font-weight:700;color:var(--teal);" id="'+id+'_b">-- €</div></div>';
+  document.getElementById('rPositionen').appendChild(d);
+  if(lPre) updPos(id);
+  updGesamt();
+}
+function selectPosL(el,pid){ el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); updPos(pid); }
+function updPos(pid){ const d=document.getElementById(pid);if(!d)return; const l=d.querySelector('.chip.on')?.dataset.l||''; const vor=parseInt(d.querySelector('[data-f="vor"]').value)||0; const ort=parseInt(d.querySelector('[data-f="ort"]').value)||0; const nach=parseInt(d.querySelector('[data-f="nach"]').value)||0; const g=vor+ort+nach; const a=Math.max(60,Math.ceil(g/15)*15); const b=l?calcPosBetrag(l,vor,ort,nach):0; document.getElementById(pid+'_i').textContent=l?g+' Min. → '+a+' Min.':'Leistung wählen'; document.getElementById(pid+'_b').textContent=l?b.toFixed(2).replace('.',',')+' €':'-- €'; updGesamt(); }
+function removePosition(pid){ const el=document.getElementById(pid);if(el)el.remove(); updGesamt(); }
+function updGesamt(){ let t=0; document.querySelectorAll('#rPositionen > div').forEach(d=>{ const l=d.querySelector('.chip.on')?.dataset.l||''; if(!l)return; t+=calcPosBetrag(l,parseInt(d.querySelector('[data-f="vor"]').value)||0,parseInt(d.querySelector('[data-f="ort"]').value)||0,parseInt(d.querySelector('[data-f="nach"]').value)||0); }); const m=parseFloat(document.getElementById('rBetragManual').value); rCurrentBetrag=isNaN(m)?Math.round(t*100)/100:m; document.getElementById('rVorBetrag').textContent=rCurrentBetrag.toFixed(2).replace('.',',')+' €'; document.getElementById('rGesamtPos').textContent=document.querySelectorAll('#rPositionen > div').length; }
+function rManualOverride(v){ rCurrentBetrag=v?(parseFloat(v)||0):0; if(!v)updGesamt(); else document.getElementById('rVorBetrag').textContent=rCurrentBetrag.toFixed(2).replace('.',',')+' €'; }
+function collectPositionen(){ const r=[]; document.querySelectorAll('#rPositionen > div').forEach(d=>{ const l=d.querySelector('.chip.on')?.dataset.l||''; if(!l)return; const vor=parseInt(d.querySelector('[data-f="vor"]').value)||0; const ort=parseInt(d.querySelector('[data-f="ort"]').value)||0; const nach=parseInt(d.querySelector('[data-f="nach"]').value)||0; r.push({leistung:l,vor,ort,nach,gesamt:vor+ort+nach,abrMin:Math.max(60,Math.ceil((vor+ort+nach)/15)*15),beschr:d.querySelector('[data-f="beschr"]').value||'',betrag:calcPosBetrag(l,vor,ort,nach)}); }); return r; }
+function populateRechnungSelect(){
+  // Alle Aufträge anzeigen – kein Statusfilter
+  const af = DB.auftraege().slice().reverse();
+  const k  = DB.kunden();
+  const s  = document.getElementById('rAuftragSel');
+  if(!s) return;
+  s.innerHTML = '<option value="">- Auftrag wählen (optional) -</option>';
+  if(!af.length){
+    const o=document.createElement('option');
+    o.disabled=true;
+    o.textContent='Noch keine Aufträge vorhanden';
+    s.appendChild(o);
+    return;
+  }
+  // Gruppierung: offen → folgetermin → erledigt
+  const order = {offen:0, folgetermin:1, erledigt:2};
+  af.sort((a,b)=>(order[a.status]??0)-(order[b.status]??0));
+  af.forEach(a=>{
+    const kd  = k.find(k=>k.id===a.kundeId);
+    const st  = a.status==='erledigt'?'✅':a.status==='folgetermin'?'📅':'🔵';
+    const o   = document.createElement('option');
+    o.value   = a.id;
+    o.textContent = st+' '+(kd?kd.name:'?')+' · '+a.leistung+' · '+fmtDate(a.datum);
+    s.appendChild(o);
+  });
+}
+function loadRechnungAuftrag(){
+  const id = document.getElementById('rAuftragSel').value;
+  const ai = document.getElementById('rAutoInfo');
+  if(!id){ if(ai) ai.style.display='none'; return; }
+  const a  = DB.auftraege().find(a=>a.id===id);
+  const k  = a ? DB.kunden().find(k=>k.id===a.kundeId) : null;
+  if(!a) return;
+
+  // ── Stammdaten befüllen ──
+  document.getElementById('rKundeName').value = k ? k.name : '';
+  const rd = document.getElementById('rDatum');
+  if(rd && a.datum) rd.value = a.datum;
+  // Mitarbeiter vorbelegen
+  const rma = document.getElementById('rMitarbeiter');
+  if(rma && a.ma){
+    for(let i=0;i<rma.options.length;i++){
+      if(rma.options[i].text===a.ma||rma.options[i].value===a.ma) rma.selectedIndex=i;
+    }
+  }
+
+  // ── Neueste Nachtermin-Dokumentation suchen ──
+  const docs = DB.docs().filter(d=>d.auftragId===id);
+  const doc  = docs.length ? docs[docs.length-1] : null;
+
+  // ── Zeiten aus Dokumentation oder Auftrag ──
+  const vorMin  = doc ? (doc.zeitVor||0)  : 0;
+  const ortMin  = doc ? (doc.zeitOrt||a.dauer||60) : (a.dauer||60);
+  const nachMin = doc ? (doc.zeitNach||0) : 0;
+
+  // ── Beschreibung: Diktat aus Sprachaufnahme kürzen auf 220 Zeichen ──
+  const diktat  = doc && doc.diktat ? doc.diktat.trim() : '';
+  const beschr  = diktat ? diktat.slice(0,220)+(diktat.length>220?'…':'') : '';
+
+  // ── Leistung: aus Auftrag, LC_SATZ-kompatibel matchen ──
+  const leistung = a.leistung||'';
+  const lcKey = Object.keys(LC_SATZ).find(k=>leistung.includes(k.replace(/[^\w]/g,'').slice(0,5))||leistung===k) || leistung;
+
+  // ── Position aufbauen ──
+  document.getElementById('rPositionen').innerHTML = '';
+  // If doc has multiple leistungsBlocks, add one position per block
+  if(doc && doc.leistungsBlocks && doc.leistungsBlocks.length > 1){
+    doc.leistungsBlocks.forEach(function(bl){
+      const blKey = bl.leistung && LC_SATZ[bl.leistung]!==undefined ? bl.leistung : lcKey;
+      addPosition(blKey, bl.dauer, 0, 0, beschr);
+    });
+    // Add Vor/Nachbereitung as note only (Handwerk block gets it)
+    if(vorMin||nachMin){
+      const firstKey = doc.leistungsBlocks[0].leistung||lcKey;
+      // Update first position to include vor/nach
+      const rows = document.querySelectorAll('[id^="rPosRow_"]');
+      if(rows.length){
+        const firstRow = rows[0];
+        const vorInp = firstRow.querySelector('[id^="rPosVor_"]');
+        const nachInp = firstRow.querySelector('[id^="rPosNach_"]');
+        if(vorInp) vorInp.value = vorMin;
+        if(nachInp) nachInp.value = nachMin;
+        updatePosRow(firstRow.id.replace('rPosRow_',''));
+      }
+    }
+  } else {
+    addPosition(lcKey, ortMin, vorMin, nachMin, beschr);
+  }
+
+  // ── Diktat komplett in hidden field für Preview ──
+  const dh = document.getElementById('rDiktatHidden');
+  if(dh) dh.value = diktat;
+
+  // ── Auto-Info-Banner ──
+  if(ai){
+    ai.style.display = 'block';
+    const infoText = document.getElementById('rAutoInfoText');
+    const infoDikt = document.getElementById('rAutoInfoDiktat');
+    if(doc){
+      const gesamt = (vorMin+ortMin+nachMin);
+      const abrMin = Math.max(60,Math.ceil(gesamt/15)*15);
+      if(infoText) infoText.textContent =
+        'Dokumentation vom '+fmtDate(doc.datum)+
+        ' · Vor Ort: '+ortMin+' Min.'+
+        (vorMin?' · Vorber.: '+vorMin+' Min.':'')+
+        (nachMin?' · Nachber.: '+nachMin+' Min.':'')+
+        ' → Abgerechnet: '+abrMin+' Min.';
+      if(infoDikt && diktat) infoDikt.textContent = '🎙 "'+diktat.slice(0,120)+(diktat.length>120?'…':'')+'"';
+      else if(infoDikt) infoDikt.textContent='';
+    } else {
+      if(infoText) infoText.textContent='Zeiten aus Auftrag übernommen · '+ortMin+' Min. Vor Ort';
+      if(infoDikt) infoDikt.textContent='Keine Nachtermin-Dokumentation vorhanden.';
+    }
+  }
+}
+function goRStep(n){ ['rStep1','rStep2','rStep3'].forEach((id,i)=>document.getElementById(id).style.display=i===n-1?'block':'none'); if(n===2)buildRPreview(); }
+function buildRPreview(){ const auftragId=document.getElementById('rAuftragSel').value; const a=auftragId?DB.auftraege().find(a=>a.id===auftragId):null; const k=a?DB.kunden().find(k=>k.id===a.kundeId):null; const name=document.getElementById('rKundeName').value||(k?k.name:'Kunde'); const ma=document.getElementById('rMitarbeiter').value; const dv=document.getElementById('rDatum').value; const dt=dv?new Date(dv+'T12:00:00').toLocaleDateString('de-DE'):new Date().toLocaleDateString('de-DE'); const pos=collectPositionen(); rCurrentNummer=nextRNr(); document.getElementById('rNummer').textContent=rCurrentNummer; document.getElementById('rPreviewKunde').textContent=name; document.getElementById('rPreviewDatum').textContent=dt; document.getElementById('rPreviewMA').textContent=ma; if(!pos.length){document.getElementById('rPreviewLeistung').textContent='--';document.getElementById('rPreviewZeit').textContent='';document.getElementById('rPreviewBeschreibung').textContent='';} else if(pos.length===1){const p=pos[0];document.getElementById('rPreviewLeistung').textContent=p.leistung;document.getElementById('rPreviewZeit').textContent=p.abrMin+' Min.';document.getElementById('rPreviewBeschreibung').textContent=p.beschr||p.leistung;} else{document.getElementById('rPreviewLeistung').textContent='Kombi ('+pos.length+' Leistungen)';document.getElementById('rPreviewZeit').textContent='';document.getElementById('rPreviewBeschreibung').innerHTML=pos.map(p=>'<div style="padding:4px 0;border-bottom:1px solid #e4e0d8;font-size:11px;"><strong>'+p.leistung+'</strong> · '+p.abrMin+' Min. · '+p.betrag.toFixed(2).replace('.',',')+'€'+(p.beschr?' — '+p.beschr:'')+'</div>').join('');} document.getElementById('rPreviewBetrag').textContent=rCurrentBetrag.toFixed(2).replace('.',',')+' €'; document.getElementById('rBarBetrag').textContent=rCurrentBetrag.toFixed(2).replace('.',',')+' €'; document.getElementById('rIbanVwz').textContent='Rechnung '+rCurrentNummer; document.getElementById('rPaypalNr').textContent=rCurrentNummer;
+  // Diktat / Notizen in Rechnung anzeigen
+  const diktatVal=(document.getElementById('rDiktatHidden')||{}).value||'';
+  const notizenBlock=document.getElementById('rPreviewNotizenBlock');
+  const diktatEl=document.getElementById('rPreviewDiktat');
+  if(notizenBlock&&diktatEl){
+    if(diktatVal){ notizenBlock.style.display='block'; diktatEl.textContent=diktatVal; }
+    else { notizenBlock.style.display='none'; diktatEl.textContent=''; }
+  }
+}
+function showZahlungDetails(t){ ['Bar','Iban','Paypal'].forEach(x=>document.getElementById('zDetail'+x).style.display=x.toLowerCase()===t?'block':'none'); }
+function calcWechsel(){ const e=parseFloat(document.getElementById('rBarErhalten').value)||0; document.getElementById('rWechsel').textContent=(e>=rCurrentBetrag?(e-rCurrentBetrag).toFixed(2).replace('.',','):'--')+' €'; }
+function saveRechnungData(bezahlt){ const aid=document.getElementById('rAuftragSel').value; const a=aid?DB.auftraege().find(a=>a.id===aid):null; const k=a?DB.kunden().find(k=>k.id===a.kundeId):null; const name=document.getElementById('rKundeName').value||(k?k.name:'Kunde'); const pos=collectPositionen(); const lbl=pos.length===1?pos[0].leistung:'Kombi ('+pos.map(p=>p.leistung).join(', ')+')'; const r={id:uid(),nummer:rCurrentNummer,auftragId:aid||null,kundeId:a?a.kundeId:null,kundeName:name,leistung:lbl,positionen:pos,betrag:rCurrentBetrag,ma:document.getElementById('rMitarbeiter').value,zahlung:mState.rZahlung||'--',bezahlt,datum:document.getElementById('rDatum').value||today()}; rechnungen.push(r); saveRechnungen(); if(aid&&bezahlt){const af=DB.auftraege();const ai=af.findIndex(a=>a.id===aid);if(ai>=0){af[ai].status='erledigt';af[ai].preis=rCurrentBetrag;DB.saveAuftraege(af);}} return r; }
+function bezahltBestaetigen(){ const r=saveRechnungData(true); document.getElementById('rBestaetigungText').innerHTML='<strong>'+r.kundeName+'</strong> hat '+r.betrag.toFixed(2).replace('.',',')+'€ bezahlt.'; goRStep(3); }
+function offenLassen(){ const r=saveRechnungData(false); document.getElementById('rBestaetigungText').innerHTML='Rechnung <strong>'+r.nummer+'</strong> offen gespeichert.'; goRStep(3); }
+function renderRechnung(){ const tk=today(),mk=tk.slice(0,7); const rOEl=document.getElementById('rOffen'); if(rOEl)rOEl.textContent=rechnungen.filter(r=>!r.bezahlt).length; const rHEl=document.getElementById('rHeute'); if(rHEl)rHEl.textContent=Math.round(rechnungen.filter(r=>r.bezahlt&&r.datum===tk).reduce((s,r)=>s+r.betrag,0))+' €'; const rMEl=document.getElementById('rMonat'); if(rMEl)rMEl.textContent=Math.round(rechnungen.filter(r=>r.bezahlt&&r.datum.startsWith(mk)).reduce((s,r)=>s+r.betrag,0))+' €'; const tb=document.getElementById('rechnungTbody'); if(!tb)return; if(!rechnungen.length){tb.innerHTML='<tr><td colspan="6" class="tbl-empty">Noch keine Rechnungen.</td></tr>';return;} tb.innerHTML=[...rechnungen].reverse().map(r=>'<tr><td><strong>'+r.kundeName+'</strong></td><td style="font-size:12px;">'+r.leistung+'</td><td>'+fmtDate(r.datum)+'</td><td style="color:var(--green);font-weight:700;">'+r.betrag.toFixed(2).replace('.',',')+' €</td><td>'+(r.bezahlt?'<span class="badge badge-green">Bezahlt</span>':'<span class="badge badge-gold">Offen</span>')+'</td><td>'+(r.bezahlt?'':'<button onclick="markBezahlt(\''+r.id+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;color:var(--text2);cursor:pointer;">Bezahlt</button>')+'</td></tr>').join(''); }
+function markBezahlt(id){ const i=rechnungen.findIndex(r=>r.id===id);if(i>=0){rechnungen[i].bezahlt=true;rechnungen[i].zahlung='Nachtraglich';saveRechnungen();renderRechnung();renderDashboard();showToast('Bezahlt!');} }
+function resetRModal(){ ['rStep2','rStep3'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';}); const s1=document.getElementById('rStep1');if(s1)s1.style.display='block'; ['rAuftragSel','rKundeName','rBetragManual'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); const rd=document.getElementById('rDatum');if(rd)rd.value=today(); const rp=document.getElementById('rPositionen');if(rp)rp.innerHTML=''; document.querySelectorAll('#rZahlungChips .chip').forEach(c=>c.classList.remove('on')); ['Bar','Iban','Paypal'].forEach(t=>{const el=document.getElementById('zDetail'+t);if(el)el.style.display='none';}); delete mState.rZahlung; rCurrentBetrag=0; rCurrentNummer=''; const vb=document.getElementById('rVorBetrag');if(vb)vb.textContent='0,00 €'; const gp=document.getElementById('rGesamtPos');if(gp)gp.textContent='0';
+  const rai=document.getElementById('rAutoInfo');if(rai)rai.style.display='none';
+  const rdh=document.getElementById('rDiktatHidden');if(rdh)rdh.value='';
+  const rnb=document.getElementById('rPreviewNotizenBlock');if(rnb)rnb.style.display='none';
+  addPosition(); }
+
+// ════ ROUTE & FAHRTENBUCH ════
+let routeManuelleStopps=[]; let fahrtenbuch=JSON.parse(localStorage.getItem(CONFIG.firma.storage+'_fahrtenbuch')||'[]');
+function saveFb(){localStorage.setItem(CONFIG.firma.storage+'_fahrtenbuch',JSON.stringify(fahrtenbuch));}
+function initRoute(){const d=document.getElementById('routeDatum');if(d&&!d.value)d.value=today();}
+function renderRoute(){ const datum=(document.getElementById('routeDatum')||{}).value||today(); const kunden=DB.kunden(); const auftraege=DB.auftraege().filter(a=>a.datum===datum); const wpItems=DB.wpItems().filter(w=>w.dayKey===datum); const stopps=[]; auftraege.forEach(a=>{const k=kunden.find(k=>k.id===a.kundeId);if(k&&k.adresse)stopps.push({id:a.id,label:k.name,adresse:k.adresse,leistung:a.leistung,preis:a.preis||0,typ:'auftrag',ma:a.ma||'--'});}); wpItems.forEach(w=>{const k=kunden.find(k=>k.id===w.kundeId);if(k&&k.adresse&&!stopps.find(s=>s.id===w.id))stopps.push({id:w.id,label:k.name,adresse:k.adresse,leistung:w.leistung,preis:calcPreis(w.leistung,w.dauer||60),typ:'wp',ma:w.ma||'--'});}); routeManuelleStopps.forEach(s=>stopps.push(s)); const aN=document.getElementById('routeAnzahl');if(aN)aN.textContent=stopps.length; const rU=document.getElementById('routeUmsatz');if(rU)rU.textContent=Math.round(stopps.reduce((s,a)=>s+(a.preis||0),0))+' €'; const rK=document.getElementById('routeKm');if(rK)rK.textContent=stopps.length>0?'~'+(stopps.length*3+2)+' km':'--'; const rSub=document.getElementById('routeSub');if(rSub)rSub.textContent=new Date(datum+'T12:00:00').toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long'}); const list=document.getElementById('routeList');if(!list)return; if(!stopps.length){list.innerHTML='<div class="card" style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Keine Auftraege fuer diesen Tag.</div>';const ra=document.getElementById('routeActions');if(ra)ra.style.display='none';return;} const colors={'Handwerk':'var(--blue)','Buerokratie':'var(--purple)','Steuer':'var(--gold)','Digital':'var(--teal)','Botendienst':'var(--green)','Garten':'#82c850'}; list.innerHTML=stopps.map((s,i)=>{let color='var(--teal)';Object.entries(colors).forEach(([k,v])=>{if(s.leistung&&s.leistung.includes(k))color=v;});const mu='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s.adresse+', Deutschland');return '<div style="background:var(--card);border-radius:12px;border:1px solid var(--border);padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;"><div style="width:26px;height:26px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;margin-top:2px;">'+(i+1)+'</div><div style="flex:1;"><div style="font-size:13px;font-weight:700;margin-bottom:1px;">'+s.label+'</div><div style="font-size:11px;color:var(--text2);margin-bottom:3px;">'+s.leistung+' - '+s.ma+'</div><a href="'+mu+'" target="_blank" style="font-size:11px;color:var(--teal);font-weight:600;text-decoration:none;">'+s.adresse+'</a></div><div style="text-align:right;flex-shrink:0;"><div style="font-size:13px;font-weight:700;color:var(--green);">~'+Math.round(s.preis||0)+' E</div>'+(s.typ==='manuell'?'<button onclick="removeManuellerStopp(\''+s.id+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;margin-top:3px;">entf.</button>':'')+'</div></div>';}).join(''); const ra=document.getElementById('routeActions');if(ra)ra.style.display='flex'; updateRouteLink(stopps); }
+function updateRouteLink(stopps){ if(!stopps||!stopps.length)return; const start=(document.getElementById('routeStart')||{}).value; const adr=stopps.map(s=>encodeURIComponent(s.adresse+', Deutschland')); const dest=adr[adr.length-1]; const wp=adr.slice(0,adr.length-1).join('|'); const origin=start?encodeURIComponent(start+', Deutschland'):adr[0]; const ml=document.getElementById('routeMapsLink'); if(ml)ml.href='https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+dest+'&waypoints='+wp+'&travelmode=driving'; }
+function addManuellerStopp(){ const a=(document.getElementById('routeManuelAdresse')||{}).value?.trim(); const l=(document.getElementById('routeManuelLabel')||{}).value?.trim()||a; if(!a){alert('Adresse eingeben');return;} routeManuelleStopps.push({id:'m_'+Date.now(),label:l,adresse:a,leistung:'Manuell',preis:0,typ:'manuell'}); document.getElementById('routeManuelAdresse').value=''; document.getElementById('routeManuelLabel').value=''; renderRoute(); }
+function removeManuellerStopp(id){routeManuelleStopps=routeManuelleStopps.filter(s=>s.id!==id);renderRoute();}
+function copyRouteAddresses(){ const datum=(document.getElementById('routeDatum')||{}).value||today(); const k=DB.kunden(); const lines=[]; const start=(document.getElementById('routeStart')||{}).value; if(start)lines.push('Start: '+start); DB.auftraege().filter(a=>a.datum===datum).forEach((a,i)=>{const kd=k.find(k=>k.id===a.kundeId);if(kd&&kd.adresse)lines.push((i+1)+'. '+kd.name+' - '+kd.adresse);}); routeManuelleStopps.forEach((s,i)=>lines.push((i+1)+'. '+s.label+' - '+s.adresse)); navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('Adressen kopiert')); }
+function calcFahrtkosten(){ const s=parseInt((document.getElementById('fbStart')||{}).value)||0; const e=parseInt((document.getElementById('fbEnde')||{}).value)||0; const km=e-s; const el=document.getElementById('fbErgebnis'); if(el)el.textContent=km>0?km+' km - '+(km*0.30).toFixed(2).replace('.',',')+'EUR':'-- km'; }
+function saveFahrtenbuch(){ const s=parseInt((document.getElementById('fbStart')||{}).value)||0; const e=parseInt((document.getElementById('fbEnde')||{}).value)||0; const km=e-s; if(km<=0){alert('Kilometer eingeben');return;} const datum=(document.getElementById('routeDatum')||{}).value||today(); fahrtenbuch.push({id:uid(),datum,km,kosten:Math.round(km*0.30*100)/100,auftraege:DB.auftraege().filter(a=>a.datum===datum).length}); saveFb(); ['fbStart','fbEnde'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); const fe=document.getElementById('fbErgebnis');if(fe)fe.textContent='-- km'; renderFbHistorie(); showToast('Fahrtenbuch gespeichert'); }
+function renderFbHistorie(){ const h=document.getElementById('fbHistorie');if(!h)return; if(!fahrtenbuch.length){h.innerHTML='<div style="color:var(--text3);font-size:12px;text-align:center;padding:12px;">Noch keine Eintraege.</div>';return;} const mk=today().slice(0,7); const mKm=fahrtenbuch.filter(f=>f.datum&&f.datum.startsWith(mk)).reduce((s,f)=>s+f.km,0); h.innerHTML='<div style="background:var(--card);border-radius:10px;padding:11px 13px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--text2);">Monat gesamt</span><span style="font-weight:700;color:var(--teal);">'+mKm+' km - '+(mKm*0.30).toFixed(2).replace('.',',')+' EUR</span></div>'+fahrtenbuch.slice().reverse().slice(0,5).map(f=>'<div style="background:var(--card);border-radius:9px;padding:10px 13px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);"><div><div style="font-size:12px;font-weight:600;">'+fmtDate(f.datum)+'</div><div style="font-size:10px;color:var(--text3);">'+f.km+' km - '+f.auftraege+' Auftraege</div></div><div style="font-size:13px;font-weight:700;color:var(--teal);">'+f.kosten.toFixed(2).replace('.',',')+' EUR</div></div>').join(''); }
+
+// ════ INIT ════
+document.addEventListener('DOMContentLoaded',()=>{
+  applyConfig();
+  const mAD=document.getElementById('mADatum');
+  if(mAD) mAD.value=isoDate(new Date());
+  renderDashboard();
+});
+
+</script>
+</body>
+</html>
