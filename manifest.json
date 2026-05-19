@@ -1,7 +1,7 @@
 {
-  "name": "FieldApp",
-  "short_name": "FieldApp",
-  "description": "Außendienst-App für Dienstleister",
+  "name": "SchnellR",
+  "short_name": "SchnellR",
+  "description": "Außendienst. Einfach gemacht.",
   "start_url": "./FieldApp_SHK_v2.html",
   "display": "standalone",
   "background_color": "#0d1520",

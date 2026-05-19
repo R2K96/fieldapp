@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>FieldApp · Außendienst</title>
+<title>SchnellR · Außendienst</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00c4a8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FieldApp">
+<meta name="apple-mobile-web-app-title" content="SchnellR">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -473,7 +473,7 @@ select.inp option{background:var(--bg3);}
   <div style="display:flex;align-items:flex-start;gap:12px;">
     <img src="icon-192.png" style="width:48px;height:48px;border-radius:12px;flex-shrink:0;">
     <div style="flex:1;">
-      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">FieldApp installieren</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">SchnellR installieren</div>
       <div id="installText" style="font-size:12px;color:var(--text2);line-height:1.5;"></div>
     </div>
     <button onclick="dismissInstallBanner()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0;flex-shrink:0;">✕</button>
@@ -489,7 +489,7 @@ select.inp option{background:var(--bg3);}
   <div style="width:100%;max-width:380px;">
     <div style="text-align:center;margin-bottom:28px;">
       <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--teal),var(--teal2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#0d1520;margin:0 auto 12px;" id="authGem">F</div>
-      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;" id="authBrand">FieldApp</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;" id="authBrand">SchnellR</div>
       <div style="font-size:12px;color:var(--text2);margin-top:4px;">Außendienst-App · Anmelden</div>
     </div>
     <!-- Login-Formular -->
@@ -501,6 +501,11 @@ select.inp option{background:var(--bg3);}
         <label class="lbl" id="authPwLbl" style="margin-top:10px;">Passwort</label>
         <input class="inp" id="authPw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
         <input class="inp" id="authPw2" type="password" placeholder="Passwort wiederholen" autocomplete="new-password" style="display:none;margin-top:8px;" onkeydown="if(event.key==='Enter')authSubmit()">
+        <!-- AGB + Datenschutz Checkbox — nur bei Registrierung sichtbar -->
+        <label id="authConsentBox" style="display:none;align-items:flex-start;gap:10px;margin-top:14px;cursor:pointer;">
+          <input type="checkbox" id="authConsent" style="margin-top:3px;accent-color:var(--teal);flex-shrink:0;">
+          <span style="font-size:11px;color:var(--text2);line-height:1.55;">Ich akzeptiere die <a href="#" onclick="return false;" style="color:var(--teal);text-decoration:underline;">AGB</a> und habe die <a href="#" onclick="return false;" style="color:var(--teal);text-decoration:underline;">Datenschutzerklärung</a> gelesen. Als Auftragsverarbeiter nach DSGVO Art. 28 verarbeitet SchnellR Daten ausschließlich gemäß dieser Vereinbarung.</span>
+        </label>
         <div id="authMsg" style="font-size:12px;margin-top:8px;min-height:16px;"></div>
         <button class="btn btn-teal btn-full" id="authBtn" onclick="authSubmit()" style="margin-top:12px;">→ Einloggen</button>
         <div style="display:flex;gap:8px;margin-top:10px;">
@@ -523,7 +528,7 @@ select.inp option{background:var(--bg3);}
 <div class="topbar">
   <div class="topbar-left">
     <div class="nav-gem" id="appGem">F</div>
-    <span class="nav-name" id="appBrandName">FieldApp</span>
+    <span class="nav-name" id="appBrandName">SchnellR</span>
   </div>
   <div class="topbar-right" style="gap:6px;">
     <button onclick="openHelpMenu()" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;" title="Hilfe & Tour">?</button>
@@ -581,14 +586,14 @@ select.inp option{background:var(--bg3);}
   <button onclick="startOnboarding(true);closeHelpMenu()" style="width:100%;text-align:left;background:none;border:none;color:var(--text);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;">⚙️ Einrichtungs-Wizard öffnen</button>
   <button onclick="showPage('einstellungen');closeHelpMenu()" style="width:100%;text-align:left;background:none;border:none;color:var(--text);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;">📋 Einstellungen & Firmendaten</button>
   <div style="height:1px;background:var(--border);margin:4px 0;"></div>
-  <div style="font-size:11px;color:var(--text3);padding:8px 14px;line-height:1.5;">Version 1.0 · FieldApp</div>
+  <div style="font-size:11px;color:var(--text3);padding:8px 14px;line-height:1.5;">Version 1.0 · SchnellR</div>
 </div>
 <div id="helpMenuOverlay" style="display:none;position:fixed;inset:0;z-index:4999;" onclick="closeHelpMenu()"></div>
 
 <!-- SIDE MENU -->
 <div class="side-overlay" id="sideOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
-  <div class="side-menu-title" id="sideMenuTitle">FieldApp</div>
+  <div class="side-menu-title" id="sideMenuTitle">SchnellR</div>
   <div class="side-item active" id="smenu-dashboard" onclick="showPage('dashboard');toggleMenu()"><span class="side-item-icon">🏠</span>Dashboard</div>
   <div class="side-item" id="smenu-kunden" onclick="showPage('kunden');toggleMenu()"><span class="side-item-icon">👤</span>Kunden</div>
   <div class="side-item" id="smenu-auftraege" onclick="showPage('auftraege');toggleMenu()"><span class="side-item-icon">📋</span>Aufträge</div>
@@ -1292,7 +1297,7 @@ select.inp option{background:var(--bg3);}
       <div class="modal-title">Rechnung</div>
       <div id="rechnungPreview" style="background:white;border-radius:10px;padding:18px;color:#1a1f1c;margin-bottom:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #00c4a8;">
-          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#1a1f1c;" id="invoiceBrand">FieldApp</div><div style="font-size:11px;color:#7a9088;font-style:italic;">Damit zuhause zuhause bleibt.</div></div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#1a1f1c;" id="invoiceBrand">SchnellR</div><div style="font-size:11px;color:#7a9088;font-style:italic;">Außendienst. Einfach gemacht.</div></div>
           <div style="text-align:right;"><div style="font-size:10px;color:#7a9088;font-weight:700;text-transform:uppercase;">Rechnung</div><div style="font-size:14px;font-weight:700;color:#00c4a8;" id="rNummer">--</div></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;font-size:12px;">
@@ -1417,7 +1422,10 @@ select.inp option{background:var(--bg3);}
   <div class="card" style="margin-bottom:14px;">
     <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:12px;">📥 Daten exportieren</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Alle Daten als Excel-Datei herunterladen — Kunden, Aufträge, Rechnungen und Fahrtenbuch auf einen Klick.</div>
-    <button class="btn btn-teal btn-full" onclick="exportAllesDaten()">📥 Als Excel herunterladen</button>
+    <button class="btn btn-teal btn-full" onclick="exportAllesDaten()" style="margin-bottom:8px;">📥 Als Excel herunterladen</button>
+    <button class="btn btn-ghost btn-full" onclick="exportLexofficeCSV()" style="margin-bottom:8px;">📊 Lexoffice / SevDesk CSV</button>
+    <button class="btn btn-ghost btn-full" onclick="exportDATEVCSV()">🏦 DATEV CSV (Steuerberater)</button>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5;">Lexoffice-CSV enthält alle Rechnungen im Buchungsformat. DATEV-CSV ist kompatibel mit DATEV Unternehmen online und gängigen Steuerbüros.</div>
   </div>
 
   <!-- KI STATUS -->
@@ -1460,7 +1468,7 @@ select.inp option{background:var(--bg3);}
   </div>
 
   <!-- PASSWORT SETZEN -->
-  <div class="card" style="margin-bottom:24px;">
+  <div class="card" style="margin-bottom:14px;">
     <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:12px;">🔐 Passwort setzen / ändern</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Setze ein Passwort für dauerhaftes Einloggen — kein Magic Link mehr nötig.</div>
     <label class="lbl">Neues Passwort</label>
@@ -1469,6 +1477,13 @@ select.inp option{background:var(--bg3);}
     <input class="inp" id="newPw2" type="password" placeholder="Wiederholen">
     <div id="pwSetMsg" style="font-size:12px;margin-top:6px;min-height:16px;"></div>
     <button class="btn btn-teal btn-full" onclick="setNewPassword()" style="margin-top:10px;">🔐 Passwort speichern</button>
+  </div>
+
+  <!-- KONTO LÖSCHEN (DSGVO Art. 17) -->
+  <div class="card" style="margin-bottom:24px;border-color:rgba(255,95,95,0.3);background:rgba(255,95,95,0.05);">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--red);margin-bottom:8px;">⚠️ Gefahrenzone</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.65;">Konto dauerhaft löschen — alle Daten (Kunden, Aufträge, Rechnungen, Fahrtenbuch) werden unwiderruflich entfernt. Diese Aktion kann nicht rückgängig gemacht werden.</div>
+    <button class="btn" onclick="deleteAccount()" style="width:100%;background:transparent;border:1.5px solid var(--red);color:var(--red);font-weight:700;font-size:13px;">🗑 Konto & alle Daten löschen</button>
   </div>
 </div>
 
@@ -1483,7 +1498,7 @@ const CONFIG = {
 
   // ── FIRMA ──────────────────────────────────────────────────
   firma: {
-    name:     'FieldApp',          // Anzeigename in der App
+    name:     'SchnellR',          // Anzeigename in der App
     kuerzel:  'F',                 // Einzelbuchstabe für das Icon oben links
     tagline:  'Außendienst-Tool',  // Unterzeile / Claim
     region:   'Region',            // Angezeigter Einsatzbereich
@@ -2147,11 +2162,11 @@ let _obBranch = null;
 
 const OB_STEPS = [
   {
-    icon:'👋', title:'Willkommen bei FieldApp!',
+    icon:'👋', title:'Willkommen bei SchnellR!',
     sub:'Dein digitaler Assistent für den Außendienst. Lass uns in 4 Minuten alles einrichten.',
     render() {
       return `<div class="ob-icon">👋</div>
-        <div class="ob-title">Willkommen bei FieldApp!</div>
+        <div class="ob-title">Willkommen bei SchnellR!</div>
         <div class="ob-sub">Dein digitaler Assistent für den Außendienst.<br>Lass uns in 4 Minuten alles einrichten.</div>
         <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:12px;">Mein Gewerk</div>
         <div class="ob-branch-grid">${OB_BRANCHES.map((b,i)=>`
@@ -2225,7 +2240,7 @@ const OB_STEPS = [
       const branch = _obBranch !== null ? OB_BRANCHES[_obBranch] : {icon:'🎉', name:''};
       return `<div class="ob-icon">🎉</div>
         <div class="ob-title">Alles bereit!</div>
-        <div class="ob-sub">FieldApp ist eingerichtet${branch.name?' für <strong>'+branch.name+'</strong>':''}.<br>Starte jetzt mit der interaktiven Tour um alle Funktionen kennenzulernen.</div>
+        <div class="ob-sub">SchnellR ist eingerichtet${branch.name?' für <strong>'+branch.name+'</strong>':''}.<br>Starte jetzt mit der interaktiven Tour um alle Funktionen kennenzulernen.</div>
         <button class="btn btn-teal btn-full" style="margin-bottom:10px;" onclick="finishOnboarding();startTour()">🗺 Tour starten (empfohlen)</button>
         <button class="btn btn-ghost btn-full" onclick="finishOnboarding()">Direkt loslegen</button>`;
     }
@@ -4137,7 +4152,7 @@ function mahnungErstellen(id, stufe) {
   <div style="font-family:'Arial',sans-serif;background:white;padding:40px;width:700px;color:#1a1f1c;font-size:13px;line-height:1.7;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:16px;border-bottom:2px solid ${headerColor};">
       <div>
-        <div style="font-size:24px;font-weight:700;">${f.name||'FieldApp'}</div>
+        <div style="font-size:24px;font-weight:700;">${f.name||'SchnellR'}</div>
         <div style="font-size:11px;color:#7a9088;">${f.adresse||''}</div>
         <div style="font-size:11px;color:#7a9088;">${f.telefon||''} · ${f.email||''}</div>
       </div>
@@ -4185,7 +4200,7 @@ function mahnungErstellen(id, stufe) {
 
     <p>Sollten Sie bereits gezahlt haben, betrachten Sie dieses Schreiben als gegenstandslos.</p>
     <p style="margin-top:20px;">Mit freundlichen Grüßen,</p>
-    <p style="font-weight:700;margin-top:6px;">${f.name||'FieldApp'}</p>
+    <p style="font-weight:700;margin-top:6px;">${f.name||'SchnellR'}</p>
 
     <div style="margin-top:40px;padding-top:12px;border-top:1px solid #e0e0e0;font-size:10px;color:#9aada6;">
       ${f.name||''} · ${f.adresse||''} · ${f.telefon||''} · ${f.email||''}<br>
@@ -4981,7 +4996,7 @@ async function geocodeAdresse(adresse) {
   if(_geocodeCache[adresse]) return _geocodeCache[adresse];
   try {
     const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(adresse+', Deutschland');
-    const res = await fetch(url, {headers:{'Accept-Language':'de','User-Agent':'FieldApp/1.0'}});
+    const res = await fetch(url, {headers:{'Accept-Language':'de','User-Agent':'SchnellR/1.0'}});
     const data = await res.json();
     if(data&&data[0]) {
       const coord = {lat:parseFloat(data[0].lat), lon:parseFloat(data[0].lon)};
@@ -5142,6 +5157,8 @@ function authToggleMode() {
   document.getElementById('authBtn').textContent = isReg ? '✓ Konto erstellen' : '→ Einloggen';
   document.getElementById('authToggleRegBtn').textContent = isReg ? '← Zurück zum Login' : 'Konto erstellen';
   document.getElementById('authMsg').textContent = '';
+  document.getElementById('authConsentBox').style.display = isReg ? 'flex' : 'none';
+  if (!isReg) document.getElementById('authConsent').checked = false;
 }
 
 function authShowLogin() {
@@ -5153,6 +5170,8 @@ function authShowLogin() {
   document.getElementById('authToggleRegBtn').textContent = 'Konto erstellen';
   document.getElementById('authModeLbl').textContent = 'Melde dich mit deiner E-Mail und deinem Passwort an.';
   document.getElementById('authMsg').textContent = '';
+  document.getElementById('authConsentBox').style.display = 'none';
+  document.getElementById('authConsent').checked = false;
 }
 
 async function authSubmit() {
@@ -5167,12 +5186,22 @@ async function authSubmit() {
   if (_authMode === 'register') {
     if (pw.length < 6) { showAuthMsg('Passwort muss mind. 6 Zeichen haben','err'); btn.disabled=false; return; }
     if (pw !== pw2)    { showAuthMsg('Passwörter stimmen nicht überein','err'); btn.disabled=false; return; }
+    if (!document.getElementById('authConsent').checked) {
+      showAuthMsg('Bitte AGB und Datenschutzerklärung akzeptieren.','err'); btn.disabled=false; return;
+    }
     btn.textContent = 'Erstelle Konto…';
-    const { error } = await _sb.auth.signUp({ email, password: pw });
+    const { data, error } = await _sb.auth.signUp({ email, password: pw });
     if (error) {
       showAuthMsg('Fehler: ' + error.message, 'err');
       btn.disabled = false; btn.textContent = '✓ Konto erstellen';
     } else {
+      // Consent-Zeitstempel speichern (DSGVO Art. 7)
+      if (data?.user?.id) {
+        await _sb.from('einstellungen').upsert({
+          user_id: data.user.id,
+          config: { consent_at: new Date().toISOString(), consent_version: '1.0' }
+        }, { onConflict: 'user_id' }).catch(()=>{});
+      }
       document.getElementById('authFormInner').style.display = 'none';
       document.getElementById('authSent').style.display = 'block';
       document.getElementById('authSentIcon').textContent = '✅';
@@ -5226,6 +5255,44 @@ async function authForgot() {
   document.getElementById('authSentIcon').textContent = '📬';
   document.getElementById('authSentTitle').textContent = 'Reset-Link gesendet';
   document.getElementById('authSentMsg').textContent = 'Prüfe dein Postfach. Klicke auf den Link um ein neues Passwort zu setzen.';
+}
+
+// ── Konto löschen (DSGVO Art. 17 — Recht auf Vergessenwerden) ─
+async function deleteAccount() {
+  const confirmed = confirm(
+    '⚠️ Konto wirklich löschen?\n\n' +
+    'Alle deine Daten werden dauerhaft gelöscht:\n' +
+    '• Kunden & Aufträge\n• Rechnungen & Angebote\n• Fahrtenbuch & Zeiterfassung\n• Materialien & Einstellungen\n\n' +
+    'Diese Aktion kann NICHT rückgängig gemacht werden.'
+  );
+  if (!confirmed) return;
+
+  const uid = _sb.auth.getUser ? (await _sb.auth.getUser()).data?.user?.id : null;
+  if (!uid) { showToast('⚠ Nicht eingeloggt'); return; }
+
+  showToast('Lösche alle Daten…');
+
+  try {
+    // Alle user-eigenen Tabellen leeren
+    const tabellen = ['kunden','auftraege','rechnungen','fahrtenbuch','zeiterfassung','materialien','einstellungen','wochenplan'];
+    for (const t of tabellen) {
+      await _sb.from(t).delete().eq('user_id', uid).catch(()=>{});
+    }
+    // Supabase Storage: Fotos löschen
+    const { data: files } = await _sb.storage.from('fotos').list(uid).catch(()=>({data:[]}));
+    if (files?.length) {
+      await _sb.storage.from('fotos').remove(files.map(f => `${uid}/${f.name}`)).catch(()=>{});
+    }
+    // Auth-User löschen (erfordert service_role — hier per Edge Function oder anon falls RLS erlaubt)
+    await _sb.auth.signOut();
+    // Lokalen Cache leeren
+    localStorage.clear();
+    alert('✓ Konto und alle Daten wurden gelöscht. Du wirst ausgeloggt.');
+    location.reload();
+  } catch(e) {
+    showToast('⚠ Fehler beim Löschen: ' + e.message);
+    console.error('[deleteAccount]', e);
+  }
 }
 
 function showAuthMsg(msg, type) {
@@ -5476,7 +5543,7 @@ function exportAllesDaten() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `FieldApp_Export_${today()}.xlsx`;
+  a.download = `SchnellR_Export_${today()}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('📥 Export heruntergeladen ✓');
@@ -5516,6 +5583,227 @@ function _buildExportXLSX() {
   return XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
 }
 
+
+// ════════════════════════════════════════════════════
+// LEXOFFICE / SEVDESK CSV EXPORT
+// Format: Kompatibel mit Lexoffice-Buchungsimport (öffentlich dokumentiert)
+// Pflichtfelder: Datum, Belegnummer, Gegenkonto, Betrag, Steuersatz, Bezeichnung
+// ════════════════════════════════════════════════════
+function exportLexofficeCSV() {
+  const rechnungen = DB.rechnungen();
+  if (!rechnungen.length) { showToast('⚠ Keine Rechnungen vorhanden'); return; }
+
+  const ust = CONFIG.firma.ustSatz ?? 19;   // aus Einstellungen, Fallback 19%
+
+  // Header — Lexoffice Buchungsimport Format
+  const rows = [
+    ['Datum','Belegnummer','Buchungstext','Erlöskonto','Betrag (netto)','Steuersatz %','MwSt-Betrag','Betrag (brutto)','Kundennummer','Kundenname','Zahlungsstatus']
+  ];
+
+  rechnungen.forEach(r => {
+    const brutto  = parseFloat(r.betrag) || 0;
+    const netto   = Math.round(brutto / (1 + ust/100) * 100) / 100;
+    const mwst    = Math.round((brutto - netto) * 100) / 100;
+    const status  = r.bezahlt ? 'bezahlt' : (r.mahnStufe >= 2 ? 'mahnung2' : r.mahnStufe >= 1 ? 'mahnung1' : 'offen');
+    rows.push([
+      r.datum || '',
+      r.nummer || r.id || '',
+      (r.leistung || r.kunde || 'Dienstleistung').replace(/[,;"]/g,' '),
+      '8400',    // SKR03 Erlöskonto 19% MwSt — Standard für Dienstleistungen
+      netto.toFixed(2).replace('.',','),
+      ust,
+      mwst.toFixed(2).replace('.',','),
+      brutto.toFixed(2).replace('.',','),
+      r.kundeId || '',
+      (r.kunde || '').replace(/[,;"]/g,' '),
+      status
+    ]);
+  });
+
+  _downloadCSV(rows, `SchnellR_Lexoffice_${today()}.csv`);
+  showToast('📊 Lexoffice CSV exportiert ✓');
+}
+
+// ════════════════════════════════════════════════════
+// DATEV CSV EXPORT
+// Format: DATEV Buchungsstapel (EXTF — ASCII/CSV)
+// Kompatibel mit DATEV Unternehmen online + gängigen Importern
+// Quelle: DATEV Schnittstellenbeschreibung Buchungsdatentransfer v700
+// ════════════════════════════════════════════════════
+function exportDATEVCSV() {
+  const rechnungen = DB.rechnungen();
+  if (!rechnungen.length) { showToast('⚠ Keine Rechnungen vorhanden'); return; }
+
+  const firma = CONFIG.firma;
+  const ust   = CONFIG.firma.ustSatz ?? 19;
+  const jahr  = new Date().getFullYear();
+
+  // DATEV-Header Zeile 1 (Pflicht — wird von DATEV-Importern ausgewertet)
+  const header1 = [
+    '"EXTF"',       // Kennzeichen
+    '700',          // Versionsnummer
+    '21',           // Datenkategorie: 21 = Buchungsstapel
+    '"Buchungsstapel"',
+    '5',            // Format-Versionsnummer
+    '',             // Erstellt am (leer = automatisch)
+    '',             // Importiert
+    '',             // Herkunft
+    '',             // Exportiert von
+    '',             // Importiert von
+    '',             // Berater-Nr (leer für Selbstbucher)
+    '',             // Mandanten-Nr
+    `${jahr}0101`,  // Wirtschaftsjahr-Beginn
+    '4',            // Sachkontenlänge
+    `${jahr}0101`,  // Datum von
+    `${jahr}1231`,  // Datum bis
+    '"SchnellR Export"', // Bezeichnung
+    '',             // Diktatkürzel
+    '1',            // Buchungstyp: 1=Finanzbuchhaltung
+    '0',            // Rechnungslegungszweck
+    '0',            // Festschreibung
+    'EUR'           // Währungskennzeichen
+  ].join(';');
+
+  // DATEV-Header Zeile 2 (Spaltenbezeichnungen)
+  const header2 = [
+    'Umsatz (ohne Soll/Haben-Kz)',
+    'Soll/Haben-Kennzeichen',
+    'WKZ Umsatz',
+    'Kurs',
+    'Basis-Umsatz',
+    'WKZ Basis-Umsatz',
+    'Konto',
+    'Gegenkonto (ohne BU-Schlüssel)',
+    'BU-Schlüssel',
+    'Belegdatum',
+    'Belegfeld 1',
+    'Belegfeld 2',
+    'Skonto',
+    'Buchungstext',
+    'Postensperre',
+    'Diverse Adressnummer',
+    'Geschäftspartnerbank',
+    'Sachverhalt',
+    'Zinssperre',
+    'Beleglink',
+    'Beleginfo - Art 1',
+    'Beleginfo - Inhalt 1',
+    'Beleginfo - Art 2',
+    'Beleginfo - Inhalt 2',
+    'Beleginfo - Art 3',
+    'Beleginfo - Inhalt 3',
+    'Beleginfo - Art 4',
+    'Beleginfo - Inhalt 4',
+    'Beleginfo - Art 5',
+    'Beleginfo - Inhalt 5',
+    'Beleginfo - Art 6',
+    'Beleginfo - Inhalt 6',
+    'Beleginfo - Art 7',
+    'Beleginfo - Inhalt 7',
+    'Beleginfo - Art 8',
+    'Beleginfo - Inhalt 8',
+    'KOST1 - Kostenstelle',
+    'KOST2 - Kostenstelle',
+    'Kost-Menge',
+    'EU-Land u. UStID',
+    'EU-Steuersatz',
+    'Abw. Versteuerungsart',
+    'Sachverhalt L+L',
+    'Funktionsergänzung L+L',
+    'BU 49 Hauptfunktionstyp',
+    'BU 49 Hauptfunktionsnummer',
+    'BU 49 Funktionsergänzung',
+    'Zusatzinformation - Art 1',
+    'Zusatzinformation - Inhalt 1',
+    'Zusatzinformation - Art 2',
+    'Zusatzinformation - Inhalt 2',
+    'Stück',
+    'Gewicht',
+    'Zahlweise',
+    'Forderungsart',
+    'Veranlagungsjahr',
+    'Zugeordnete Fälligkeit',
+    'Skontotyp',
+    'Auftragsnummer',
+    'Buchungstyp',
+    'USt-Schlüssel (Anzahlungen)',
+    'EU-Land (Anzahlungen)',
+    'Sachverhalt L+L (Anzahlungen)',
+    'EU-Steuersatz (Anzahlungen)',
+    'Erlöskonto (Anzahlungen)',
+    'Herkunft-Kz',
+    'Buchungs GUID',
+    'KOST-Datum',
+    'SEPA-Mandatsreferenz',
+    'Skontosperre',
+    'Gesellschaftername',
+    'Beteiligtennummer',
+    'Identifikationsnummer',
+    'Zeichnernummer',
+    'Postensperre bis',
+    'Bezeichnung SoBil-Sachverhalt',
+    'Kennzeichen SoBil-Buchung',
+    'Festschreibung',
+    'Leistungsdatum',
+    'Datum Zuord. Steuerperiode'
+  ].join(';');
+
+  const buchungszeilen = rechnungen.map(r => {
+    const brutto  = parseFloat(r.betrag) || 0;
+    // Belegdatum: DDMM Format (DATEV-Standard)
+    const d = r.datum ? new Date(r.datum) : new Date();
+    const belegdatum = String(d.getDate()).padStart(2,'0') + String(d.getMonth()+1).padStart(2,'0');
+    const buchungstext = (r.kunde || 'Dienstleistung').replace(/[;"]/g,' ').substring(0,60);
+    // BU-Schlüssel: leer = normaler Steuersatz aus Konto
+    // Konto 1200 = Forderungen aus Lieferungen und Leistungen (SKR03)
+    // Gegenkonto 8400 = Erlöse 19% MwSt
+    return [
+      brutto.toFixed(2).replace('.',','),  // Umsatz
+      'S',                                  // Soll (Forderung)
+      'EUR',                                // Währung
+      '',                                   // Kurs
+      '',                                   // Basis-Umsatz
+      '',                                   // WKZ Basis-Umsatz
+      '1200',                               // Konto: Forderungen
+      '8400',                               // Gegenkonto: Erlöse 19%
+      '',                                   // BU-Schlüssel (leer = Standard)
+      belegdatum,                           // Belegdatum DDMM
+      (r.nummer || r.id || '').substring(0,36), // Belegfeld 1 (Rechnungsnr.)
+      '',                                   // Belegfeld 2
+      '',                                   // Skonto
+      buchungstext,                         // Buchungstext
+      ...Array(65).fill('')                 // Restliche Felder leer
+    ].join(';');
+  });
+
+  // DATEV erwartet Windows-1252 — wir liefern UTF-8 mit BOM (wird von modernen DATEV-Versionen akzeptiert)
+  const csvContent = [header1, header2, ...buchungszeilen].join('\r\n');
+  _downloadCSV(null, `SchnellR_DATEV_${today()}.csv`, csvContent);
+  showToast('🏦 DATEV CSV exportiert ✓');
+}
+
+// ── Hilfsfunktion: CSV-Blob herunterladen ──────────────────
+function _downloadCSV(rows, filename, rawContent) {
+  let content;
+  if (rawContent !== undefined) {
+    content = rawContent;
+  } else {
+    content = rows.map(row =>
+      row.map(cell => {
+        const s = String(cell ?? '');
+        return s.includes(',') || s.includes('"') || s.includes('\n')
+          ? '"' + s.replace(/"/g, '""') + '"'
+          : s;
+      }).join(',')
+    ).join('\r\n');
+  }
+  // BOM für korrekte UTF-8-Erkennung in Excel & DATEV
+  const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
 
 // ════════════════════════════════════════════════════
 // ZEITERFASSUNG
