@@ -88,6 +88,23 @@
     .feat-card p{font-size:13px;color:var(--text2);line-height:1.65;}
     .feat-tag{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:rgba(0,196,168,.1);color:var(--teal);border:1px solid rgba(0,196,168,.2);}
 
+    /* COMPLIANCE */
+    .compliance-block{background:linear-gradient(135deg,rgba(0,196,168,.07) 0%,rgba(0,196,168,.02) 100%);border:1px solid rgba(0,196,168,.2);border-radius:20px;padding:48px 40px;}
+    .compliance-header{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+    .compliance-shield{width:56px;height:56px;background:rgba(0,196,168,.15);border:1.5px solid rgba(0,196,168,.3);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+    .compliance-header h2{margin-bottom:6px;}
+    .compliance-header p{font-size:14px;color:var(--text2);max-width:600px;line-height:1.65;}
+    .compliance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:32px;}
+    .c-card{background:var(--card);border:1px solid rgba(0,196,168,.15);border-radius:14px;padding:22px;}
+    .c-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .c-icon{width:36px;height:36px;background:rgba(0,196,168,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .c-card h3{font-size:14px;font-weight:700;}
+    .c-card p{font-size:12px;color:var(--text2);line-height:1.65;}
+    .c-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);background:rgba(0,196,168,.1);border:1px solid rgba(0,196,168,.2);padding:2px 8px;border-radius:100px;display:inline-block;margin-top:8px;}
+    .eu-stack{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+    .eu-pill{background:var(--card);border:1px solid rgba(0,196,168,.2);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;}
+    .eu-pill .flag{font-size:16px;}
+
     /* STEPS */
     .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;}
     .step{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;}
@@ -215,8 +232,8 @@
     <div class="usp-strip">
       <div class="usp-item"><div class="usp-num">80%</div><div class="usp-label">weniger Zeit für<br>Dokumentation</div></div>
       <div class="usp-item"><div class="usp-num">7</div><div class="usp-label">Sprachen erkennt<br>die KI automatisch</div></div>
-      <div class="usp-item"><div class="usp-num">0</div><div class="usp-label">Installation nötig —<br>läuft im Browser</div></div>
-      <div class="usp-item"><div class="usp-num">1</div><div class="usp-label">App statt<br>5 verschiedene Tools</div></div>
+      <div class="usp-item"><div class="usp-num">100%</div><div class="usp-label">EU-Datenverarbeitung —<br>kein US-Transfer</div></div>
+      <div class="usp-item"><div class="usp-num">E-Re.</div><div class="usp-label">Pflicht ab 2025<br>— bereits integriert</div></div>
       <div class="usp-item"><div class="usp-num">30T</div><div class="usp-label">kostenlos testen —<br>keine Kreditkarte</div></div>
     </div>
   </div>
@@ -254,9 +271,9 @@
       </div>
       <div class="feat-card">
         <div class="feat-icon">📄</div>
-        <h3>Rechnungen & Mahnwesen</h3>
-        <p>PDF-Rechnung auf Knopfdruck. Automatisches 2-Stufen-Mahnwesen mit gesetzlichen Verzugszinsen nach §288 BGB — ohne dass Sie daran denken müssen.</p>
-        <span class="feat-tag">ZUGFeRD · DSGVO-konform</span>
+        <h3>E-Rechnung 2025 & Mahnwesen</h3>
+        <p>PDF- und E-Rechnung nach ZUGFeRD 2.0 — dem gesetzlich verpflichtenden Standard seit 2025. Automatisches 2-Stufen-Mahnwesen mit Verzugszinsen nach §288 BGB. Keine manuelle Nacharbeit.</p>
+        <span class="feat-tag">ZUGFeRD 2.0 · Pflicht ab 2025</span>
       </div>
       <div class="feat-card">
         <div class="feat-icon">🗺</div>
@@ -281,6 +298,66 @@
         <h3>Materiallisten & Katalog</h3>
         <p>Verbrauchte Materialien direkt beim Auftrag erfassen. Eigenen Katalog hochladen, Preise hinterlegen, automatisch in Rechnungen übernehmen.</p>
         <span class="feat-tag">CSV / Excel Import</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPLIANCE -->
+<section>
+  <div class="container">
+    <div class="compliance-block">
+      <div class="compliance-header">
+        <div class="compliance-shield">🛡</div>
+        <div>
+          <div class="sec-label" style="margin-bottom:6px;">Datenschutz & Compliance</div>
+          <h2 style="font-size:clamp(22px,3.5vw,36px);margin-bottom:8px;">100% Europa.<br>Keine Kompromisse.</h2>
+          <p>Was andere versprechen, liefern wir technisch: Jedes Byte Ihrer Kundendaten bleibt in der EU — von der KI-Verarbeitung bis zur Datenbank. Das ist kein Marketing, das ist Architektur.</p>
+        </div>
+      </div>
+
+      <div class="compliance-grid">
+        <div class="c-card">
+          <div class="c-card-top"><div class="c-icon">🇪🇺</div><h3>100% EU-Datenverarbeitung</h3></div>
+          <p>Alle Daten werden ausschließlich auf europäischen Servern gespeichert und verarbeitet. Kein Transfer in die USA, kein US-Cloud-Act-Risiko.</p>
+          <span class="c-badge">DSGVO Art. 44 konform</span>
+        </div>
+        <div class="c-card">
+          <div class="c-card-top"><div class="c-icon">🤖</div><h3>Europäische KI</h3></div>
+          <p>Spracherkennung über Gladia (EU) und Texte über Mistral AI (Paris) — zwei der führenden europäischen KI-Anbieter. Ihre Sprachdaten verlassen nie den europäischen Rechtsraum.</p>
+          <span class="c-badge">Mistral AI · Gladia · EU-AVV</span>
+        </div>
+        <div class="c-card">
+          <div class="c-card-top"><div class="c-icon">🔒</div><h3>DSGVO-konform by Design</h3></div>
+          <p>Auftragsverarbeitungsverträge (AVV) mit allen Dienstleistern. Recht auf Löschung, Datenportabilität und Auskunft direkt in der App integriert.</p>
+          <span class="c-badge">AVV · Art. 17 · Art. 20</span>
+        </div>
+        <div class="c-card">
+          <div class="c-card-top"><div class="c-icon">🧾</div><h3>E-Rechnung Pflicht 2025</h3></div>
+          <p>Seit Januar 2025 gilt die E-Rechnungspflicht im B2B-Bereich. SchnellR stellt Rechnungen im ZUGFeRD 2.0-Format aus — dem gesetzlich anerkannten Standard. Kein Handlungsbedarf für Sie.</p>
+          <span class="c-badge">ZUGFeRD 2.0 · §14 UStG</span>
+        </div>
+        <div class="c-card">
+          <div class="c-card-top"><div class="c-icon">🗑</div><h3>Automatische Datenlöschung</h3></div>
+          <p>Sprachaufnahmen werden nach der KI-Verarbeitung sofort gelöscht. Keine dauerhafte Speicherung sensibler Audiodaten — technisch sichergestellt, nicht nur versprochen.</p>
+          <span class="c-badge">Privacy by Design</span>
+        </div>
+        <div class="c-card">
+          <div class="c-card-top"><div class="c-icon">📋</div><h3>GoBD-konforme Ablage</h3></div>
+          <p>Rechnungen, Belege und Dokumente werden revisionssicher und manipulationssicher gespeichert — wie es das Finanzamt verlangt. Steuerprüfung? Kein Problem.</p>
+          <span class="c-badge">GoBD · Revisionssicher</span>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid rgba(0,196,168,.15);padding-top:24px;">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;">Infrastruktur ausschließlich in der EU</div>
+        <div class="eu-stack">
+          <div class="eu-pill"><span class="flag">🇩🇪</span>Supabase — Frankfurt</div>
+          <div class="eu-pill"><span class="flag">🇫🇷</span>Mistral AI — Paris</div>
+          <div class="eu-pill"><span class="flag">🇪🇺</span>Gladia — Europa</div>
+          <div class="eu-pill"><span class="flag">🌍</span>OpenStreetMap — EU-gehostet</div>
+          <div class="eu-pill"><span class="flag">🇺🇸</span style="text-decoration:line-through;opacity:.4;">Kein US-Transfer</div>
+        </div>
       </div>
     </div>
   </div>
