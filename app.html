@@ -640,6 +640,9 @@ select.inp option{background:var(--bg3);}
     <div style="font-size:12px;color:var(--text3);" id="dashDate">--</div>
   </div>
 
+  <!-- TEAM ÜBERSICHT (nur Admin) -->
+  <div id="dashTeamBlock" style="display:none;margin-bottom:16px;"></div>
+
   <!-- HEUTE STRIP -->
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px;" id="dashHeuteLbl">Heute · wird geladen…</div>
   <div class="heute-strip" id="dashHeuteStrip">
@@ -1476,6 +1479,15 @@ select.inp option{background:var(--bg3);}
         <div><label class="lbl" style="margin-top:0;">VK-Preis (€)</label><input class="inp" id="matNewVK" type="number" step="0.01" placeholder="0.00" style="padding:7px 10px;font-size:13px;"></div>
       </div>
       <button class="btn btn-teal" onclick="matManualSave()" style="width:100%;">+ Material speichern</button>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="card" style="margin-bottom:14px;" id="teamCard">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:12px;">👥 Team</div>
+    <div id="teamSection">
+      <!-- wird per renderTeamSection() befüllt -->
+      <div style="font-size:13px;color:var(--text2);">Lädt…</div>
     </div>
   </div>
 
@@ -3613,6 +3625,7 @@ function saveNachtermin(fotoUrls=[], unterschrift=null){
 // DASHBOARD
 // ════════════════════════════════
 function renderDashboard(){
+  renderDashTeam(); // Team-Übersicht für Admins
   const kunden=DB.kunden();
   const auftraege=DB.auftraege();
   const todayKey=isoDate(new Date());
@@ -4556,12 +4569,8 @@ function rgMatKatalogNamen() {
 }
 
 function renderEinstellungen() {
-  // Groq Key
-  const savedKey = localStorage.getItem('fa_groq_key') || '';
-  const ki = document.getElementById('groqKeyInput');
-  if (ki) ki.value = savedKey;
-  const km = document.getElementById('groqKeyMsg');
-  if (km && savedKey) { km.style.color='var(--teal)'; km.textContent='✓ KI-Auswertung aktiv.'; }
+  // Team-Sektion laden
+  renderTeamSection();
 
   // Materialkatalog anzeigen
   renderMaterialListe();
@@ -6149,6 +6158,245 @@ function seAuftragAnlegen() {
     if (dauer)  { document.getElementById('mADauer').value = dauer; updateMAPreis(); }
     if (notiz)  document.getElementById('mANotiz').value  = notiz;
   }, 100);
+}
+
+// ════════════════════════════════════════════════════════
+// MULTI-USER TEAM SYSTEM
+// ════════════════════════════════════════════════════════
+
+let _teamData = null;   // { team, members, role }
+
+// ── Team-State laden ──────────────────────────────────
+async function loadTeamData() {
+  if (!_accessToken) return;
+  try {
+    // Bin ich Admin (owner) eines Teams?
+    const { data: ownedTeam } = await _supabase
+      .from('teams').select('*, team_members(*)').eq('owner_id', _userId).maybeSingle();
+
+    if (ownedTeam) {
+      _teamData = { team: ownedTeam, members: ownedTeam.team_members || [], role: 'admin' };
+      return;
+    }
+
+    // Bin ich Mitglied eines Teams?
+    const { data: membership } = await _supabase
+      .from('team_members')
+      .select('*, teams(*)')
+      .eq('user_id', _userId)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (membership) {
+      const { data: members } = await _supabase
+        .from('team_members').select('*')
+        .eq('team_id', membership.team_id).eq('is_active', true);
+      _teamData = { team: membership.teams, members: members || [], role: 'member' };
+      return;
+    }
+
+    _teamData = null; // Kein Team
+  } catch(e) {
+    console.warn('[Team] loadTeamData:', e.message);
+    _teamData = null;
+  }
+}
+
+// ── Team erstellen ────────────────────────────────────
+async function createTeam() {
+  const nameEl = document.getElementById('teamNewName');
+  const name = nameEl?.value.trim();
+  if (!name) { showToast('⚠ Bitte Teamnamen eingeben'); return; }
+
+  const invite_code = Math.random().toString(36).slice(2,8).toUpperCase();
+  const { error } = await _supabase.from('teams').insert({
+    name, owner_id: _userId, invite_code
+  });
+  if (error) { showToast('⚠ Fehler: ' + error.message); return; }
+
+  // Admin direkt als Mitglied eintragen
+  const email = (await _supabase.auth.getUser()).data.user?.email || '';
+  await _supabase.from('team_members').insert({
+    team_id: (await _supabase.from('teams').select('id').eq('owner_id', _userId).single()).data.id,
+    user_id: _userId, role: 'admin',
+    display_name: CONFIG.firma.name || 'Admin', email
+  });
+
+  await loadTeamData();
+  renderTeamSection();
+  renderDashTeam();
+  showToast('✓ Team erstellt!');
+}
+
+// ── Team beitreten per Code ────────────────────────────
+async function joinTeam() {
+  const code = document.getElementById('teamJoinCode')?.value.trim().toUpperCase();
+  if (!code || code.length < 6) { showToast('⚠ Bitte Einladungscode eingeben'); return; }
+
+  const { data: team, error } = await _supabase
+    .from('teams').select('id, name, max_members').eq('invite_code', code).maybeSingle();
+
+  if (error || !team) { showToast('⚠ Code nicht gefunden'); return; }
+
+  // Mitgliederanzahl prüfen
+  const { count } = await _supabase.from('team_members')
+    .select('id', { count: 'exact', head: true })
+    .eq('team_id', team.id).eq('is_active', true);
+
+  if (count >= team.max_members) { showToast('⚠ Team ist voll'); return; }
+
+  // Bin ich schon Mitglied?
+  const { data: existing } = await _supabase.from('team_members')
+    .select('id').eq('team_id', team.id).eq('user_id', _userId).maybeSingle();
+  if (existing) { showToast('Du bist bereits in diesem Team'); return; }
+
+  const email = (await _supabase.auth.getUser()).data.user?.email || '';
+  const { error: joinErr } = await _supabase.from('team_members').insert({
+    team_id: team.id, user_id: _userId, role: 'member',
+    display_name: CONFIG.firma.name || email.split('@')[0], email
+  });
+  if (joinErr) { showToast('⚠ ' + joinErr.message); return; }
+
+  await loadTeamData();
+  renderTeamSection();
+  showToast('✓ Team beigetreten: ' + team.name);
+}
+
+// ── Mitglied entfernen (Admin) ─────────────────────────
+async function removeTeamMember(memberId) {
+  if (!confirm('Mitglied wirklich entfernen?')) return;
+  await _supabase.from('team_members').update({ is_active: false }).eq('id', memberId);
+  await loadTeamData();
+  renderTeamSection();
+  renderDashTeam();
+  showToast('Mitglied entfernt');
+}
+
+// ── Team verlassen (Mitglied) ──────────────────────────
+async function leaveTeam() {
+  if (!confirm('Team wirklich verlassen?')) return;
+  const membership = _teamData?.members.find(m => m.user_id === _userId);
+  if (!membership) return;
+  await _supabase.from('team_members').update({ is_active: false }).eq('id', membership.id);
+  _teamData = null;
+  renderTeamSection();
+  showToast('Team verlassen');
+}
+
+// ── Einladungscode kopieren ────────────────────────────
+function copyInviteCode() {
+  const code = _teamData?.team?.invite_code;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => showToast('✓ Code kopiert: ' + code));
+}
+
+// ── Team-Sektion in Einstellungen rendern ─────────────
+async function renderTeamSection() {
+  const el = document.getElementById('teamSection');
+  if (!el) return;
+  await loadTeamData();
+
+  if (!_teamData) {
+    // Kein Team — erstellen oder beitreten
+    el.innerHTML = `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Erstelle ein Team oder tritt einem bestehenden bei.</div>
+        <label class="lbl">Teamname</label>
+        <input class="inp" id="teamNewName" placeholder="z.B. Müller SHK GmbH" style="margin-bottom:8px;">
+        <button class="btn btn-teal btn-full" onclick="createTeam()">➕ Team erstellen</button>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <label class="lbl">Einladungscode</label>
+        <div style="display:flex;gap:8px;">
+          <input class="inp" id="teamJoinCode" placeholder="z.B. AB12CD" maxlength="8" style="text-transform:uppercase;letter-spacing:.1em;">
+          <button class="btn btn-ghost" onclick="joinTeam()" style="white-space:nowrap;flex-shrink:0;">Beitreten</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const { team, members, role } = _teamData;
+  const isAdmin = role === 'admin';
+
+  const memberRows = members.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:13px;font-weight:600;">${m.display_name || m.email || '–'}</div>
+        <div style="font-size:11px;color:var(--text3);">${m.role === 'admin' ? '👑 Admin' : '👤 Mitglied'} · ${m.email || ''}</div>
+      </div>
+      ${isAdmin && m.user_id !== _userId
+        ? `<button onclick="removeTeamMember('${m.id}')" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;">Entfernen</button>`
+        : m.user_id === _userId ? '<span style="font-size:11px;color:var(--teal);">Du</span>' : ''}
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div>
+        <div style="font-size:14px;font-weight:700;">${team.name}</div>
+        <div style="font-size:11px;color:var(--text3);">${members.length}/${team.max_members} Mitglieder · ${isAdmin ? '👑 Du bist Admin' : '👤 Mitglied'}</div>
+      </div>
+    </div>
+    ${isAdmin ? `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Einladungscode — teile ihn mit deinen Mitarbeitern:</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:.15em;color:var(--teal);">${team.invite_code}</div>
+        <button class="btn btn-ghost" onclick="copyInviteCode()" style="padding:5px 10px;font-size:12px;">📋 Kopieren</button>
+      </div>
+    </div>` : ''}
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;">Mitglieder</div>
+    ${memberRows || '<div style="font-size:13px;color:var(--text3);">Noch keine Mitglieder</div>'}
+    ${!isAdmin ? `
+    <button onclick="leaveTeam()" style="margin-top:14px;width:100%;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;">Team verlassen</button>` : ''}`;
+}
+
+// ── Team-Übersicht im Dashboard (Admin) ───────────────
+async function renderDashTeam() {
+  const el = document.getElementById('dashTeamBlock');
+  if (!el) return;
+
+  if (!_teamData || _teamData.role !== 'admin') { el.style.display = 'none'; return; }
+
+  const { team, members } = _teamData;
+  if (members.length <= 1) { el.style.display = 'none'; return; }
+
+  el.style.display = 'block';
+
+  // Aufträge aller Mitglieder heute laden
+  const today = new Date().toISOString().slice(0,10);
+  const userIds = members.map(m => m.user_id);
+
+  const { data: alleAuftraege } = await _supabase
+    .from('auftraege')
+    .select('user_id, status, datum')
+    .in('user_id', userIds)
+    .eq('datum', today);
+
+  const { data: alleRechnungen } = await _supabase
+    .from('rechnungen')
+    .select('user_id, betrag, status')
+    .in('user_id', userIds)
+    .eq('status', 'offen');
+
+  const memberStats = members.map(m => {
+    const auftraege = (alleAuftraege || []).filter(a => a.user_id === m.user_id);
+    const offen = (alleRechnungen || []).filter(r => r.user_id === m.user_id);
+    const offenSum = offen.reduce((s,r) => s + (r.betrag || 0), 0);
+    return { ...m, heute: auftraege.length, offenSumme: offenSum };
+  });
+
+  const rows = memberStats.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px;">
+      <div style="font-size:13px;font-weight:600;">${m.display_name || m.email?.split('@')[0] || '–'}</div>
+      <div style="display:flex;gap:12px;font-size:12px;color:var(--text2);">
+        <span>📋 <strong style="color:var(--text);">${m.heute}</strong> heute</span>
+        <span>💶 <strong style="color:var(--teal);">${m.offenSumme.toLocaleString('de-DE',{style:'currency',currency:'EUR'})}</strong> offen</span>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px;">👥 Team · ${team.name}</div>
+    ${rows}`;
 }
 </script>
 
