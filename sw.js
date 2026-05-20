@@ -1,5 +1,5 @@
 // FieldApp Service Worker — Offline + Sync
-const CACHE = 'schnellr-v7';
+const CACHE = 'schnellr-v8';
 const SHELL = [
   './app.html',
   './manifest.json',
@@ -68,4 +68,38 @@ self.addEventListener('sync', e => {
       clients.forEach(c => c.postMessage({type: 'FLUSH_QUEUE'}));
     }));
   }
+});
+
+// Push-Benachrichtigung empfangen + anzeigen
+self.addEventListener('push', e => {
+  let data = { title: 'SchnellR', body: 'Neue Benachrichtigung', url: '/', icon: '/icon-192.png' };
+  try { if (e.data) data = { ...data, ...e.data.json() }; } catch (_) {}
+
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body:  data.body,
+      icon:  data.icon,
+      badge: '/icon-192.png',
+      data:  { url: data.url },
+      vibrate: [100, 50, 100],
+      actions: [{ action: 'open', title: 'Öffnen' }],
+    })
+  );
+});
+
+// Klick auf Benachrichtigung → App öffnen
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data?.url ?? '/';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      for (const c of clientList) {
+        if (c.url.includes(self.location.origin) && 'focus' in c) {
+          c.navigate(url);
+          return c.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
 });
