@@ -24,6 +24,23 @@ import {
   deleteAuftrag as _deleteAuftrag, onAuftragDataChange, onStartZeiterfassung,
   onOpenBarcodeScanner, onRenderAuftragChecklist,
 } from './modules/auftraege'
+import {
+  initDashboard, renderDashboard as _renderDashboard, setKalTab as _setKalTab,
+  onDashRenderKalMonat, onDashRenderKalAgenda, onDashRenderTeam,
+  onDashRenderTagesreport, onDashGetRgStatus, onDashShowAuftragDetail,
+} from './modules/dashboard'
+import {
+  initRechnungen, renderRechnung as _renderRechnung, getRgStatus,
+  markBezahlt as _markBezahlt, mahnungErstellen as _mahnungErstellen,
+  populateRechnungSelect as _populateRechnungSelect, nextRNr as _nextRNr,
+  onRechnungDataChange, onRechnungTriggerPush,
+} from './modules/rechnungen'
+import {
+  initEinstellungen, renderEinstellungen as _renderEinstellungen,
+  saveEinstellungen as _saveEinstellungen, applyEinstellungenFromDB as _applyEinstellungenFromDB,
+  renderMaList as _renderMaList, addMitarbeiter as _addMitarbeiter, removeMitarbeiter as _removeMitarbeiter,
+  onRenderTeamSection, onRenderMaterialListe, onRenderChecklistTemplates,
+} from './modules/einstellungen'
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║               FIELDAPP — KONFIGURATION                       ║
@@ -4051,9 +4068,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   onOpenBarcodeScanner((id) => openBarcodeScanner(id))
   onRenderAuftragChecklist((id, cId) => renderAuftragChecklist(id, cId))
 
+  // ── Callbacks für Dashboard ──
+  onDashRenderKalMonat(() => renderKalMonat())
+  onDashRenderKalAgenda(() => renderKalAgenda())
+  onDashRenderTeam(() => renderDashTeam())
+  onDashRenderTagesreport(() => renderTagesreport())
+  onDashGetRgStatus((r) => getRgStatus(r))
+  onDashShowAuftragDetail((id) => _showAuftragDetail(id))
+
+  // ── Callbacks für Rechnungen ──
+  onRechnungDataChange(() => _renderDashboard())
+  onRechnungTriggerPush((e, uid, t, m) => triggerPush(e, uid, t, m))
+
+  // ── Callbacks für Einstellungen ──
+  onRenderTeamSection(() => renderTeamSection())
+  onRenderMaterialListe(() => renderMaterialListe())
+  onRenderChecklistTemplates(() => renderChecklistTemplates())
+
   // Module initialisieren (registrieren Pages + Event-Listener)
   initKunden()
   initAuftraege()
+  initDashboard()
+  initRechnungen()
+  initEinstellungen()
 
   // Statische Buttons verdrahten
   initStaticEventListeners({
@@ -5928,15 +5965,26 @@ _w.setAuftragStatus  = _setAuftragStatus
 _w.deleteAuftrag     = _deleteAuftrag
 _w.closeDetail       = () => document.getElementById('detailPanel')?.classList.remove('open')
 
-// ── Noch in main.ts (wird in Phase 2b migriert) ──
-_w.renderDashboard = renderDashboard
-_w.renderRechnung = renderRechnung
-_w.renderEinstellungen = renderEinstellungen
-_w.renderAngebote = renderAngebote
+// ── Phase-2b-Module ──
+_w.renderDashboard     = _renderDashboard
+_w.renderRechnung      = _renderRechnung
+_w.renderEinstellungen = _renderEinstellungen
+_w.markBezahlt         = _markBezahlt
+_w.mahnungErstellen    = _mahnungErstellen
+_w.setKalTab           = _setKalTab
+_w.saveEinstellungen   = _saveEinstellungen
+_w.addMitarbeiter      = _addMitarbeiter
+_w.removeMitarbeiter   = _removeMitarbeiter
+_w.getRgStatus         = getRgStatus
+
+// ── Noch in main.ts (Phase 2c) ──
+_w.renderAngebote  = renderAngebote
 _w.renderAuswertung = renderAuswertung
 _w.saveRechnungData = saveRechnungData
 _w.bezahltBestaetigen = bezahltBestaetigen
-_w.markBezahlt = markBezahlt
+// Fallbacks für rechnungen.ts Legacy-Delegation
+_w.downloadRechnungPDFDataLegacy = downloadRechnungPDFData
+_w.downloadZUGFeRDXmlLegacy = downloadZUGFeRDXml
 _w.setKalTab = setKalTab
 _w.kalChangeMonth = kalChangeMonth
 _w.renderKalMonat = renderKalMonat
