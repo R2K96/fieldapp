@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 
 :root {
@@ -47,7 +47,7 @@
   --sh: 0 4px 24px rgba(0,0,0,0.4);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+body{font-family:'Inter Tight',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
 
 /* nav replaced */
 
@@ -57,13 +57,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 /* ── SHARED COMPONENTS ── */
 .section-title{
-  font-family:'Syne',sans-serif;font-size:22px;font-weight:700;
+  font-family:'Inter Tight',sans-serif;font-size:22px;font-weight:700;
   margin-bottom:4px;
 }
 .section-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
 
 .card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:20px;margin-bottom:14px;}
-.card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text);}
+.card-title{font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text);}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
@@ -79,7 +79,7 @@ input.inp,select.inp,textarea.inp{
   width:100%;padding:10px 12px;
   background:var(--bg3);border:1px solid var(--border2);
   border-radius:8px;color:var(--text);
-  font-family:'Inter',sans-serif;font-size:14px;
+  font-family:'Inter Tight',sans-serif;font-size:14px;
   outline:none;transition:border-color 0.15s;-webkit-appearance:none;
 }
 input.inp:focus,select.inp:focus,textarea.inp:focus{border-color:var(--teal);}
@@ -98,7 +98,7 @@ select.inp option{background:var(--bg3);}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
   padding:10px 18px;border:none;border-radius:8px;
-  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  font-family:'Inter Tight',sans-serif;font-size:13px;font-weight:700;
   cursor:pointer;transition:all 0.15s;
 }
 .btn-teal{background:var(--teal);color:#0d1520;}
@@ -116,7 +116,7 @@ select.inp option{background:var(--bg3);}
   border-radius:var(--r);padding:16px;
 }
 .stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;}
-.stat-val{font-family:'Syne',sans-serif;font-size:clamp(15px,4.5vw,26px);font-weight:700;color:var(--teal);word-break:break-all;}
+.stat-val{font-family:'Inter Tight',sans-serif;font-size:clamp(15px,4.5vw,26px);font-weight:700;color:var(--teal);word-break:break-all;}
 .stat-sub{font-size:11px;color:var(--text3);margin-top:3px;}
 .stat.gold .stat-val{color:var(--gold);}
 .stat.green .stat-val{color:var(--green);}
@@ -183,7 +183,7 @@ select.inp option{background:var(--bg3);}
   animation:mup 0.25s ease;
 }
 @keyframes mup{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:18px;}
+.modal-title{font-family:'Inter Tight',sans-serif;font-size:18px;font-weight:700;margin-bottom:18px;}
 .modal-close{
   float:right;background:none;border:none;color:var(--text2);
   font-size:20px;cursor:pointer;margin-top:-4px;
@@ -202,7 +202,7 @@ select.inp option{background:var(--bg3);}
   float:right;background:none;border:none;color:var(--text2);
   font-size:18px;cursor:pointer;
 }
-.dp-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;}
+.dp-name{font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;}
 .dp-sub{font-size:12px;color:var(--text2);margin-bottom:16px;}
 .dp-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
 .dp-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:10px;}
@@ -235,7 +235,7 @@ select.inp option{background:var(--bg3);}
   padding:10px 10px 8px;border-bottom:1px solid var(--border);
   background:var(--bg2);
 }
-.day-name2{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;}
+.day-name2{font-family:'Inter Tight',sans-serif;font-size:12px;font-weight:700;}
 .day-date2{font-size:9px;color:var(--text3);margin-top:1px;}
 .day-list{padding:6px;min-height:60px;}
 .day-item{
@@ -276,8 +276,9 @@ select.inp option{background:var(--bg3);}
 }
 .topbar-left{display:flex;align-items:center;gap:10px;}
 .topbar-right{display:flex;align-items:center;gap:8px;}
-.nav-gem{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--teal),var(--teal2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#0d1520;}
-.nav-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.nav-mark{display:flex;align-items:center;flex-shrink:0;}
+.nav-name{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:800;letter-spacing:-0.02em;}
+.nav-name .nav-r{color:var(--teal);}
 .burger-btn{
   width:44px;height:44px;border-radius:10px;
   border:1px solid var(--border);background:var(--bg3);
@@ -293,14 +294,14 @@ select.inp option{background:var(--bg3);}
 .side-overlay.open{display:block;}
 .side-menu{position:fixed;right:0;top:0;bottom:0;width:250px;background:var(--bg2);border-left:1px solid var(--border);z-index:301;padding:20px 14px;overflow-y:auto;transform:translateX(100%);transition:transform 0.25s ease;}
 .side-menu.open{transform:translateX(0);}
-.side-menu-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text);padding:0 8px;}
+.side-menu-title{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text);padding:0 8px;}
 .side-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:all 0.15s;margin-bottom:3px;font-size:13px;font-weight:600;color:var(--text2);}
 .side-item:hover{background:var(--bg3);color:var(--text);}
 .side-item.active{background:var(--teal-dim);color:var(--teal);}
 .side-item-icon{font-size:18px;width:22px;text-align:center;}
 /* ── BOTTOM NAV ── */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg2);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);height:64px;padding-bottom:env(safe-area-inset-bottom,0px);}
-.bnav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:all 0.15s;color:var(--text3);border:none;background:none;font-family:'Inter',sans-serif;padding:0;}
+.bnav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:all 0.15s;color:var(--text3);border:none;background:none;font-family:'Inter Tight',sans-serif;padding:0;}
 .bnav-item.active{color:var(--teal);}
 .bnav-item:hover{color:var(--text2);}
 .bnav-icon{font-size:20px;}
@@ -377,7 +378,7 @@ select.inp option{background:var(--bg3);}
 .ob-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:all 0.2s;}
 .ob-dot.active{background:var(--teal);width:24px;border-radius:4px;}
 .ob-icon{font-size:36px;text-align:center;margin-bottom:8px;}
-.ob-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:6px;}
+.ob-title{font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:6px;}
 .ob-sub{font-size:13px;color:var(--text2);text-align:center;line-height:1.55;margin-bottom:14px;}
 .ob-branch-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px;}
 .ob-branch{background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
@@ -394,7 +395,7 @@ select.inp option{background:var(--bg3);}
 .tour-spotlight{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.72);transition:all 0.35s cubic-bezier(0.4,0,0.2,1);pointer-events:none;}
 .tour-bubble{position:fixed;background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:18px 20px;max-width:300px;width:calc(100vw - 40px);z-index:7100;box-shadow:0 8px 32px rgba(0,0,0,0.5);pointer-events:all;animation:mup 0.25s ease;}
 .tour-bubble-step{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--teal);margin-bottom:6px;}
-.tour-bubble-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;}
+.tour-bubble-title{font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;}
 .tour-bubble-text{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px;}
 .tour-nav{display:flex;gap:8px;align-items:center;}
 .tour-progress{flex:1;font-size:11px;color:var(--text3);}
@@ -427,7 +428,7 @@ select.inp option{background:var(--bg3);}
 /* ── EMPTY STATE ── */
 .empty-state{text-align:center;padding:40px 24px;border:1.5px dashed var(--border2);border-radius:16px;background:var(--card);}
 .empty-state-icon{font-size:44px;margin-bottom:12px;}
-.empty-state-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px;}
+.empty-state-title{font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px;}
 .empty-state-sub{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.6;}
 
 /* ── SKELETON LOADER ── */
@@ -488,8 +489,14 @@ select.inp option{background:var(--bg3);}
 <div id="authScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
   <div style="width:100%;max-width:380px;">
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--teal),var(--teal2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#0d1520;margin:0 auto 12px;" id="authGem">F</div>
-      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;" id="authBrand">SchnellR</div>
+      <div style="display:flex;align-items:center;justify-content:center;margin:0 auto 12px;" id="authGem">
+        <svg viewBox="0 0 32 32" width="52" height="52" style="display:block;">
+          <rect x="0" y="0" width="32" height="32" rx="7" fill="#00c4a8"/>
+          <path d="M 9 7 L 9 25 M 9 7 L 18.5 7 A 5 5 0 0 1 18.5 17 L 9 17 M 15.5 17 L 22 25"
+                stroke="#0e1f1c" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+        </svg>
+      </div>
+      <div style="font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.03em;" id="authBrand">schnell<span style="color:var(--teal);">R</span></div>
       <div style="font-size:12px;color:var(--text2);margin-top:4px;">Außendienst-App · Anmelden</div>
     </div>
     <!-- Login-Formular -->
@@ -517,7 +524,7 @@ select.inp option{background:var(--bg3);}
     <!-- Bestätigungs-Screen (Registrierung / Passwort-Reset) -->
     <div id="authSent" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;">
       <div style="font-size:40px;margin-bottom:12px;" id="authSentIcon">📬</div>
-      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;" id="authSentTitle">E-Mail gesendet</div>
+      <div style="font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;" id="authSentTitle">E-Mail gesendet</div>
       <div style="font-size:13px;color:var(--text2);line-height:1.65;" id="authSentMsg">Prüfe dein Postfach und bestätige deine E-Mail-Adresse. Danach kannst du dich einloggen.</div>
       <button onclick="authShowLogin()" class="btn btn-ghost btn-full" style="margin-top:16px;font-size:12px;">← Zurück zum Login</button>
     </div>
@@ -527,8 +534,14 @@ select.inp option{background:var(--bg3);}
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-left">
-    <div class="nav-gem" id="appGem">F</div>
-    <span class="nav-name" id="appBrandName">SchnellR</span>
+    <div class="nav-mark">
+      <svg viewBox="0 0 32 32" width="26" height="26" style="display:block;">
+        <rect x="0" y="0" width="32" height="32" rx="7" fill="#00c4a8"/>
+        <path d="M 9 7 L 9 25 M 9 7 L 18.5 7 A 5 5 0 0 1 18.5 17 L 9 17 M 15.5 17 L 22 25"
+              stroke="#0e1f1c" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+      </svg>
+    </div>
+    <span class="nav-name" id="appBrandName">schnell<span class="nav-r">R</span></span>
   </div>
   <div class="topbar-right" style="gap:6px;">
     <button onclick="openHelpMenu()" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;" title="Hilfe & Tour">?</button>
@@ -540,7 +553,7 @@ select.inp option{background:var(--bg3);}
   <div style="width:100%;max-width:380px;">
     <div style="text-align:center;margin-bottom:28px;">
       <div style="font-size:48px;margin-bottom:12px;">🔐</div>
-      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;">Neues Passwort setzen</div>
+      <div style="font-family:'Inter Tight',sans-serif;font-size:22px;font-weight:700;">Neues Passwort setzen</div>
       <div style="font-size:13px;color:var(--text2);margin-top:6px;">Gib dein neues Passwort ein. Danach kannst du dich in der App damit einloggen.</div>
     </div>
     <label class="lbl">Neues Passwort</label>
@@ -636,7 +649,7 @@ select.inp option{background:var(--bg3);}
 
 <div class="page active" id="page-dashboard">
   <div style="margin-bottom:12px;">
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:2px;" id="dashGreeting">Guten Morgen 👋</div>
+    <div style="font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:700;margin-bottom:2px;" id="dashGreeting">Guten Morgen 👋</div>
     <div style="font-size:12px;color:var(--text3);" id="dashDate">--</div>
   </div>
 
@@ -753,7 +766,7 @@ select.inp option{background:var(--bg3);}
 <div class="sig-modal-bg" id="sigModal">
   <div class="sig-modal">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;">✍️ Kundenunterschrift</div>
+      <div style="font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:700;">✍️ Kundenunterschrift</div>
       <button onclick="closeSigModal()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;">✕</button>
     </div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Bitte im weißen Feld unterschreiben. Die Unterschrift wird auf dem Dokument gespeichert.</p>
@@ -822,7 +835,7 @@ select.inp option{background:var(--bg3);}
     <!-- Schritt 2: Ergebnis -->
     <div id="importStep2" style="display:none;text-align:center;padding:16px 0;">
       <div style="font-size:44px;margin-bottom:14px;">✅</div>
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--teal);margin-bottom:8px;">Import abgeschlossen</div>
+      <div style="font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:700;color:var(--teal);margin-bottom:8px;">Import abgeschlossen</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:18px;" id="importResultText"></div>
       <button class="btn btn-teal btn-full" onclick="closeModal('modalImport');renderKunden();">Fertig</button>
     </div>
@@ -1300,7 +1313,7 @@ select.inp option{background:var(--bg3);}
       <div class="modal-title">Rechnung</div>
       <div id="rechnungPreview" style="background:white;border-radius:10px;padding:18px;color:#1a1f1c;margin-bottom:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #00c4a8;">
-          <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#1a1f1c;" id="invoiceBrand">SchnellR</div><div style="font-size:11px;color:#7a9088;font-style:italic;">Außendienst. Einfach gemacht.</div></div>
+          <div><div style="font-family:'Inter Tight',sans-serif;font-size:22px;font-weight:700;color:#1a1f1c;" id="invoiceBrand">SchnellR</div><div style="font-size:11px;color:#7a9088;font-style:italic;">Außendienst. Einfach gemacht.</div></div>
           <div style="text-align:right;"><div style="font-size:10px;color:#7a9088;font-weight:700;text-transform:uppercase;">Rechnung</div><div style="font-size:14px;font-weight:700;color:#00c4a8;" id="rNummer">--</div></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;font-size:12px;">
@@ -1317,7 +1330,7 @@ select.inp option{background:var(--bg3);}
         </div>
         <div style="background:#00c4a8;border-radius:8px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;">
           <div style="font-size:11px;color:rgba(13,21,32,0.75);">Gesamt (netto, §19 UStG)</div>
-          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#0d1520;" id="rPreviewBetrag">-- €</div>
+          <div style="font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:700;color:#0d1520;" id="rPreviewBetrag">-- €</div>
         </div>
         <div id="rPreviewFooter" style="margin-top:10px;font-size:10px;color:#9aada6;line-height:1.6;"></div>
         <div id="rPreviewSigBlock" style="display:none;margin-top:16px;border-top:1px solid #e8e4dc;padding-top:12px;">
@@ -1354,7 +1367,7 @@ select.inp option{background:var(--bg3);}
     </div>
     <div id="rStep3" style="display:none;text-align:center;padding:16px 0;">
       <div style="font-size:44px;margin-bottom:14px;">✅</div>
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--teal);margin-bottom:8px;">Abgeschlossen!</div>
+      <div style="font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:700;color:var(--teal);margin-bottom:8px;">Abgeschlossen!</div>
       <div style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:18px;" id="rBestaetigungText">--</div>
       <button class="btn btn-teal btn-full" onclick="closeModal('modalRechnung');renderRechnung();renderDashboard();">Fertig</button>
     </div>
@@ -6340,7 +6353,7 @@ async function renderTeamSection() {
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;">
       <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Einladungscode — teile ihn mit deinen Mitarbeitern:</div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:.15em;color:var(--teal);">${team.invite_code}</div>
+        <div style="font-family:'Inter Tight',sans-serif;font-size:22px;font-weight:800;letter-spacing:.15em;color:var(--teal);">${team.invite_code}</div>
         <button class="btn btn-ghost" onclick="copyInviteCode()" style="padding:5px 10px;font-size:12px;">📋 Kopieren</button>
       </div>
     </div>` : ''}
@@ -6405,7 +6418,7 @@ async function renderDashTeam() {
   <div style="background:var(--card);border-radius:20px;width:90%;max-width:380px;padding:28px;text-align:center;">
     <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--teal);margin-bottom:6px;">⏱ Zeiterfassung läuft</div>
     <div id="ztAuftragName" style="font-size:13px;color:var(--text2);margin-bottom:16px;"></div>
-    <div id="ztDisplay" style="font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:var(--text1);margin-bottom:20px;letter-spacing:-1px;">00min 00s</div>
+    <div id="ztDisplay" style="font-family:'Inter Tight',sans-serif;font-size:42px;font-weight:800;color:var(--text1);margin-bottom:20px;letter-spacing:-1px;">00min 00s</div>
     <div style="margin-bottom:16px;">
       <label class="lbl" style="text-align:left;display:block;">Mitarbeiter</label>
       <select class="inp" id="ztMaSelect"></select>
@@ -6423,7 +6436,7 @@ async function renderDashTeam() {
 <div id="seModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:flex-end;justify-content:center;">
   <div style="background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:24px;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">🎙 Schnellerfassung</div>
+      <div style="font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:700;">🎙 Schnellerfassung</div>
       <button onclick="closeSchnellerfassung()" style="background:none;border:none;font-size:20px;color:var(--text2);cursor:pointer;">✕</button>
     </div>
     <div id="seStatus" style="font-size:12px;color:var(--text2);margin-bottom:12px;">Tippe auf das Mikrofon und diktiere einen Kunden oder Auftrag.</div>
