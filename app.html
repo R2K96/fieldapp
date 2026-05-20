@@ -357,6 +357,14 @@ select.inp option{background:var(--bg3);}
 .foto-add-lbl{font-size:10px;font-weight:700;color:var(--text3);}
 .foto-uploading{opacity:0.5;animation:shimmer 1s infinite;}
 
+/* ── GLOBALE SUCHE ── */
+.gs-tab{flex:1;padding:8px 4px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.gs-tab-active{color:var(--teal);border-bottom-color:var(--teal);}
+.gs-result{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.gs-result:active{opacity:.7;}
+.gs-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.gs-empty{text-align:center;color:var(--text3);font-size:13px;padding:40px 0;}
+
 /* ── SIGNATUR PAD ── */
 .sig-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);}
 .sig-modal-bg.open{display:flex;}
@@ -544,6 +552,9 @@ select.inp option{background:var(--bg3);}
     <span class="nav-name" id="appBrandName">schnell<span class="nav-r">R</span></span>
   </div>
   <div class="topbar-right" style="gap:6px;">
+    <button onclick="openGlobalSearch()" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;" title="Suche">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
     <button onclick="openHelpMenu()" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;" title="Hilfe & Tour">?</button>
     <button class="burger-btn" onclick="toggleMenu()">&#9776;</button>
   </div>
@@ -791,6 +802,40 @@ select.inp option{background:var(--bg3);}
   </div>
 </div>
 
+<!-- ══ GLOBALE SUCHE ══ -->
+<div id="globalSearchOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:4000;backdrop-filter:blur(6px);" onclick="closeGlobalSearch()">
+  <div onclick="event.stopPropagation()" style="position:absolute;top:0;left:0;right:0;background:var(--card2);border-bottom:1px solid var(--border2);padding:12px 16px 0;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--text3)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="globalSearchInput" type="text" placeholder="Kunden, Aufträge, Rechnungen suchen…" oninput="runGlobalSearch()"
+        style="flex:1;background:transparent;border:none;outline:none;font-size:16px;color:var(--text);font-family:inherit;">
+      <button onclick="closeGlobalSearch()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:30px;height:30px;cursor:pointer;font-size:14px;">✕</button>
+    </div>
+    <!-- Kategorie-Tabs -->
+    <div style="display:flex;gap:0;border-top:1px solid var(--border);">
+      <button id="gsTab-all"     onclick="setGsTab('all')"      class="gs-tab gs-tab-active">Alle</button>
+      <button id="gsTab-kunden"  onclick="setGsTab('kunden')"   class="gs-tab">Kunden</button>
+      <button id="gsTab-auftraege" onclick="setGsTab('auftraege')" class="gs-tab">Aufträge</button>
+      <button id="gsTab-rechnungen" onclick="setGsTab('rechnungen')" class="gs-tab">Rechnungen</button>
+    </div>
+  </div>
+  <div id="globalSearchResults" onclick="event.stopPropagation()"
+    style="position:absolute;top:115px;left:0;right:0;bottom:0;overflow-y:auto;padding:8px 16px 24px;">
+  </div>
+</div>
+
+<!-- ══ CUSTOM CONFIRM MODAL ══ -->
+<div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:5000;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:var(--card2);border-radius:20px 20px 0 0;border:1px solid var(--border2);padding:24px 20px 32px;width:100%;max-width:500px;">
+    <div id="confirmTitle" style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--text);"></div>
+    <div id="confirmMsg"   style="font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.5;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="confirmResolve(false)" style="flex:1;padding:13px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:15px;font-weight:600;cursor:pointer;">Abbrechen</button>
+      <button id="confirmOkBtn" onclick="confirmResolve(true)" style="flex:1;padding:13px;border-radius:12px;background:var(--red);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">Löschen</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ BARCODE SCANNER MODAL ══ -->
 <div id="bcModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:3000;flex-direction:column;align-items:center;justify-content:center;">
   <div style="width:100%;max-width:460px;padding:20px;">
@@ -905,10 +950,27 @@ select.inp option{background:var(--bg3);}
   </div>
   <div class="section-sub">Alle erfassten Aufträge</div>
 
-  <div class="grid3" style="margin-bottom:16px;">
+  <div class="grid3" style="margin-bottom:12px;">
     <div class="stat"><div class="stat-lbl">Offen</div><div class="stat-val" id="aOffen">0</div></div>
     <div class="stat green"><div class="stat-lbl">Abgeschlossen</div><div class="stat-val" id="aErledigt">0</div></div>
     <div class="stat gold"><div class="stat-lbl">Folgetermin</div><div class="stat-val" id="aFolge">0</div></div>
+  </div>
+
+  <!-- Filter-Bar -->
+  <div id="auftragFilterBar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+    <select id="afStatus" onchange="renderAuftraege()" class="inp" style="flex:1;min-width:120px;padding:7px 10px;font-size:12px;border-radius:8px;">
+      <option value="">Alle Status</option>
+      <option value="offen">Offen</option>
+      <option value="erledigt">Erledigt</option>
+      <option value="folgetermin">Folgetermin</option>
+    </select>
+    <select id="afMa" onchange="renderAuftraege()" class="inp" style="flex:1;min-width:120px;padding:7px 10px;font-size:12px;border-radius:8px;">
+      <option value="">Alle Mitarbeiter</option>
+    </select>
+    <input id="afDatumVon" type="date" onchange="renderAuftraege()" class="inp" style="flex:1;min-width:120px;padding:7px 10px;font-size:12px;border-radius:8px;" title="Datum von">
+    <input id="afDatumBis" type="date" onchange="renderAuftraege()" class="inp" style="flex:1;min-width:120px;padding:7px 10px;font-size:12px;border-radius:8px;" title="Datum bis">
+    <input id="afTyp" type="text" oninput="renderAuftraege()" class="inp" placeholder="Leistungstyp..." style="flex:2;min-width:140px;padding:7px 10px;font-size:12px;border-radius:8px;">
+    <button onclick="resetAuftragFilter()" style="padding:7px 12px;border-radius:8px;font-size:11px;font-weight:700;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;white-space:nowrap;">↺ Reset</button>
   </div>
 
   <div class="card-list" id="auftragList"></div>
@@ -2749,22 +2811,49 @@ function resetModalAuftrag(){
 }
 
 function renderAuftraege(){
-  const auftraege = DB.auftraege().slice().reverse();
+  const alleAuftraege = DB.auftraege().slice().reverse();
   const kunden = DB.kunden();
-  const offen = auftraege.filter(a=>a.status==='offen').length;
-  const erledigt = auftraege.filter(a=>a.status==='erledigt').length;
-  const folge = auftraege.filter(a=>a.folgetermin).length;
-  document.getElementById('aOffen').textContent=offen;
-  document.getElementById('aErledigt').textContent=erledigt;
-  document.getElementById('aFolge').textContent=folge;
+
+  // Stat-Cards immer über Gesamtbestand
+  document.getElementById('aOffen').textContent    = alleAuftraege.filter(a=>a.status==='offen').length;
+  document.getElementById('aErledigt').textContent = alleAuftraege.filter(a=>a.status==='erledigt').length;
+  document.getElementById('aFolge').textContent    = alleAuftraege.filter(a=>a.folgetermin).length;
+
+  // MA-Select befüllen (einmalig pro Render)
+  populateAfMaSelect();
+
+  // Filter lesen
+  const fStatus   = (document.getElementById('afStatus')?.value   || '').toLowerCase();
+  const fMa       = (document.getElementById('afMa')?.value       || '').toLowerCase();
+  const fDatumVon = document.getElementById('afDatumVon')?.value  || '';
+  const fDatumBis = document.getElementById('afDatumBis')?.value  || '';
+  const fTyp      = (document.getElementById('afTyp')?.value      || '').toLowerCase();
+
+  let auftraege = alleAuftraege.filter(a => {
+    if (fStatus && (a.status||'').toLowerCase() !== fStatus) return false;
+    if (fMa     && (a.ma||'').toLowerCase() !== fMa)         return false;
+    if (fDatumVon && a.datum < fDatumVon)                    return false;
+    if (fDatumBis && a.datum > fDatumBis)                    return false;
+    if (fTyp    && !(a.leistung||'').toLowerCase().includes(fTyp)) return false;
+    return true;
+  });
 
   const list = document.getElementById('auftragList');
-  if(!auftraege.length){
+  if(!alleAuftraege.length){
     list.innerHTML = `<div class="empty-state">
       <div class="empty-state-icon">📋</div>
       <div class="empty-state-title">Noch keine Aufträge erfasst</div>
       <div class="empty-state-sub">Erstelle deinen ersten Auftrag und behalte den Überblick über alle Einsätze.</div>
       <button class="btn btn-teal" onclick="openModal('modalAuftrag')">+ Ersten Auftrag anlegen</button>
+    </div>`;
+    return;
+  }
+  if (!auftraege.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🔍</div>
+      <div class="empty-state-title">Keine Aufträge gefunden</div>
+      <div class="empty-state-sub">Passe die Filter an oder setze sie zurück.</div>
+      <button class="btn btn-ghost" onclick="resetAuftragFilter()">↺ Filter zurücksetzen</button>
     </div>`;
     return;
   }
@@ -2884,13 +2973,15 @@ function setAuftragStatus(id, status){
   closeDetail(); renderAuftraege(); renderDashboard(); showToast('Status aktualisiert ✓');
 }
 
-function deleteKunde(id){
-  if(!confirm('Kunde wirklich löschen? Alle Aufträge bleiben erhalten.')) return;
+async function deleteKunde(id){
+  const ok = await showConfirm('Kunde löschen?', 'Alle Aufträge bleiben erhalten. Diese Aktion kann nicht rückgängig gemacht werden.');
+  if(!ok) return;
   DB.saveKunden(DB.kunden().filter(k=>k.id!==id));
   closeDetail(); renderKunden(); renderDashboard();
 }
-function deleteAuftrag(id){
-  if(!confirm('Auftrag wirklich löschen?')) return;
+async function deleteAuftrag(id){
+  const ok = await showConfirm('Auftrag löschen?', 'Der Auftrag wird dauerhaft entfernt.');
+  if(!ok) return;
   DB.saveAuftraege(DB.auftraege().filter(a=>a.id!==id));
   closeDetail(); renderAuftraege(); renderDashboard();
 }
@@ -4535,8 +4626,9 @@ function renderMaterialListe() {
     + '</tbody></table>';
 }
 
-function matDelete(id) {
-  if (!confirm('Material löschen?')) return;
+async function matDelete(id) {
+  const ok = await showConfirm('Material löschen?', 'Das Material wird aus dem Katalog entfernt.');
+  if (!ok) return;
   DB.saveMaterialien(DB.materialien().filter(m=>m.id!==id));
   renderMaterialListe();
 }
@@ -5396,11 +5488,10 @@ async function authForgot() {
 
 // ── Konto löschen (DSGVO Art. 17 — Recht auf Vergessenwerden) ─
 async function deleteAccount() {
-  const confirmed = confirm(
-    '⚠️ Konto wirklich löschen?\n\n' +
-    'Alle deine Daten werden dauerhaft gelöscht:\n' +
-    '• Kunden & Aufträge\n• Rechnungen & Angebote\n• Fahrtenbuch & Zeiterfassung\n• Materialien & Einstellungen\n\n' +
-    'Diese Aktion kann NICHT rückgängig gemacht werden.'
+  const confirmed = await showConfirm(
+    '⚠️ Konto wirklich löschen?',
+    'Alle Daten werden dauerhaft entfernt: Kunden, Aufträge, Rechnungen, Angebote, Fahrtenbuch, Zeiterfassung, Materialien und Einstellungen. Diese Aktion kann NICHT rückgängig gemacht werden.',
+    'Konto löschen', 'var(--red)'
   );
   if (!confirmed) return;
 
@@ -6006,8 +6097,9 @@ function stopZeiterfassung() {
 
   // In Nachtermin übernehmen anbieten
   if (_ztAuftragId) {
-    setTimeout(() => {
-      if (confirm(`${dauerMin} Min. direkt in Nachtermin-Dokumentation übernehmen?`)) {
+    setTimeout(async () => {
+      const ok = await showConfirm('In Dokumentation übernehmen?', `${dauerMin} Min. direkt in die Nachtermin-Dokumentation eintragen?`, 'Übernehmen', 'var(--teal)');
+      if (ok) {
         showPage('nachtermin');
         setTimeout(() => {
           const sel = document.getElementById('ntAuftrag');
@@ -6379,7 +6471,8 @@ async function joinTeam() {
 
 // ── Mitglied entfernen (Admin) ─────────────────────────
 async function removeTeamMember(memberId) {
-  if (!confirm('Mitglied wirklich entfernen?')) return;
+  const ok = await showConfirm('Mitglied entfernen?', 'Das Mitglied verliert den Zugang zum Team.');
+  if (!ok) return;
   await _supabase.from('team_members').update({ is_active: false }).eq('id', memberId);
   await loadTeamData();
   renderTeamSection();
@@ -6389,7 +6482,8 @@ async function removeTeamMember(memberId) {
 
 // ── Team verlassen (Mitglied) ──────────────────────────
 async function leaveTeam() {
-  if (!confirm('Team wirklich verlassen?')) return;
+  const ok = await showConfirm('Team verlassen?', 'Du verlierst den Zugang zu allen Team-Daten.', 'Team verlassen', 'var(--red)');
+  if (!ok) return;
   const membership = _teamData?.members.find(m => m.user_id === _userId);
   if (!membership) return;
   await _supabase.from('team_members').update({ is_active: false }).eq('id', membership.id);
@@ -6639,7 +6733,8 @@ async function clSaveTemplate() {
 }
 
 async function clDeleteTemplate(id) {
-  if (!confirm('Checkliste wirklich löschen?')) return;
+  const ok = await showConfirm('Checkliste löschen?', 'Alle Einträge dieser Checkliste werden ebenfalls gelöscht.');
+  if (!ok) return;
   await _supabase.from('checklist_templates').delete().eq('id', id);
   renderChecklistTemplates();
   showToast('Checkliste gelöscht.');
@@ -6843,6 +6938,164 @@ async function triggerPush(eventType, targetUserId, title, message) {
       body: JSON.stringify({ user_id: targetUserId, title, message }),
     });
   } catch (_) { /* Push-Fehler sind nicht kritisch */ }
+}
+
+// ════════════════════════════════════════════════════════════
+// CUSTOM CONFIRM (ersetzt alle browser confirm())
+// ════════════════════════════════════════════════════════════
+let _confirmResolve = null;
+
+function showConfirm(title, msg, okLabel = 'Löschen', okColor = 'var(--red)') {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent   = msg;
+    const btn = document.getElementById('confirmOkBtn');
+    btn.textContent = okLabel;
+    btn.style.background = okColor;
+    const modal = document.getElementById('confirmModal');
+    modal.style.display = 'flex';
+  });
+}
+
+function confirmResolve(val) {
+  document.getElementById('confirmModal').style.display = 'none';
+  if (_confirmResolve) { _confirmResolve(val); _confirmResolve = null; }
+}
+
+// ════════════════════════════════════════════════════════════
+// GLOBALE SUCHE
+// ════════════════════════════════════════════════════════════
+let _gsTab = 'all';
+
+function openGlobalSearch() {
+  document.getElementById('globalSearchOverlay').style.display = 'block';
+  setTimeout(() => document.getElementById('globalSearchInput').focus(), 50);
+  runGlobalSearch();
+}
+
+function closeGlobalSearch() {
+  document.getElementById('globalSearchOverlay').style.display = 'none';
+  document.getElementById('globalSearchInput').value = '';
+}
+
+function setGsTab(tab) {
+  _gsTab = tab;
+  document.querySelectorAll('.gs-tab').forEach(b => b.classList.remove('gs-tab-active'));
+  document.getElementById('gsTab-' + tab).classList.add('gs-tab-active');
+  runGlobalSearch();
+}
+
+function runGlobalSearch() {
+  const q   = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+  const out = document.getElementById('globalSearchResults');
+
+  if (!q) { out.innerHTML = '<div class="gs-empty">Suche nach Kunden, Aufträgen oder Rechnungen…</div>'; return; }
+
+  const kunden    = DB.kunden();
+  const auftraege = DB.auftraege();
+  const rechnungen = DB.rechnungen ? DB.rechnungen() : [];
+
+  const matchKunden = (_gsTab === 'all' || _gsTab === 'kunden')
+    ? kunden.filter(k =>
+        k.name?.toLowerCase().includes(q) ||
+        k.adresse?.toLowerCase().includes(q) ||
+        k.telefon?.toLowerCase().includes(q) ||
+        k.email?.toLowerCase().includes(q))
+    : [];
+
+  const matchAuftraege = (_gsTab === 'all' || _gsTab === 'auftraege')
+    ? auftraege.filter(a => {
+        const k = kunden.find(k => k.id === a.kundeId);
+        return a.leistung?.toLowerCase().includes(q) ||
+               a.notiz?.toLowerCase().includes(q) ||
+               a.ma?.toLowerCase().includes(q) ||
+               k?.name?.toLowerCase().includes(q);
+      })
+    : [];
+
+  const matchRechnungen = (_gsTab === 'all' || _gsTab === 'rechnungen')
+    ? rechnungen.filter(r =>
+        r.kunde?.toLowerCase().includes(q) ||
+        r.nr?.toLowerCase().includes(q) ||
+        r.positionen?.some(p => p.leistung?.toLowerCase().includes(q)))
+    : [];
+
+  if (!matchKunden.length && !matchAuftraege.length && !matchRechnungen.length) {
+    out.innerHTML = `<div class="gs-empty">Keine Ergebnisse für „${q}"</div>`;
+    return;
+  }
+
+  let html = '';
+
+  if (matchKunden.length) {
+    html += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:14px 0 6px;">Kunden</div>`;
+    html += matchKunden.slice(0,5).map(k => `
+      <div class="gs-result" onclick="closeGlobalSearch();showPage('kunden');setTimeout(()=>renderKunden(),100)">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--teal-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${k.name}</div>
+          <div style="font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${k.adresse||k.telefon||'–'}</div>
+        </div>
+        <span class="gs-badge" style="background:var(--teal-dim);color:var(--teal);">Kunde</span>
+      </div>`).join('');
+  }
+
+  if (matchAuftraege.length) {
+    html += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:14px 0 6px;">Aufträge</div>`;
+    html += matchAuftraege.slice(0,5).map(a => {
+      const k = kunden.find(k => k.id === a.kundeId);
+      const dot = a.status==='erledigt'?'var(--green)':a.status==='offen'?'var(--gold)':'var(--teal)';
+      return `
+      <div class="gs-result" onclick="closeGlobalSearch();showPage('auftraege');setTimeout(()=>showAuftragDetail('${a.id}'),150)">
+        <div style="width:34px;height:34px;border-radius:50%;background:${dot}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${dot};"></div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.leistung||'Auftrag'}</div>
+          <div style="font-size:12px;color:var(--text3);">${k?.name||'–'} · ${fmtDate(a.datum)}</div>
+        </div>
+        <span class="gs-badge" style="background:rgba(99,102,241,0.15);color:#a5b4fc;">Auftrag</span>
+      </div>`;
+    }).join('');
+  }
+
+  if (matchRechnungen.length) {
+    html += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:14px 0 6px;">Rechnungen</div>`;
+    html += matchRechnungen.slice(0,5).map(r => `
+      <div class="gs-result" onclick="closeGlobalSearch();showPage('rechnung');setTimeout(()=>renderRechnung(),100)">
+        <div style="width:34px;height:34px;border-radius:50%;background:rgba(234,179,8,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);">${r.nr||'Rechnung'}</div>
+          <div style="font-size:12px;color:var(--text3);">${r.kunde||'–'} · ${r.betrag ? Math.round(r.betrag)+'€' : ''}</div>
+        </div>
+        <span class="gs-badge" style="background:rgba(234,179,8,0.15);color:var(--gold);">Rechnung</span>
+      </div>`).join('');
+  }
+
+  out.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════
+// AUFTRAGS-FILTER
+// ════════════════════════════════════════════════════════════
+function populateAfMaSelect() {
+  const sel = document.getElementById('afMa');
+  if (!sel) return;
+  const mas = [...new Set(DB.auftraege().map(a => a.ma).filter(Boolean))].sort();
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Alle Mitarbeiter</option>' +
+    mas.map(m => `<option value="${m}" ${m===current?'selected':''}>${m}</option>`).join('');
+}
+
+function resetAuftragFilter() {
+  ['afStatus','afMa'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['afDatumVon','afDatumBis','afTyp'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  renderAuftraege();
 }
 
 // ════════════════════════════════════════════════════════════
