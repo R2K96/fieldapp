@@ -762,6 +762,59 @@ select.inp option{background:var(--bg3);}
   <div class="card-list" id="kundenList"></div>
 </div>
 
+<!-- ══ CHECKLISTEN TEMPLATE EDITOR ══ -->
+<div class="sig-modal-bg" id="clModal" style="display:none;z-index:300;">
+  <div class="sig-modal" style="max-width:480px;width:100%;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:17px;font-weight:700;" id="clModalTitle">Neue Checkliste</div>
+      <button onclick="clCloseModal()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;">Name der Checkliste *</label>
+      <input id="clTemplateName" type="text" placeholder="z.B. Heizungswartung, Erstbegehung…"
+        style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--text);outline:none;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;">Auftragstyp (optional)</label>
+      <input id="clTemplateTyp" type="text" placeholder="z.B. Wartung, Reparatur, Erstinstallation…"
+        style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--text);outline:none;">
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);">Punkte</div>
+      <button onclick="clAddItem()" style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:var(--teal);color:#0d1520;border:none;cursor:pointer;">+ Punkt hinzufügen</button>
+    </div>
+    <div id="clItemList" style="max-height:280px;overflow-y:auto;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="clCloseModal()" style="flex:1;padding:10px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;">Abbrechen</button>
+      <button onclick="clSaveTemplate()" style="flex:2;padding:10px;border-radius:9px;background:var(--teal);color:#0d1520;font-size:13px;font-weight:700;border:none;cursor:pointer;">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BARCODE SCANNER MODAL ══ -->
+<div id="bcModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:3000;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="width:100%;max-width:460px;padding:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:16px;font-weight:700;color:#fff;">Barcode / QR scannen</div>
+      <button onclick="closeBarcodeScanner()" style="background:rgba(255,255,255,0.12);border:none;border-radius:8px;color:#fff;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <!-- Video-Vorschau -->
+    <div style="position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:1/1;">
+      <video id="bcVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>
+      <!-- Scan-Rahmen -->
+      <div style="position:absolute;inset:15%;border:2px solid var(--teal);border-radius:12px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);"></div>
+      <!-- Canvas (unsichtbar, für Bildanalyse) -->
+      <canvas id="bcCanvas" style="display:none;"></canvas>
+    </div>
+    <div id="bcStatus" style="text-align:center;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.6);">Kamera wird gestartet…</div>
+    <!-- Manuelle EAN-Eingabe als Fallback -->
+    <div style="margin-top:14px;display:flex;gap:8px;">
+      <input id="bcManualInput" class="inp" placeholder="EAN / Artikelnummer manuell eingeben" style="flex:1;font-size:13px;padding:8px 12px;">
+      <button onclick="bcManualLookup()" style="background:var(--teal);border:none;border-radius:8px;color:#0d1520;font-weight:700;padding:8px 14px;cursor:pointer;font-size:13px;">↵</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ SIGNATUR MODAL ══ -->
 <div class="sig-modal-bg" id="sigModal">
   <div class="sig-modal">
@@ -1469,6 +1522,16 @@ select.inp option{background:var(--bg3);}
   </div>
 
   <!-- MATERIALKATALOG -->
+  <!-- CHECKLISTEN -->
+  <div class="card" style="margin-bottom:14px;" id="checklistCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Checklisten</div>
+      <button onclick="clNewTemplate()" style="padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;background:var(--teal);color:#0d1520;border:none;cursor:pointer;">+ Neue Liste</button>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Definiere Checklisten pro Auftragstyp. Monteure können sie beim Auftrag abhaken.</div>
+    <div id="clTemplateList"><div style="font-size:13px;color:var(--text3);">Lädt…</div></div>
+  </div>
+
   <div class="card" style="margin-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">📦 Materialkatalog</div>
@@ -2803,10 +2866,15 @@ function showAuftragDetail(auftragId){
       <button class="btn btn-full" style="background:var(--teal-dim);border:1px solid var(--teal);color:var(--teal);font-weight:700;" onclick="startZeiterfassung('${a.id}','${(a.leistung+' – '+(k?k.name:'')).replace(/'/g,"\\'")}')">⏱ Zeit erfassen</button>
     </div>
     <div style="margin-top:8px;">
+      <button class="btn btn-full" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;font-weight:700;" onclick="openBarcodeScanner('${a.id}')">📷 Material scannen</button>
+    </div>
+    <div style="margin-top:8px;">
       <button class="btn btn-red btn-full" onclick="deleteAuftrag('${a.id}')">Auftrag löschen</button>
     </div>
+    <div id="auftragChecklistContainer" style="margin-top:16px;"></div>
   `;
   panel.classList.add('open');
+  renderAuftragChecklist('${a.id}', 'auftragChecklistContainer');
 }
 
 function setAuftragStatus(id, status){
@@ -4618,6 +4686,9 @@ function renderEinstellungen() {
 
   // Materialkatalog anzeigen
   renderMaterialListe();
+
+  // Checklisten-Templates laden
+  renderChecklistTemplates();
 
   const f = CONFIG.firma;
   // Firmendaten
@@ -6444,6 +6515,194 @@ async function renderDashTeam() {
 }
 
 // ════════════════════════════════════════════════════════════
+// CHECKLISTEN
+// ════════════════════════════════════════════════════════════
+let _clEditId = null; // null = neue Template, uuid = bearbeiten
+let _clItems  = [];   // [{text, pos}]
+
+async function renderChecklistTemplates() {
+  const el = document.getElementById('clTemplateList');
+  if (!el) return;
+  if (!_accessToken) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);">Bitte einloggen.</div>'; return; }
+
+  const { data: { user } } = await _supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: templates } = await _supabase
+    .from('checklist_templates')
+    .select('*, checklist_items(id)')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (!templates?.length) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--text3);">Noch keine Checklisten. Erstelle deine erste Liste.</div>';
+    return;
+  }
+
+  el.innerHTML = templates.map(t => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:13px;font-weight:600;">${t.name}</div>
+        <div style="font-size:11px;color:var(--text2);">${t.auftragstyp ? t.auftragstyp + ' · ' : ''}${(t.checklist_items||[]).length} Punkte</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="clEditTemplate('${t.id}')" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;background:var(--bg2);border:1px solid var(--border);color:var(--text2);cursor:pointer;">Bearbeiten</button>
+        <button onclick="clDeleteTemplate('${t.id}')" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;background:var(--red-dim);border:1px solid rgba(255,95,95,.2);color:var(--red);cursor:pointer;">Löschen</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clNewTemplate() {
+  _clEditId = null;
+  _clItems  = [{ text: '', pos: 0 }];
+  document.getElementById('clTemplateName').value = '';
+  document.getElementById('clTemplateTyp').value  = '';
+  document.getElementById('clModalTitle').textContent = 'Neue Checkliste';
+  clRenderItems();
+  document.getElementById('clModal').style.display = 'flex';
+}
+
+async function clEditTemplate(id) {
+  _clEditId = id;
+  const { data: t } = await _supabase.from('checklist_templates').select('*').eq('id', id).single();
+  const { data: items } = await _supabase.from('checklist_items').select('*').eq('template_id', id).order('position');
+  document.getElementById('clTemplateName').value = t?.name || '';
+  document.getElementById('clTemplateTyp').value  = t?.auftragstyp || '';
+  document.getElementById('clModalTitle').textContent = 'Checkliste bearbeiten';
+  _clItems = (items || []).map(i => ({ id: i.id, text: i.text, pos: i.position }));
+  if (!_clItems.length) _clItems = [{ text: '', pos: 0 }];
+  clRenderItems();
+  document.getElementById('clModal').style.display = 'flex';
+}
+
+function clRenderItems() {
+  const el = document.getElementById('clItemList');
+  el.innerHTML = _clItems.map((item, idx) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="font-size:12px;color:var(--text3);font-weight:600;width:20px;text-align:right;">${idx+1}.</span>
+      <input type="text" value="${item.text.replace(/"/g,'&quot;')}" placeholder="Checkpunkt eingeben…"
+        oninput="_clItems[${idx}].text=this.value"
+        style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+      <button onclick="clRemoveItem(${idx})" style="width:28px;height:28px;border-radius:6px;background:var(--red-dim);border:none;color:var(--red);cursor:pointer;font-size:14px;">✕</button>
+    </div>
+  `).join('');
+}
+
+function clAddItem() {
+  _clItems.push({ text: '', pos: _clItems.length });
+  clRenderItems();
+  // Fokus auf letztes Input
+  const inputs = document.getElementById('clItemList').querySelectorAll('input');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+}
+
+function clRemoveItem(idx) {
+  _clItems.splice(idx, 1);
+  clRenderItems();
+}
+
+async function clSaveTemplate() {
+  const name = document.getElementById('clTemplateName').value.trim();
+  if (!name) { showToast('Bitte einen Namen eingeben.'); return; }
+
+  const { data: { user } } = await _supabase.auth.getUser();
+  if (!user) return;
+
+  const validItems = _clItems.filter(i => i.text.trim());
+  const auftragstyp = document.getElementById('clTemplateTyp').value.trim();
+
+  if (_clEditId) {
+    // Update
+    await _supabase.from('checklist_templates').update({ name, auftragstyp }).eq('id', _clEditId);
+    await _supabase.from('checklist_items').delete().eq('template_id', _clEditId);
+    if (validItems.length) {
+      await _supabase.from('checklist_items').insert(
+        validItems.map((item, pos) => ({ template_id: _clEditId, text: item.text.trim(), position: pos }))
+      );
+    }
+  } else {
+    // Insert
+    const { data: tmpl } = await _supabase.from('checklist_templates').insert({
+      user_id: user.id, name, auftragstyp
+    }).select().single();
+    if (tmpl && validItems.length) {
+      await _supabase.from('checklist_items').insert(
+        validItems.map((item, pos) => ({ template_id: tmpl.id, text: item.text.trim(), position: pos }))
+      );
+    }
+  }
+
+  clCloseModal();
+  renderChecklistTemplates();
+  showToast('Checkliste gespeichert!');
+}
+
+async function clDeleteTemplate(id) {
+  if (!confirm('Checkliste wirklich löschen?')) return;
+  await _supabase.from('checklist_templates').delete().eq('id', id);
+  renderChecklistTemplates();
+  showToast('Checkliste gelöscht.');
+}
+
+function clCloseModal() {
+  document.getElementById('clModal').style.display = 'none';
+}
+
+// Checkliste im Auftrags-Detail anzeigen + abhaken
+async function renderAuftragChecklist(auftragId, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el || !_accessToken) return;
+
+  const { data: { user } } = await _supabase.auth.getUser();
+  if (!user) return;
+
+  // Alle Templates des Teams laden
+  const { data: templates } = await _supabase
+    .from('checklist_templates')
+    .select('*, checklist_items(id, text, position)')
+    .order('created_at');
+
+  if (!templates?.length) { el.innerHTML = ''; return; }
+
+  // Bereits abgehakte Einträge
+  const itemIds = templates.flatMap(t => (t.checklist_items||[]).map(i => i.id));
+  const { data: entries } = await _supabase
+    .from('checklist_entries')
+    .select('item_id, erledigt')
+    .eq('auftrag_id', auftragId)
+    .in('item_id', itemIds);
+
+  const doneMap = {};
+  (entries||[]).forEach(e => { doneMap[e.item_id] = e.erledigt; });
+
+  el.innerHTML = templates.map(t => {
+    const items = (t.checklist_items||[]).sort((a,b) => a.position - b.position);
+    if (!items.length) return '';
+    return `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:6px;">${t.name}</div>
+        ${items.map(item => `
+          <label style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer;">
+            <input type="checkbox" ${doneMap[item.id] ? 'checked' : ''}
+              onchange="clToggleEntry('${auftragId}','${item.id}','${user.id}',this.checked)"
+              style="width:16px;height:16px;accent-color:var(--teal);cursor:pointer;flex-shrink:0;">
+            <span style="font-size:13px;color:var(--text);${doneMap[item.id]?'text-decoration:line-through;opacity:.5;':''}">${item.text}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+async function clToggleEntry(auftragId, itemId, userId, erledigt) {
+  await _supabase.from('checklist_entries').upsert({
+    auftrag_id: auftragId, item_id: itemId, user_id: userId,
+    erledigt, erledigt_at: erledigt ? new Date().toISOString() : null
+  }, { onConflict: 'auftrag_id,item_id' });
+}
+
+// ════════════════════════════════════════════════════════════
 // PUSH-BENACHRICHTIGUNGEN
 // ════════════════════════════════════════════════════════════
 const VAPID_PUBLIC_KEY = 'BPPbS4HwPUsbty24g9VGzVk8tdt3tLWbpsY9Xjt5QHp5EI7Xqgkjj4omQtb4OmFrMwFLZ3wtkEeSNG-lGOJ1yJM';
@@ -6584,6 +6843,165 @@ async function triggerPush(eventType, targetUserId, title, message) {
       body: JSON.stringify({ user_id: targetUserId, title, message }),
     });
   } catch (_) { /* Push-Fehler sind nicht kritisch */ }
+}
+
+// ════════════════════════════════════════════════════════════
+// BARCODE / QR-SCANNER
+// ════════════════════════════════════════════════════════════
+let _bcStream       = null;   // MediaStream
+let _bcAnim         = null;   // requestAnimationFrame handle
+let _bcAuftragId    = null;   // aktiver Auftrag für den Scan
+let _bcScanning     = false;  // verhindert Doppel-Trigger
+
+async function openBarcodeScanner(auftragId) {
+  _bcAuftragId = auftragId;
+  _bcScanning  = false;
+
+  const modal  = document.getElementById('bcModal');
+  const status = document.getElementById('bcStatus');
+  modal.style.display = 'flex';
+  status.textContent  = 'Kamera wird gestartet…';
+  document.getElementById('bcManualInput').value = '';
+
+  try {
+    _bcStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 1280 } }
+    });
+    const video = document.getElementById('bcVideo');
+    video.srcObject = _bcStream;
+    await video.play();
+    status.textContent = 'Halte den Barcode in den Rahmen…';
+    _bcStartLoop();
+  } catch (err) {
+    status.textContent = 'Kamera nicht verfügbar: ' + err.message;
+  }
+}
+
+function closeBarcodeScanner() {
+  if (_bcAnim) { cancelAnimationFrame(_bcAnim); _bcAnim = null; }
+  if (_bcStream) { _bcStream.getTracks().forEach(t => t.stop()); _bcStream = null; }
+  const video = document.getElementById('bcVideo');
+  video.srcObject = null;
+  document.getElementById('bcModal').style.display = 'none';
+}
+
+function _bcStartLoop() {
+  const video  = document.getElementById('bcVideo');
+  const canvas = document.getElementById('bcCanvas');
+  const ctx    = canvas.getContext('2d');
+
+  // BarcodeDetector API (Chrome ≥ 83, Android WebView)
+  const detector = ('BarcodeDetector' in window)
+    ? new BarcodeDetector({ formats: ['ean_13','ean_8','qr_code','code_128','code_39','upc_a','upc_e','data_matrix'] })
+    : null;
+
+  async function tick() {
+    if (!_bcStream || _bcScanning) return;
+    if (video.readyState < 2) { _bcAnim = requestAnimationFrame(tick); return; }
+
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    let code = null;
+
+    try {
+      if (detector) {
+        const barcodes = await detector.detect(video);
+        if (barcodes.length) code = barcodes[0].rawValue;
+      } else {
+        // Fallback: jsQR (lazy-geladen)
+        if (!window.jsQR) {
+          await _bcLoadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js');
+        }
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const result  = window.jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'dontInvert' });
+        if (result) code = result.data;
+      }
+    } catch (_) {}
+
+    if (code) {
+      _bcScanning = true;
+      await _bcHandleCode(code);
+      return; // Loop endet nach erfolgreichem Scan
+    }
+
+    _bcAnim = requestAnimationFrame(tick);
+  }
+
+  _bcAnim = requestAnimationFrame(tick);
+}
+
+function _bcLoadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function _bcHandleCode(code) {
+  const status = document.getElementById('bcStatus');
+  status.textContent = `Erkannt: ${code} — suche…`;
+
+  // 1. Lokaler Katalog (artNr oder Bezeichnung enthält den Code)
+  const katalog  = DB.materialien();
+  let material   = katalog.find(m => m.artNr && m.artNr.trim() === code.trim());
+
+  // 2. Falls nicht im Katalog: einfachen Eintrag mit dem gescannten Code anlegen
+  if (!material) {
+    material = { bezeichnung: code, artNr: code, einheit: 'Stk', vkPreis: 0, menge: 1 };
+  }
+
+  _bcAddToAuftrag(material, code);
+}
+
+function _bcAddToAuftrag(material, rawCode) {
+  const status   = document.getElementById('bcStatus');
+  const auftraege = DB.auftraege();
+  const idx       = auftraege.findIndex(a => a.id === _bcAuftragId);
+
+  if (idx < 0) {
+    status.textContent = 'Auftrag nicht gefunden.';
+    _bcScanning = false;
+    _bcAnim = requestAnimationFrame(() => _bcStartLoop());
+    return;
+  }
+
+  const a = auftraege[idx];
+  if (!a.materialien) a.materialien = [];
+
+  // Bereits vorhanden? → Menge erhöhen
+  const existing = a.materialien.find(m => (m.artNr || m.bezeichnung) === (material.artNr || material.bezeichnung));
+  if (existing) {
+    existing.menge = (existing.menge || 1) + 1;
+    status.textContent = `Menge +1: ${existing.bezeichnung}`;
+  } else {
+    a.materialien.push({
+      id:          material.id || crypto.randomUUID(),
+      bezeichnung: material.bezeichnung,
+      artNr:       material.artNr || rawCode,
+      einheit:     material.einheit || 'Stk',
+      vkPreis:     material.vkPreis || 0,
+      menge:       1,
+    });
+    status.textContent = `✓ Hinzugefügt: ${material.bezeichnung}`;
+  }
+
+  DB.saveAuftraege(auftraege);
+  showToast(`${material.bezeichnung} zur Materialliste hinzugefügt`);
+
+  // Kurz anzeigen, dann Modal schließen
+  setTimeout(() => closeBarcodeScanner(), 1500);
+}
+
+// Manuelle EAN-Eingabe
+function bcManualLookup() {
+  const code = document.getElementById('bcManualInput').value.trim();
+  if (!code) return;
+  _bcScanning = true;
+  if (_bcAnim) { cancelAnimationFrame(_bcAnim); _bcAnim = null; }
+  _bcHandleCode(code);
 }
 </script>
 
