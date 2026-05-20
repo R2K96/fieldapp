@@ -1,7 +1,8 @@
 # SchnellR — Netlify Konfiguration
 
 [build]
-  publish = "."       # Root-Verzeichnis = Publish-Ordner (kein Build-Schritt nötig)
+  command = "npm run build"
+  publish = "dist"
 
 # ── Sicherheits-Header ────────────────────────────────────────
 [[headers]]
