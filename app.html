@@ -357,6 +357,28 @@ select.inp option{background:var(--bg3);}
 .foto-add-lbl{font-size:10px;font-weight:700;color:var(--text3);}
 .foto-uploading{opacity:0.5;animation:shimmer 1s infinite;}
 
+/* ── KALENDER ── */
+.kal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;}
+.kal-head{font-size:10px;font-weight:700;text-align:center;color:var(--text3);padding:4px 0;}
+.kal-day{min-height:34px;border-radius:8px;display:flex;flex-direction:column;align-items:center;padding:4px 2px;cursor:pointer;transition:background .1s;position:relative;}
+.kal-day:active{background:var(--bg3);}
+.kal-day-num{font-size:12px;font-weight:500;color:var(--text2);line-height:1;}
+.kal-day.today .kal-day-num{background:var(--teal);color:#0d1520;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.kal-day.other-month .kal-day-num{color:var(--text3);opacity:.4;}
+.kal-dots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;margin-top:2px;}
+.kal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.kal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.kal-nav-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:30px;height:30px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.kal-month-lbl{font-size:14px;font-weight:700;color:var(--text);}
+.agenda-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.agenda-item:last-child{border-bottom:none;}
+.agenda-date-col{min-width:42px;text-align:center;}
+.agenda-day-num{font-size:18px;font-weight:800;color:var(--text);line-height:1;}
+.agenda-day-name{font-size:10px;color:var(--text3);font-weight:600;}
+.agenda-body{flex:1;}
+.agenda-title{font-size:13px;font-weight:600;color:var(--text);}
+.agenda-sub{font-size:11px;color:var(--text3);}
+
 /* ── GLOBALE SUCHE ── */
 .gs-tab{flex:1;padding:8px 4px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
 .gs-tab-active{color:var(--teal);border-bottom-color:var(--teal);}
@@ -550,6 +572,7 @@ select.inp option{background:var(--bg3);}
       </svg>
     </div>
     <span class="nav-name" id="appBrandName">schnell<span class="nav-r">R</span></span>
+    <span id="offlineBadge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);letter-spacing:.03em;">OFFLINE</span>
   </div>
   <div class="topbar-right" style="gap:6px;">
     <button onclick="openGlobalSearch()" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;" title="Suche">
@@ -747,6 +770,19 @@ select.inp option{background:var(--bg3);}
     <div class="card-title">Cross-Selling Hinweise</div>
     <div id="dashCrossSell"><div class="tbl-empty">Keine offenen Hinweise.</div></div>
   </div>
+  <!-- KALENDER BLOCK -->
+  <div class="card" id="dashKalenderCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="card-title" style="margin:0;">Kalender</div>
+      <div style="display:flex;gap:4px;">
+        <button id="kalTabMonat" onclick="setKalTab('monat')" style="padding:4px 12px;border-radius:7px;font-size:11px;font-weight:700;background:var(--teal);color:#0d1520;border:none;cursor:pointer;">Monat</button>
+        <button id="kalTabAgenda" onclick="setKalTab('agenda')" style="padding:4px 12px;border-radius:7px;font-size:11px;font-weight:700;background:var(--bg3);color:var(--text2);border:1px solid var(--border);cursor:pointer;">Agenda</button>
+      </div>
+    </div>
+    <div id="kalMonatView"></div>
+    <div id="kalAgendaView" style="display:none;"></div>
+  </div>
+
   <div class="card">
     <div class="card-title">Letzte Aktivitäten</div>
     <div id="dashAktivitaet"><div class="tbl-empty">Noch keine Aktivitäten.</div></div>
@@ -1799,6 +1835,87 @@ function getLeistungConfig(label) {
   return CONFIG.leistungen.find(l => (l.emoji+' '+l.label) === label || l.label === label) || {satz:65,puffer:30,color:'var(--teal)',flat:false};
 }
 
+// ════════════════════════════════════════════════════════════
+// OFFLINE-QUEUE — persistiert Writes wenn kein Netz
+// ════════════════════════════════════════════════════════════
+const OfflineQueue = {
+  _key: 'schnellr_offline_queue',
+  _q: [],
+
+  load() {
+    try { this._q = JSON.parse(localStorage.getItem(this._key) || '[]'); } catch { this._q = []; }
+  },
+  save() {
+    try { localStorage.setItem(this._key, JSON.stringify(this._q)); } catch {}
+  },
+  push(op) { this._q.push({ ...op, ts: Date.now() }); },
+  count() { return this._q.length; },
+  clear() { this._q = []; this.save(); },
+
+  async flush(headers) {
+    if (!this._q.length) return;
+    const ops = [...this._q];
+    this.clear();
+    updateOfflineBadge();
+    let failed = [];
+
+    for (const op of ops) {
+      try {
+        if (op.type === 'upsert' && op.items?.length) {
+          const h = { ...headers, 'Prefer': 'resolution=merge-duplicates' };
+          const res = await fetch(`${SUPA_URL}/rest/v1/${op.table}`, {
+            method: 'POST', headers: h,
+            body: JSON.stringify(op.items.map(item => ({ id: item.id, user_id: op.uid, data: item })))
+          });
+          if (!res.ok) { failed.push(op); console.error('[Queue] upsert Fehler', op.table); }
+        } else if (op.type === 'delete' && op.ids?.length) {
+          const ids = op.ids.map(id => `"${id}"`).join(',');
+          const res = await fetch(`${SUPA_URL}/rest/v1/${op.table}?id=in.(${ids})`, {
+            method: 'DELETE', headers
+          });
+          if (!res.ok) { failed.push(op); console.error('[Queue] delete Fehler', op.table); }
+        }
+      } catch { failed.push(op); }
+    }
+
+    if (failed.length) { this._q = failed; this.save(); }
+    else { showToast(`✓ ${ops.length} Änderung${ops.length > 1 ? 'en' : ''} synchronisiert`); }
+    updateOfflineBadge();
+  }
+};
+OfflineQueue.load();
+
+function updateOfflineBadge() {
+  const badge = document.getElementById('offlineBadge');
+  if (!badge) return;
+  const offline = !navigator.onLine;
+  const pending = OfflineQueue.count();
+  if (offline) {
+    badge.style.display = 'inline';
+    badge.textContent = pending ? `OFFLINE · ${pending} ausstehend` : 'OFFLINE';
+  } else if (pending) {
+    badge.style.display = 'inline';
+    badge.style.background = 'rgba(234,179,8,0.15)';
+    badge.style.color = 'var(--gold)';
+    badge.style.borderColor = 'rgba(234,179,8,0.3)';
+    badge.textContent = `⏳ ${pending} syncing…`;
+  } else {
+    badge.style.display = 'none';
+    badge.style.background = 'rgba(239,68,68,0.15)';
+    badge.style.color = '#f87171';
+    badge.style.borderColor = 'rgba(239,68,68,0.3)';
+  }
+}
+
+// Online-Event: Queue flushen
+window.addEventListener('online', async () => {
+  updateOfflineBadge();
+  if (OfflineQueue.count() && DB._headers) {
+    await OfflineQueue.flush(DB._headers());
+  }
+});
+window.addEventListener('offline', () => updateOfflineBadge());
+
 // ── SUPABASE CLIENT ────────────────────────────────────────────
 const SUPA_URL = 'https://bpgrqvxspcpkzdvoiyfj.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwZ3JxdnhzcGNwa3pkdm9peWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODY0MDMsImV4cCI6MjA5NDQ2MjQwM30.qsD_ZK-XAca1hrhD74Fq9UoTlKZ0cWdNtf8FpdAiuP8';
@@ -1856,6 +1973,22 @@ const DB = {
     });
     const toDelete = old.filter(o => !newData.find(n => n.id === o.id)).map(o => o.id);
 
+    if (!toUpsert.length && !toDelete.length) return;
+
+    // Offline? → Queue und später flushen
+    if (!navigator.onLine) {
+      if (toUpsert.length) OfflineQueue.push({ type:'upsert', table, uid, items: toUpsert });
+      if (toDelete.length) OfflineQueue.push({ type:'delete', table, uid, ids: toDelete });
+      OfflineQueue.save();
+      updateOfflineBadge();
+      console.log('[DB] offline – in Queue gespeichert:', table);
+      return;
+    }
+
+    this._flush(table, uid, toUpsert, toDelete);
+  },
+
+  _flush(table, uid, toUpsert, toDelete) {
     if (toUpsert.length) {
       const h = this._headers();
       fetch(`${SUPA_URL}/rest/v1/${table}`, {
@@ -3814,6 +3947,9 @@ function saveNachtermin(fotoUrls=[], unterschrift=null){
 // ════════════════════════════════
 function renderDashboard(){
   renderDashTeam(); // Team-Übersicht für Admins
+  // Kalender rendern (aktiver Tab)
+  if (_kalTab === 'monat') renderKalMonat();
+  else renderKalAgenda();
   const kunden=DB.kunden();
   const auftraege=DB.auftraege();
   const todayKey=isoDate(new Date());
@@ -5582,6 +5718,7 @@ function _applyAuthUser(user) {
 
 // ════ INIT ════
 document.addEventListener('DOMContentLoaded', async () => {
+  updateOfflineBadge();
   applyConfig();
 
   // Auth-Zustand überwachen
@@ -6938,6 +7075,151 @@ async function triggerPush(eventType, targetUserId, title, message) {
       body: JSON.stringify({ user_id: targetUserId, title, message }),
     });
   } catch (_) { /* Push-Fehler sind nicht kritisch */ }
+}
+
+// ════════════════════════════════════════════════════════════
+// KALENDER (Monat + Agenda)
+// ════════════════════════════════════════════════════════════
+let _kalTab   = 'monat';
+let _kalYear  = new Date().getFullYear();
+let _kalMonth = new Date().getMonth(); // 0-based
+
+function setKalTab(tab) {
+  _kalTab = tab;
+  const btnM = document.getElementById('kalTabMonat');
+  const btnA = document.getElementById('kalTabAgenda');
+  document.getElementById('kalMonatView').style.display  = tab === 'monat'  ? '' : 'none';
+  document.getElementById('kalAgendaView').style.display = tab === 'agenda' ? '' : 'none';
+  if (btnM) { btnM.style.background = tab==='monat'  ? 'var(--teal)' : 'var(--bg3)'; btnM.style.color = tab==='monat'  ? '#0d1520' : 'var(--text2)'; btnM.style.border = tab==='monat' ? 'none' : '1px solid var(--border)'; }
+  if (btnA) { btnA.style.background = tab==='agenda' ? 'var(--teal)' : 'var(--bg3)'; btnA.style.color = tab==='agenda' ? '#0d1520' : 'var(--text2)'; btnA.style.border = tab==='agenda' ? 'none' : '1px solid var(--border)'; }
+  if (tab === 'monat')  renderKalMonat();
+  if (tab === 'agenda') renderKalAgenda();
+}
+
+function kalChangeMonth(dir) {
+  _kalMonth += dir;
+  if (_kalMonth > 11) { _kalMonth = 0; _kalYear++; }
+  if (_kalMonth < 0)  { _kalMonth = 11; _kalYear--; }
+  renderKalMonat();
+}
+
+function renderKalMonat() {
+  const el = document.getElementById('kalMonatView');
+  if (!el) return;
+
+  const auftraege  = DB.auftraege();
+  const kunden     = DB.kunden();
+  const today      = new Date(); today.setHours(0,0,0,0);
+  const firstDay   = new Date(_kalYear, _kalMonth, 1);
+  const lastDay    = new Date(_kalYear, _kalMonth + 1, 0);
+  const startDow   = (firstDay.getDay() + 6) % 7; // Mo=0
+  const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+  // Aufträge pro Tag indizieren
+  const byDay = {};
+  auftraege.forEach(a => {
+    if (!a.datum) return;
+    const d = new Date(a.datum + 'T12:00:00');
+    if (d.getFullYear() === _kalYear && d.getMonth() === _kalMonth) {
+      const k = a.datum;
+      if (!byDay[k]) byDay[k] = [];
+      byDay[k].push(a);
+    }
+  });
+
+  const dotColor = s => s==='erledigt'?'var(--green)':s==='offen'?'var(--gold)':'var(--teal)';
+
+  // Wochentag-Header
+  let html = `<div class="kal-nav">
+    <button class="kal-nav-btn" onclick="kalChangeMonth(-1)">‹</button>
+    <span class="kal-month-lbl">${monthNames[_kalMonth]} ${_kalYear}</span>
+    <button class="kal-nav-btn" onclick="kalChangeMonth(1)">›</button>
+  </div>
+  <div class="kal-grid">`;
+  ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach(d => { html += `<div class="kal-head">${d}</div>`; });
+  html += '</div><div class="kal-grid">';
+
+  // Leere Zellen vor dem 1.
+  for (let i = 0; i < startDow; i++) html += `<div class="kal-day other-month"><span class="kal-day-num">&nbsp;</span></div>`;
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date    = new Date(_kalYear, _kalMonth, d); date.setHours(0,0,0,0);
+    const isToday = date.getTime() === today.getTime();
+    const key     = `${_kalYear}-${String(_kalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayAuf  = byDay[key] || [];
+    const dots    = dayAuf.slice(0,3).map(a => `<div class="kal-dot" style="background:${dotColor(a.status)};"></div>`).join('');
+    html += `<div class="kal-day${isToday?' today':''}" onclick="kalDayClick('${key}')">
+      <span class="kal-day-num">${d}</span>
+      <div class="kal-dots">${dots}</div>
+    </div>`;
+  }
+
+  // Auffüllen bis 7er-Raster
+  const total = startDow + lastDay.getDate();
+  const rest  = (7 - (total % 7)) % 7;
+  for (let i = 0; i < rest; i++) html += `<div class="kal-day other-month"><span class="kal-day-num">&nbsp;</span></div>`;
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+function kalDayClick(dateStr) {
+  // Filter auf diesen Tag setzen und zu Aufträge navigieren
+  const von = document.getElementById('afDatumVon');
+  const bis = document.getElementById('afDatumBis');
+  if (von) von.value = dateStr;
+  if (bis) bis.value = dateStr;
+  showPage('auftraege');
+  renderAuftraege();
+}
+
+function renderKalAgenda() {
+  const el = document.getElementById('kalAgendaView');
+  if (!el) return;
+
+  const auftraege = DB.auftraege();
+  const kunden    = DB.kunden();
+  const today     = new Date(); today.setHours(0,0,0,0);
+  const in30      = new Date(today.getTime() + 30 * 86400000);
+
+  const kommend = auftraege
+    .filter(a => {
+      if (!a.datum) return false;
+      const d = new Date(a.datum + 'T12:00:00'); d.setHours(0,0,0,0);
+      return d >= today && d <= in30;
+    })
+    .sort((a,b) => a.datum.localeCompare(b.datum));
+
+  if (!kommend.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;padding:24px 0;">Keine Termine in den nächsten 30 Tagen.</div>';
+    return;
+  }
+
+  const dotColor = s => s==='erledigt'?'var(--green)':s==='offen'?'var(--gold)':'var(--teal)';
+  const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+  let html = '';
+  let lastDate = '';
+  kommend.forEach(a => {
+    const k   = kunden.find(k => k.id === a.kundeId);
+    const d   = new Date(a.datum + 'T12:00:00');
+    const dn  = dayNames[d.getDay()];
+    const day = d.getDate();
+    const showDate = a.datum !== lastDate;
+    lastDate = a.datum;
+    html += `<div class="agenda-item" onclick="showPage('auftraege');setTimeout(()=>showAuftragDetail('${a.id}'),150)">
+      <div class="agenda-date-col">
+        ${showDate ? `<div class="agenda-day-num">${day}</div><div class="agenda-day-name">${dn}</div>` : ''}
+      </div>
+      <div style="width:3px;border-radius:4px;background:${dotColor(a.status)};align-self:stretch;flex-shrink:0;"></div>
+      <div class="agenda-body">
+        <div class="agenda-title">${a.leistung||'Auftrag'}</div>
+        <div class="agenda-sub">${k?.name||'–'}${a.ma?' · '+a.ma:''}${a.termin_uhrzeit?' · '+a.termin_uhrzeit+' Uhr':''}</div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════════════
