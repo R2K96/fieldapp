@@ -3,6 +3,28 @@
 import './styles/app.css'
 import { createClient } from '@supabase/supabase-js'
 
+// ── Phase-2-Module ──────────────────────────────────────────────
+import { DB, OfflineQueue, updateOfflineBadge, setAccessToken, supabase as _sbNew } from './lib/db'
+import { showToast as _showToast, uid as _uid, today as _today, fmtDate as _fmtDate } from './lib/utils'
+import {
+  showPage as _showPage, registerPage, registerModalOpen, openModal as _openModal,
+  closeModal as _closeModal, showConfirm as _showConfirm, confirmResolve as _confirmResolve,
+  openGlobalSearch as _openGlobalSearch, closeGlobalSearch, setGsTab, runGlobalSearch,
+  toggleMenu as _toggleMenu, openHelpMenu, closeHelpMenu,
+  populateAfMaSelect, resetAuftragFilter as _resetAuftragFilter,
+  initSwipeNavigation, initStaticEventListeners, initSearchDelegation, closeDetailPanel,
+} from './modules/ui'
+import {
+  initKunden, renderKunden as _renderKunden, saveKunde as _saveKunde,
+  showKundeDetail, deleteKunde as _deleteKunde, onKundenDataChange,
+} from './modules/kunden'
+import {
+  initAuftraege, renderAuftraege as _renderAuftraege, saveAuftrag as _saveAuftrag,
+  showAuftragDetail as _showAuftragDetail, setAuftragStatus as _setAuftragStatus,
+  deleteAuftrag as _deleteAuftrag, onAuftragDataChange, onStartZeiterfassung,
+  onOpenBarcodeScanner, onRenderAuftragChecklist,
+} from './modules/auftraege'
+
 // ╔══════════════════════════════════════════════════════════════╗
 // ║               FIELDAPP — KONFIGURATION                       ║
 // ║  Alle branchen-spezifischen Einstellungen hier anpassen.     ║
@@ -4021,6 +4043,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateOfflineBadge();
   applyConfig();
 
+  // ── Phase-2-Module initialisieren ────────────────────────────
+  // Callbacks registrieren (löst zirkuläre Imports auf)
+  onKundenDataChange(() => renderDashboard())
+  onAuftragDataChange(() => renderDashboard())
+  onStartZeiterfassung((id, label) => startZeiterfassung(id, label))
+  onOpenBarcodeScanner((id) => openBarcodeScanner(id))
+  onRenderAuftragChecklist((id, cId) => renderAuftragChecklist(id, cId))
+
+  // Module initialisieren (registrieren Pages + Event-Listener)
+  initKunden()
+  initAuftraege()
+
+  // Statische Buttons verdrahten
+  initStaticEventListeners({
+    showPage, signOut, startTour, startOnboarding, openSchnellerfassung,
+    openModal, dismissInstallBanner, triggerInstall, recoverySetPassword,
+    finishOnboarding, authSubmit, authToggleMode, authForgot, authShowLogin,
+    tourGo, endTour, initRoute, renderRoute,
+  })
+
+  // Swipe-Navigation
+  initSwipeNavigation()
+
+  // Suchergebnis-Delegation
+  initSearchDelegation(
+    () => _renderKunden(),
+    (id) => _showAuftragDetail(id),
+    () => renderRechnung(),
+  )
+
   // Auth-Zustand überwachen
   _sb.auth.onAuthStateChange(async (event, session) => {
     const screen = document.getElementById('authScreen');
@@ -5841,39 +5893,50 @@ function bcManualLookup() {
 
 
 // ════════════════════════════════════════════════════════════
-// WINDOW-EXPORTS — benötigt für HTML onclick-Handler
-// Wird in Phase 2 durch Event Listener ersetzt
+// WINDOW-EXPORTS — Bridge für HTML onclick-Handler
+// Migrierte Funktionen → Modul-Versionen
+// Noch nicht migrierte → lokale Funktionen (main.ts)
 // ════════════════════════════════════════════════════════════
 const _w = window as any
-_w.showPage = showPage
-_w.openModal = openModal
-_w.closeModal = closeModal
-_w.toggleMenu = toggleMenu
+
+// ── Navigations-Modul ──
+_w.showPage       = _showPage
+_w.openModal      = _openModal
+_w.closeModal     = _closeModal
+_w.toggleMenu     = _toggleMenu
+_w.openHelpMenu   = openHelpMenu
+_w.closeHelpMenu  = closeHelpMenu
+_w.openGlobalSearch  = _openGlobalSearch
+_w.closeGlobalSearch = closeGlobalSearch
+_w.runGlobalSearch   = runGlobalSearch
+_w.setGsTab          = setGsTab
+_w.showConfirm       = _showConfirm
+_w.confirmResolve    = _confirmResolve
+_w.resetAuftragFilter= _resetAuftragFilter
+
+// ── Kunden-Modul ──
+_w.renderKunden    = _renderKunden
+_w.saveKunde       = _saveKunde
+_w.showDetail      = showKundeDetail
+_w.deleteKunde     = _deleteKunde
+
+// ── Auftrags-Modul ──
+_w.renderAuftraege   = _renderAuftraege
+_w.saveAuftrag       = _saveAuftrag
+_w.showAuftragDetail = _showAuftragDetail
+_w.setAuftragStatus  = _setAuftragStatus
+_w.deleteAuftrag     = _deleteAuftrag
+_w.closeDetail       = () => document.getElementById('detailPanel')?.classList.remove('open')
+
+// ── Noch in main.ts (wird in Phase 2b migriert) ──
 _w.renderDashboard = renderDashboard
-_w.renderKunden = renderKunden
-_w.renderAuftraege = renderAuftraege
 _w.renderRechnung = renderRechnung
 _w.renderEinstellungen = renderEinstellungen
 _w.renderAngebote = renderAngebote
 _w.renderAuswertung = renderAuswertung
-_w.showAuftragDetail = showAuftragDetail
-_w.closeDetail = closeDetail
-_w.deleteKunde = deleteKunde
-_w.deleteAuftrag = deleteAuftrag
-_w.setAuftragStatus = setAuftragStatus
-_w.saveKunde = saveKunde
-_w.saveAuftrag = saveAuftrag
 _w.saveRechnungData = saveRechnungData
 _w.bezahltBestaetigen = bezahltBestaetigen
 _w.markBezahlt = markBezahlt
-_w.openHelpMenu = openHelpMenu
-_w.openGlobalSearch = openGlobalSearch
-_w.closeGlobalSearch = closeGlobalSearch
-_w.runGlobalSearch = runGlobalSearch
-_w.setGsTab = setGsTab
-_w.resetAuftragFilter = resetAuftragFilter
-_w.showConfirm = showConfirm
-_w.confirmResolve = confirmResolve
 _w.setKalTab = setKalTab
 _w.kalChangeMonth = kalChangeMonth
 _w.renderKalMonat = renderKalMonat
@@ -5947,10 +6010,10 @@ _w.populateRechnungSelect = populateRechnungSelect
 _w.collectPositionen = collectPositionen
 _w.addPosition = addPosition
 _w.removePosition = removePosition
-_w.fmtDate = fmtDate
-_w.today = today
-_w.showToast = showToast
-_w.toggleMenu = toggleMenu
+_w.fmtDate = fmtDate          // utils.ts — Fallback für onclicks in Templates
+_w.today = today               // utils.ts — Fallback
+_w.showToast = showToast       // utils.ts — Fallback
+// toggleMenu → bereits oben via _toggleMenu gesetzt
 _w.setChipExclusive = setChipExclusive
 _w.ntToggleMat = ntToggleMat
 _w.ntToggleBlock = ntToggleBlock
