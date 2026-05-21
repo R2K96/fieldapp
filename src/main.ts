@@ -73,6 +73,26 @@ import {
   copyInviteCode as _copyInviteCode, renderTeamSection as _renderTeamSection,
   renderDashTeam as _renderDashTeam,
 } from './modules/team'
+import {
+  initChecklist, renderChecklistTemplates as _renderChecklistTemplates,
+  clNewTemplate as _clNewTemplate, clEditTemplate as _clEditTemplate,
+  clAddItem as _clAddItem, clRemoveItem as _clRemoveItem,
+  clSaveTemplate as _clSaveTemplate, clDeleteTemplate as _clDeleteTemplate,
+  clCloseModal as _clCloseModal, renderAuftragChecklist as _renderAuftragChecklist,
+  clToggleEntry as _clToggleEntry,
+} from './modules/checklist'
+import {
+  initPush, initPushUI as _initPushUI, triggerPush as _triggerPush,
+  togglePushSubscription as _togglePushSubscription,
+  renderPushToggles as _renderPushToggles, savePushSetting as _savePushSetting,
+} from './modules/push'
+import {
+  initAuth, authSubmit as _authSubmit, authToggleMode as _authToggleMode,
+  authShowLogin as _authShowLogin, authForgot as _authForgot,
+  recoverySetPassword as _recoverySetPassword, deleteAccount as _deleteAccount,
+  signOut as _signOut, applyAuthUser as _applyAuthUser, showAuthMsg as _showAuthMsg,
+  onAuthSuccess, onAuthSignOut, onAuthApplyUser,
+} from './modules/auth'
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║               FIELDAPP — KONFIGURATION                       ║
@@ -4099,7 +4119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   onStartZeiterfassung((id, label) => _startZeiterfassung(id, label))
   // onOpenBarcodeScanner: wird weiter unten per initBarcode-Modul überschrieben
   onOpenBarcodeScanner((id) => _openBarcodeScanner(id))
-  onRenderAuftragChecklist((id, cId) => renderAuftragChecklist(id, cId))
+  onRenderAuftragChecklist((id, cId) => _renderAuftragChecklist(id, cId))
 
   // ── Callbacks für Dashboard ──
   // renderKalMonat/Agenda → werden nach initKalender durch Modul-Callbacks überschrieben
@@ -4112,12 +4132,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ── Callbacks für Rechnungen ──
   onRechnungDataChange(() => _renderDashboard())
-  onRechnungTriggerPush((e, uid, t, m) => triggerPush(e, uid, t, m))
+  onRechnungTriggerPush((e, uid, t, m) => _triggerPush(e, uid, t, m))
 
   // ── Callbacks für Einstellungen ──
-  onRenderTeamSection(() => _renderTeamSection())   // → team.ts Modul
+  onRenderTeamSection(() => _renderTeamSection())
   onRenderMaterialListe(() => renderMaterialListe())
-  onRenderChecklistTemplates(() => renderChecklistTemplates())
+  onRenderChecklistTemplates(() => _renderChecklistTemplates())
 
   // ── Callbacks für Zeiterfassung ──
   onZtShowPage((page) => showPage(page))
@@ -4139,12 +4159,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSchnellerfassung()
   initKalender()
   initBarcode()
+  initChecklist()
+  initPush()
+  initAuth()
 
   // Statische Buttons verdrahten
   initStaticEventListeners({
-    showPage, signOut, startTour, startOnboarding, openSchnellerfassung,
-    openModal, dismissInstallBanner, triggerInstall, recoverySetPassword,
-    finishOnboarding, authSubmit, authToggleMode, authForgot, authShowLogin,
+    showPage, signOut: _signOut, startTour, startOnboarding, openSchnellerfassung: _openSchnellerfassung,
+    openModal, dismissInstallBanner, triggerInstall, recoverySetPassword: _recoverySetPassword,
+    finishOnboarding, authSubmit: _authSubmit, authToggleMode: _authToggleMode, authForgot: _authForgot, authShowLogin: _authShowLogin,
     tourGo, endTour, initRoute, renderRoute,
   })
 
@@ -6037,16 +6060,18 @@ _w.setKalTab = _setKalTabMod
 _w.kalChangeMonth = _kalChangeMonth
 _w.renderKalMonat = _renderKalMonat
 _w.renderKalAgenda = _renderKalAgenda
-_w.initPushUI = initPushUI
-_w.togglePushSetting = togglePushSetting
-_w.clNewTemplate = clNewTemplate
-_w.clEditTemplate = clEditTemplate
-_w.clSaveTemplate = clSaveTemplate
-_w.clDeleteTemplate = clDeleteTemplate
-_w.clCloseModal = clCloseModal
-_w.clAddItem = clAddItem
-_w.clRemoveItem = clRemoveItem
-_w.clToggleEntry = clToggleEntry
+_w.initPushUI = _initPushUI
+_w.togglePushSubscription = _togglePushSubscription
+_w.savePushSetting = _savePushSetting
+_w.triggerPush = _triggerPush
+_w.clNewTemplate = _clNewTemplate
+_w.clEditTemplate = _clEditTemplate
+_w.clSaveTemplate = _clSaveTemplate
+_w.clDeleteTemplate = _clDeleteTemplate
+_w.clCloseModal = _clCloseModal
+_w.clAddItem = _clAddItem
+_w.clRemoveItem = _clRemoveItem
+_w.clToggleEntry = _clToggleEntry
 _w.openBarcodeScanner = _openBarcodeScanner
 _w.closeBarcodeScanner = _closeBarcodeScanner
 _w.bcManualLookup = _bcManualLookup
@@ -6094,7 +6119,12 @@ _w.copyInviteCode = _copyInviteCode
 _w.renderTeamSection = _renderTeamSection
 _w.renderDashTeam = _renderDashTeam
 _w.inviteTeamMember = inviteTeamMember
-_w.deleteAccount = deleteAccount
+_w.deleteAccount = _deleteAccount
+_w.signOut = _signOut
+_w.authSubmit = _authSubmit
+_w.authToggleMode = _authToggleMode
+_w.authForgot = _authForgot
+_w.authShowLogin = _authShowLogin
 _w.exportLexoffice = exportLexoffice
 _w.exportDATEV = exportDATEV
 _w.exportZugferd = exportZugferd
@@ -6122,4 +6152,4 @@ _w.ntToggleBlock = ntToggleBlock
 _w.obNext = obNext
 _w.obBack = obBack
 _w.startOnboarding = startOnboarding
-_w.recoverySetPassword = recoverySetPassword
+_w.recoverySetPassword = _recoverySetPassword
