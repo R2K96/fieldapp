@@ -5,6 +5,8 @@
 import { DB } from '../lib/db'
 import { uid, showToast } from '../lib/utils'
 import { registerPage } from './ui'
+import { BRANCH_LEISTUNGEN, DEFAULT_LEISTUNGEN } from '../lib/branchLeistungen'
+import { OB_BRANCHES } from './onboarding'
 
 // Logo-State (Modul-lokal, kein globales Leak mehr)
 let _logoBase64: string | null = null
@@ -60,21 +62,84 @@ export function renderEinstellungen() {
       : 'kein Logo'
   }
 
-  // Stundensätze
+  // Leistungen-Bereich mit Branch-Switcher
   const list = document.getElementById('cfg-leistungen-list')
   if (list) {
-    list.innerHTML = CONFIG.leistungen.map((l: any, i: number) =>
+    const currentBranch = CONFIG._branchLabel || ''
+    const branchBadge = currentBranch
+      ? `<span style="background:var(--teal);color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">${currentBranch}</span>`
+      : ''
+
+    // Branch-Switcher oben
+    const branchGrid = OB_BRANCHES.map((b, i) =>
+      `<div data-cfg-branch="${b.label}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:12px;text-align:center;gap:3px;background:${CONFIG._branchLabel === b.label ? 'var(--teal)' : 'var(--bg3)'};color:${CONFIG._branchLabel === b.label ? '#fff' : 'var(--text1)'};">
+        <span style="font-size:18px;">${b.icon}</span>
+        <span style="font-weight:600;">${b.label}</span>
+      </div>`
+    ).join('')
+
+    // Leistungs-Zeilen mit Löschen-Button
+    const leistungRows = CONFIG.leistungen.map((l: any, i: number) =>
       `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;background:var(--bg3);border-radius:8px;padding:9px 12px;">
         <span style="font-size:18px;flex-shrink:0;">${l.emoji}</span>
         <div style="flex:1;font-size:13px;font-weight:600;">${l.label}</div>
         ${l.flat
           ? `<div style="font-size:12px;color:var(--text3);">Pauschale</div>
-             <input class="inp" type="number" value="${l.pause || 0}" style="width:80px;padding:6px 8px;font-size:13px;" id="cfg-l-pause-${i}" placeholder="€">`
-          : `<input class="inp" type="number" value="${l.satz || 0}" style="width:80px;padding:6px 8px;font-size:13px;" id="cfg-l-satz-${i}" placeholder="€/h">
+             <input class="inp" type="number" value="${l.pause || 0}" style="width:68px;padding:6px 8px;font-size:13px;" id="cfg-l-pause-${i}" placeholder="€">`
+          : `<input class="inp" type="number" value="${l.satz || 0}" style="width:68px;padding:6px 8px;font-size:13px;" id="cfg-l-satz-${i}" placeholder="€/h">
              <span style="font-size:11px;color:var(--text3);">€/h</span>`
         }
+        <button data-remove-leistung="${i}" style="background:none;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:0 2px;flex-shrink:0;">✕</button>
       </div>`
     ).join('')
+
+    list.innerHTML = `
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;">Aktives Gewerk ${branchBadge}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px;" id="cfg-branch-grid">${branchGrid}</div>
+        <div style="font-size:11px;color:var(--text3);">Gewerk wechseln setzt Leistungen auf Branchenstandard zurück.</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;">Leistungskatalog</div>
+      <div id="cfg-leistungen-rows">${leistungRows}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <input class="inp" id="cfg-new-leistung-emoji" placeholder="🔧" style="width:48px;text-align:center;padding:8px;">
+        <input class="inp" id="cfg-new-leistung-label" placeholder="Neue Leistung..." style="flex:1;">
+        <input class="inp" id="cfg-new-leistung-satz" type="number" placeholder="€/h" style="width:72px;" min="0">
+        <button id="btnAddLeistung" style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">+ Hinzufügen</button>
+      </div>`
+
+    // Events: Branch-Wechsel
+    list.querySelectorAll('[data-cfg-branch]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const label = (btn as HTMLElement).dataset.cfgBranch!
+        if (!confirm(`Leistungen auf "${label}"-Standard zurücksetzen?`)) return
+        const leistungen = BRANCH_LEISTUNGEN[label] ?? DEFAULT_LEISTUNGEN
+        CONFIG.leistungen  = leistungen
+        CONFIG._branchLabel = label
+        renderEinstellungen()
+        showToast(`✓ Gewerk auf ${label} gewechselt`)
+      })
+    })
+
+    // Events: Leistung löschen
+    list.querySelectorAll('[data-remove-leistung]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt((btn as HTMLElement).dataset.removeLeistung!)
+        CONFIG.leistungen.splice(i, 1)
+        renderEinstellungen()
+      })
+    })
+
+    // Event: Leistung hinzufügen
+    list.querySelector('#btnAddLeistung')?.addEventListener('click', () => {
+      const emoji = (list.querySelector('#cfg-new-leistung-emoji') as HTMLInputElement)?.value.trim() || '🔧'
+      const label = (list.querySelector('#cfg-new-leistung-label') as HTMLInputElement)?.value.trim()
+      const satz  = parseFloat((list.querySelector('#cfg-new-leistung-satz') as HTMLInputElement)?.value) || 60
+      if (!label) { showToast('⚠ Bitte Leistungsname eingeben'); return }
+      CONFIG.leistungen.push({ emoji, label, satz, flat: false, puffer: 60, color: 'var(--teal)' })
+      renderEinstellungen()
+      ;(window as any).buildLeistungChips?.()
+    })
   }
 
   renderMaList()
@@ -175,6 +240,7 @@ export function saveEinstellungen() {
   DB.saveEinstellungen({
     firma: f, mitarbeiter, leistungen,
     rechnungsFusszeile: CONFIG.abrechnung.rechnungsFusszeile,
+    branchLabel: CONFIG._branchLabel || '',
   })
 
   // UI aktualisieren (applyConfig ist noch in main.ts)
@@ -207,8 +273,9 @@ export function applyEinstellungenFromDB() {
   if (!einst || !CONFIG) return
 
   if (einst.firma)        Object.assign(CONFIG.firma, einst.firma)
-  if (einst.mitarbeiter)  CONFIG.mitarbeiter  = einst.mitarbeiter
-  if (einst.leistungen)   CONFIG.leistungen   = einst.leistungen
+  if (einst.mitarbeiter)  CONFIG.mitarbeiter   = einst.mitarbeiter
+  if (einst.leistungen)   CONFIG.leistungen    = einst.leistungen
+  if (einst.branchLabel)  CONFIG._branchLabel  = einst.branchLabel
   if (einst.rechnungsFusszeile !== undefined)
     CONFIG.abrechnung.rechnungsFusszeile = einst.rechnungsFusszeile
 }

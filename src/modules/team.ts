@@ -6,6 +6,7 @@
 import { supabase } from '../lib/db'
 import { showToast } from '../lib/utils'
 import { showConfirm } from './ui'
+import { setCurrentRole, ROLE_LABELS, ROLE_DESCRIPTIONS, UserRole } from '../lib/permissions'
 
 // ── Modul-State ──────────────────────────────────────────────────
 let _teamData: any = null   // { team, members, role }
@@ -27,6 +28,7 @@ export async function loadTeamData() {
 
     if (ownedTeam) {
       _teamData = { team: ownedTeam, members: ownedTeam.team_members || [], role: 'admin' }
+      setCurrentRole('admin')
       return
     }
 
@@ -41,14 +43,22 @@ export async function loadTeamData() {
       const { data: members } = await supabase
         .from('team_members').select('*')
         .eq('team_id', membership.team_id).eq('is_active', true)
-      _teamData = { team: membership.teams, members: members || [], role: 'member' }
+      // Rolle aus DB übernehmen (admin / buero / techniker)
+      const role = membership.role === 'admin' ? 'admin'
+                 : membership.role === 'buero' ? 'buero'
+                 : 'techniker'
+      _teamData = { team: membership.teams, members: members || [], role }
+      setCurrentRole(role as UserRole)
       return
     }
 
+    // Kein Team → Einzelnutzer = Admin
     _teamData = null
+    setCurrentRole('admin')
   } catch (e: any) {
     console.warn('[Team] loadTeamData:', e.message)
     _teamData = null
+    setCurrentRole('admin')
   }
 }
 
@@ -135,6 +145,18 @@ export async function leaveTeam() {
   showToast('Team verlassen')
 }
 
+// ── Rolle eines Mitglieds ändern (nur Admin) ─────────────────────
+export async function changeTeamMemberRole(memberId: string, newRole: string) {
+  const { error } = await supabase
+    .from('team_members')
+    .update({ role: newRole })
+    .eq('id', memberId)
+  if (error) { showToast('⚠ Fehler: ' + error.message); return }
+  await loadTeamData()
+  await renderTeamSection()
+  showToast(`✓ Rolle auf ${ROLE_LABELS[newRole as UserRole] || newRole} geändert`)
+}
+
 // ── Einladungscode kopieren ──────────────────────────────────────
 export function copyInviteCode() {
   const code = _teamData?.team?.invite_code
@@ -172,16 +194,36 @@ export async function renderTeamSection() {
   const userId  = await _getUserId()
   const isAdmin = role === 'admin'
 
-  const memberRows = members.map((m: any) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
-      <div>
-        <div style="font-size:13px;font-weight:600;">${m.display_name || m.email || '–'}</div>
-        <div style="font-size:11px;color:var(--text3);">${m.role === 'admin' ? '👑 Admin' : '👤 Mitglied'} · ${m.email || ''}</div>
+  const roleOptions = (currentRole: string, memberId: string) =>
+    (['admin', 'buero', 'techniker'] as UserRole[]).map(r =>
+      `<option value="${r}" ${currentRole === r ? 'selected' : ''}>${ROLE_LABELS[r]}</option>`
+    ).join('')
+
+  const memberRows = members.map((m: any) => {
+    const isSelf     = m.user_id === userId
+    const memberRole = m.role === 'admin' ? 'admin' : m.role === 'buero' ? 'buero' : 'techniker'
+    return `
+    <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.display_name || m.email?.split('@')[0] || '–'}</div>
+          <div style="font-size:11px;color:var(--text3);">${m.email || ''}</div>
+        </div>
+        ${isAdmin && !isSelf
+          ? `<select data-role-member="${m.id}" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;background:var(--bg3);color:var(--text1);cursor:pointer;">
+               ${roleOptions(memberRole, m.id)}
+             </select>
+             <button data-remove-member="${m.id}" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>`
+          : isSelf
+            ? `<span style="font-size:11px;color:var(--teal);font-weight:700;">${ROLE_LABELS[memberRole as UserRole]} · Du</span>`
+            : `<span style="font-size:11px;color:var(--text3);">${ROLE_LABELS[memberRole as UserRole]}</span>`
+        }
       </div>
-      ${isAdmin && m.user_id !== userId
-        ? `<button data-remove-member="${m.id}" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;">Entfernen</button>`
-        : m.user_id === userId ? '<span style="font-size:11px;color:var(--teal);">Du</span>' : ''}
-    </div>`).join('')
+      ${isAdmin && !isSelf
+        ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">${ROLE_DESCRIPTIONS[memberRole as UserRole]}</div>`
+        : ''}
+    </div>`
+  }).join('')
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -208,6 +250,14 @@ export async function renderTeamSection() {
   document.getElementById('btnLeaveTeam')?.addEventListener('click', leaveTeam)
   el.querySelectorAll('[data-remove-member]').forEach(btn => {
     btn.addEventListener('click', () => removeTeamMember((btn as HTMLElement).dataset.removeMember!))
+  })
+  // Rollen-Änderung durch Admin
+  el.querySelectorAll('[data-role-member]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const memberId = (sel as HTMLElement).dataset.roleMember!
+      const newRole  = (sel as HTMLSelectElement).value
+      changeTeamMemberRole(memberId, newRole)
+    })
   })
 }
 

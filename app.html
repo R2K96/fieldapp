@@ -166,28 +166,30 @@
 <div class="side-overlay" id="sideOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
   <div class="side-menu-title" id="sideMenuTitle">SchnellR</div>
-  <div class="side-item active" id="smenu-dashboard" onclick="showPage('dashboard');toggleMenu()"><span class="side-item-icon">🏠</span>Dashboard</div>
-  <div class="side-item" id="smenu-kunden" onclick="showPage('kunden');toggleMenu()"><span class="side-item-icon">👤</span>Kunden</div>
-  <div class="side-item" id="smenu-auftraege" onclick="showPage('auftraege');toggleMenu()"><span class="side-item-icon">📋</span>Aufträge</div>
-  <div class="side-item" id="smenu-wochenplan" onclick="showPage('wochenplan');toggleMenu()"><span class="side-item-icon">📅</span>Wochenplan</div>
-  <div class="side-item" id="smenu-route" onclick="showPage('route');toggleMenu()"><span class="side-item-icon">🗺</span>Tagesroute</div>
-  <div class="side-item" id="smenu-angebote" onclick="showPage('angebote');toggleMenu()"><span class="side-item-icon">📄</span>Angebote</div>
-  <div class="side-item" id="smenu-auswertung" onclick="showPage('auswertung');toggleMenu()"><span class="side-item-icon">📈</span>Auswertung</div>
+  <div class="side-item active" id="smenu-dashboard" data-perm="dashboard" onclick="showPage('dashboard');toggleMenu()"><span class="side-item-icon">🏠</span>Dashboard</div>
+  <div class="side-item" id="smenu-kunden" data-perm="kunden" onclick="showPage('kunden');toggleMenu()"><span class="side-item-icon">👤</span>Kunden</div>
+  <div class="side-item" id="smenu-auftraege" data-perm="auftraege" onclick="showPage('auftraege');toggleMenu()"><span class="side-item-icon">📋</span>Aufträge</div>
+  <div class="side-item" id="smenu-nachtermin" data-perm="nachtermin" onclick="showPage('nachtermin');toggleMenu()"><span class="side-item-icon">📝</span>Nachtermin</div>
+  <div class="side-item" id="smenu-wochenplan" data-perm="wochenplan" onclick="showPage('wochenplan');toggleMenu()"><span class="side-item-icon">📅</span>Wochenplan</div>
+  <div class="side-item" id="smenu-route" data-perm="route" onclick="showPage('route');toggleMenu()"><span class="side-item-icon">🗺</span>Tagesroute</div>
+  <div class="side-item" id="smenu-angebote" data-perm="angebote" onclick="showPage('angebote');toggleMenu()"><span class="side-item-icon">📄</span>Angebote</div>
+  <div class="side-item" id="smenu-auswertung" data-perm="auswertung" onclick="showPage('auswertung');toggleMenu()"><span class="side-item-icon">📈</span>Auswertung</div>
+  <div class="side-item" id="smenu-export" data-perm="export" onclick="showPage('export');toggleMenu()"><span class="side-item-icon">📤</span>Export</div>
   <div style="height:1px;background:var(--border);margin:10px 0;"></div>
   <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);padding:4px 10px;"><span id="appRegion">Region</span></div>
   <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border);margin-top:14px;">
     <div class="side-item" id="sideUserEmail" style="font-size:11px;color:var(--text3);cursor:default;"></div>
-    <div class="side-item" id="smenu-einstellungen" onclick="showPage('einstellungen');toggleMenu()"><span class="side-item-icon">⚙</span>Einstellungen</div>
+    <div class="side-item" id="smenu-einstellungen" data-admin-only onclick="showPage('einstellungen');toggleMenu()"><span class="side-item-icon">⚙</span>Einstellungen</div>
     <div class="side-item" onclick="signOut()" style="color:var(--red);"><span class="side-item-icon">🚪</span>Abmelden</div>
   </div>
 </div>
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <button class="bnav-item active" id="bnav-dashboard" onclick="showPage('dashboard')">
+  <button class="bnav-item active" id="bnav-dashboard" data-page="dashboard" onclick="showPage('dashboard')">
     <span class="bnav-icon">🏠</span>
     <span class="bnav-label">Home</span>
   </button>
-  <button class="bnav-item" id="bnav-nachtermin" onclick="showPage('nachtermin')">
+  <button class="bnav-item" id="bnav-nachtermin" data-page="nachtermin" onclick="showPage('nachtermin')">
     <span class="bnav-icon">📋</span>
     <span class="bnav-label">Nachtermin</span>
   </button>
@@ -196,11 +198,11 @@
     <div class="bnav-hero-ring">🎙</div>
     <span class="bnav-label" style="color:var(--teal);font-weight:700;">Aufnahme</span>
   </button>
-  <button class="bnav-item" id="bnav-rechnung" onclick="showPage('rechnung')">
+  <button class="bnav-item" id="bnav-rechnung" data-page="rechnungen" onclick="showPage('rechnung')">
     <span class="bnav-icon">🧾</span>
     <span class="bnav-label">Rechnung</span>
   </button>
-  <button class="bnav-item" id="bnav-einstellungen" onclick="showPage('einstellungen')">
+  <button class="bnav-item" id="bnav-einstellungen" data-page="einstellungen" data-admin-only onclick="showPage('einstellungen')">
     <span class="bnav-icon">⚙️</span>
     <span class="bnav-label">Einst.</span>
   </button>
@@ -664,12 +666,7 @@
           <label class="lbl">Folgetermin Datum</label>
           <input class="inp" type="date" id="ntFolgeDate">
           <label class="lbl">Leistung Folgetermin</label>
-          <div class="chips" id="ntFolgeLeistungChips">
-            <div class="chip" onclick="ntPick(this,'folgeLeistung')">🔧 Handwerk</div>
-            <div class="chip" onclick="ntPick(this,'folgeLeistung')">📋 Bürokratie</div>
-            <div class="chip" onclick="ntPick(this,'folgeLeistung')">💰 Steuer</div>
-            <div class="chip" onclick="ntPick(this,'folgeLeistung')">📱 Digital</div>
-          </div>
+          <div class="chips" id="ntFolgeLeistungChips"><!-- dynamisch via buildLeistungChips() --></div>
         </div>
         <label class="lbl" style="margin-top:14px;">Interne Notiz</label>
         <textarea class="inp" id="ntNotiz" placeholder="Nur für das Team..." style="min-height:60px;"></textarea>
@@ -806,14 +803,7 @@
     <label class="lbl">Kunde</label>
     <select class="inp" id="mAKunde"><option value="">– Kunde wählen –</option></select>
     <label class="lbl">Leistung</label>
-    <div class="chips" id="mALeistungChips">
-      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">🔧 Handwerk</div>
-      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">📋 Bürokratie</div>
-      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">💰 Steuer</div>
-      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">📱 Digital</div>
-      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">🛵 Botendienst</div>
-      <div class="chip" onclick="modalChip(this,'mALeistung');updateMAPreis()">🌿 Garten</div>
-    </div>
+    <div class="chips" id="mALeistungChips"><!-- dynamisch via buildLeistungChips() --></div>
     <div class="grid2">
       <div><label class="lbl">Datum</label><input class="inp" type="date" id="mADatum"></div>
       <div><label class="lbl">Dauer (Min.)</label><input class="inp" type="number" id="mADauer" value="60" min="15" oninput="updateMAPreis()"></div>

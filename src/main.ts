@@ -72,7 +72,7 @@ import {
   loadTeamData as _loadTeamData, createTeam as _createTeam, joinTeam as _joinTeam,
   removeTeamMember as _removeTeamMember, leaveTeam as _leaveTeam,
   copyInviteCode as _copyInviteCode, renderTeamSection as _renderTeamSection,
-  renderDashTeam as _renderDashTeam,
+  renderDashTeam as _renderDashTeam, changeTeamMemberRole as _changeTeamMemberRole,
 } from './modules/team'
 import {
   initChecklist, renderChecklistTemplates as _renderChecklistTemplates,
@@ -262,7 +262,7 @@ function applyEinstellungenFromDB() {
   applyConfig();
 }
 
-// Leistungskatalog aus CONFIG aufbauen
+// Leistungskatalog aus CONFIG aufbauen (auch global für Einstellungen)
 function buildLeistungChips() {
   const leistungStr = l => l.emoji + ' ' + l.label;
   // Auftrag-Modal
@@ -274,6 +274,11 @@ function buildLeistungChips() {
   const wpL = document.getElementById('wpMLeistungChips');
   if(wpL) wpL.innerHTML = CONFIG.leistungen.map(l =>
     `<div class="chip" onclick="modalChip(this,'wpMLeistung')">${leistungStr(l)}</div>`
+  ).join('');
+  // Nachtermin – Folgetermin Leistung
+  const ntL = document.getElementById('ntFolgeLeistungChips');
+  if(ntL) ntL.innerHTML = CONFIG.leistungen.map(l =>
+    `<div class="chip" onclick="ntPick(this,'folgeLeistung')">${leistungStr(l)}</div>`
   ).join('');
 }
 
@@ -1734,6 +1739,7 @@ _w.createTeam = _createTeam
 _w.joinTeam = _joinTeam
 _w.copyInviteCode = _copyInviteCode
 _w.renderTeamSection = _renderTeamSection
+_w.changeTeamMemberRole = _changeTeamMemberRole
 _w.renderDashTeam = _renderDashTeam
 _w.deleteAccount = _deleteAccount
 _w.signOut = _signOut
@@ -1764,6 +1770,8 @@ _w.populateRechnungSelect = populateRechnungSelect
 _w.collectPositionen = collectPositionen
 _w.addPosition = addPosition
 _w.removePosition = removePosition
+_w.applyConfig = applyConfig          // für Einstellungen-Modul
+_w.buildLeistungChips = buildLeistungChips // für Einstellungen-Modul
 _w.fmtDate = fmtDate          // utils.ts — Fallback für onclicks in Templates
 _w.today = today               // utils.ts — Fallback
 _w.showToast = showToast       // utils.ts — Fallback

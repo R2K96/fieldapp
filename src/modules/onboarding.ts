@@ -5,6 +5,7 @@
 
 import { DB } from '../lib/db'
 import { uid, today, showToast } from '../lib/utils'
+import { BRANCH_LEISTUNGEN, DEFAULT_LEISTUNGEN } from '../lib/branchLeistungen'
 
 // ── Modul-State ──────────────────────────────────────────────────
 let _obStep:   number      = 0
@@ -21,14 +22,15 @@ export function onObStartTour(fn: () => void)       { _onStartTour       = fn }
 
 // ── Branchen-Konstanten ──────────────────────────────────────────
 export const OB_BRANCHES = [
-  { icon: '🔧', label: 'SHK',          name: 'Sanitär & Heizung'  },
-  { icon: '⚡', label: 'Elektro',       name: 'Elektro'            },
-  { icon: '🪟', label: 'Fenster & Türen',name: 'Fenster & Türen'  },
-  { icon: '🧹', label: 'Reinigung',     name: 'Reinigung'          },
-  { icon: '🌿', label: 'Garten',        name: 'Garten & Landschaft'},
-  { icon: '🏗',  label: 'Bau',          name: 'Bau & Renovierung'  },
-  { icon: '❄️', label: 'Klima',         name: 'Klima & Kälte'     },
-  { icon: '🪛', label: 'Sonstiges',     name: 'Sonstiges'          },
+  { icon: '🔧', label: 'SHK',            name: 'Sanitär & Heizung'  },
+  { icon: '⚡', label: 'Elektro',         name: 'Elektro'            },
+  { icon: '🎨', label: 'Maler',           name: 'Maler & Trockenbau' },
+  { icon: '🪟', label: 'Fenster & Türen', name: 'Fenster & Türen'   },
+  { icon: '🧹', label: 'Reinigung',       name: 'Reinigung'          },
+  { icon: '🌿', label: 'Garten',          name: 'Garten & Landschaft'},
+  { icon: '🏗',  label: 'Bau',            name: 'Bau & Renovierung'  },
+  { icon: '❄️', label: 'Klima',           name: 'Klima & Kälte'     },
+  { icon: '🪛', label: 'Sonstiges',       name: 'Sonstiges'          },
 ]
 
 // ── Steps ────────────────────────────────────────────────────────
@@ -206,9 +208,16 @@ export function obSaveFirma() {
   CONFIG.firma.telefon   = (document.getElementById('obFirmaTel')     as HTMLInputElement)?.value.trim() || CONFIG.firma.telefon
   CONFIG.firma.email     = (document.getElementById('obFirmaEmail')   as HTMLInputElement)?.value.trim() || CONFIG.firma.email
   CONFIG.firma.steuernr  = (document.getElementById('obFirmaSteuernr')as HTMLInputElement)?.value.trim() || ''
-  if (_obBranch !== null) CONFIG._branchName = OB_BRANCHES[_obBranch].name
+  if (_obBranch !== null) {
+    const branch = OB_BRANCHES[_obBranch]
+    CONFIG._branchLabel = branch.label
+    CONFIG._branchName  = branch.name
+    // Branchen-spezifische Leistungen setzen (nur wenn noch keine eigenen gesetzt)
+    const branchLeistungen = BRANCH_LEISTUNGEN[branch.label] ?? DEFAULT_LEISTUNGEN
+    CONFIG.leistungen = branchLeistungen
+  }
 
-  DB.saveEinstellungen({ firma: CONFIG.firma, mitarbeiter: CONFIG.mitarbeiter })
+  DB.saveEinstellungen({ firma: CONFIG.firma, mitarbeiter: CONFIG.mitarbeiter, leistungen: CONFIG.leistungen })
   _onApplyConfig()
   obNext()
 }
