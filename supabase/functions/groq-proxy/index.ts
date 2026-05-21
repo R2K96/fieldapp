@@ -74,15 +74,15 @@ serve(async (req) => {
       if (!text) return json({ error: 'Kein Text übergeben' }, 400)
       if (!mistralKey && !groqKey) return json({ error: 'Kein LLM-Key konfiguriert' }, 500)
 
-      const systemPrompt = `Du bist ein Assistent für Handwerker-Dokumentationen.
-Extrahiere aus dem folgenden Diktat strukturierte Informationen und antworte NUR mit validem JSON:
+      const systemPrompt = `Du bist ein Assistent für Handwerker-Dokumentationen im Außendienst.
+Extrahiere aus dem folgenden Diktat strukturierte Informationen und antworte NUR mit validem JSON (kein Markdown, keine Erklärung):
 {
-  "taetigkeit": "<Was wurde konkret gemacht?>",
-  "material": "<Welche Materialien wurden verwendet?>",
-  "dauer": "<Wie lange hat es gedauert?>",
-  "maengel": "<Welche Mängel oder Probleme wurden festgestellt?>",
-  "naechsteSchritte": "<Was muss noch gemacht werden?>",
-  "zusammenfassung": "<1-2 Sätze was gemacht wurde>"
+  "zeitMinuten": <Gesamtdauer als Zahl in Minuten, z.B. 45 — oder 0 wenn nicht erkennbar>,
+  "materialien": [<Array von durchgeführten Leistungen oder verwendeten Materialien als Strings, z.B. ["Thermostat getauscht","Heizkörper entlüftet"]>],
+  "folgetermin": <true wenn ein Folgetermin, Rückruf oder Wiedervorlage erwähnt wird — sonst false>,
+  "folgeGrund": "<Kurzer Grund für den Folgetermin oder null>",
+  "leistungsart": "<'Handwerk' wenn handwerkliche Folgeleistung, 'Bürokratie' wenn administrativ — sonst null>",
+  "zusammenfassung": "<1-2 prägnante Sätze was konkret gemacht wurde>"
 }`
 
       const msgs = [
