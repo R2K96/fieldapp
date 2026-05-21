@@ -107,6 +107,16 @@ import {
   onAgRenderDashboard,
 } from './modules/angebote'
 import {
+  startTour as _startTour, endTour as _endTour, tourGo as _tourGo,
+  showTourStep as _showTourStep, onTourShowPage, onTourToggleMenu,
+} from './modules/tour'
+import { renderAuswertung as _renderAuswertung } from './modules/auswertung'
+import {
+  openSigModal as _openSigModal, closeSigModal as _closeSigModal,
+  skipSig as _skipSig, confirmSig as _confirmSig,
+  clearSigCanvas as _clearSigCanvas, initSigCanvas as _initSigCanvas,
+} from './modules/signatur'
+import {
   startOnboarding as _startOnboarding, renderObStep as _renderObStep,
   selectBranch as _selectBranch, obNext as _obNext, obPrev as _obPrev,
   obSaveFirma as _obSaveFirma, obAddMa as _obAddMa, obRemoveMa as _obRemoveMa,
@@ -520,7 +530,7 @@ function showPage(id){
   if(id==='wochenplan') renderWochenplan();
   if(id==='route'){ initRoute(); renderRoute(); renderFbHistorie(); }
   if(id==='nachtermin') loadNtSelects();
-  if(id==='auswertung') renderAuswertung();
+  if(id==='auswertung') _renderAuswertung();
   if(id==='rechnung'){ renderRechnung(); populateRechnungSelect(); }
   if(id==='einstellungen'){ renderEinstellungen(); initPushUI(); }
   if(id==='angebote'){ _renderAngebote(); }
@@ -4169,13 +4179,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   onKalRenderAuftraege(() => renderAuftraege())
   onKalShowAuftragDetail((id) => _showAuftragDetail(id))
 
+  // ── Callbacks für Tour ──
+  onTourShowPage((id) => showPage(id))
+  onTourToggleMenu(() => toggleMenu())
+
   // ── Callbacks für Angebote ──
   onAgRenderDashboard(() => _renderDashboard())
 
   // ── Callbacks für Onboarding ──
   onObRenderDashboard(() => _renderDashboard())
   onObApplyConfig(() => applyConfig())
-  onObStartTour(() => startTour())
+  onObStartTour(() => _startTour())
 
   // Module initialisieren (registrieren Pages + Event-Listener)
   initKunden()
@@ -4195,10 +4209,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Statische Buttons verdrahten
   initStaticEventListeners({
-    showPage, signOut: _signOut, startTour, startOnboarding: _startOnboarding, openSchnellerfassung: _openSchnellerfassung,
+    showPage, signOut: _signOut, startTour: _startTour, startOnboarding: _startOnboarding, openSchnellerfassung: _openSchnellerfassung,
     openModal, dismissInstallBanner, triggerInstall, recoverySetPassword: _recoverySetPassword,
     finishOnboarding: _finishOnboarding, authSubmit: _authSubmit, authToggleMode: _authToggleMode, authForgot: _authForgot, authShowLogin: _authShowLogin,
-    tourGo, endTour, initRoute, renderRoute,
+    tourGo: _tourGo, endTour: _endTour, initRoute, renderRoute,
   })
 
   // Swipe-Navigation
@@ -6080,7 +6094,7 @@ _w.getRgStatus         = getRgStatus
 
 // ── Noch in main.ts (Phase 2c) ──
 _w.renderAngebote  = _renderAngebote
-_w.renderAuswertung = renderAuswertung
+_w.renderAuswertung = _renderAuswertung
 _w.saveRechnungData = saveRechnungData
 _w.bezahltBestaetigen = bezahltBestaetigen
 // Fallbacks für rechnungen.ts Legacy-Delegation
@@ -6162,9 +6176,14 @@ _w.exportAllesDaten = _exportAllesDaten
 _w.exportLexoffice = _exportLexoffice
 _w.exportDATEV = _exportDATEV
 _w.exportZugferd = exportZugferd
-_w.openSigModal = openSigModal
-_w.closeSigModal = closeSigModal
-_w.clearSigCanvas = clearSigCanvas
+_w.openSigModal = _openSigModal
+_w.closeSigModal = _closeSigModal
+_w.skipSig = _skipSig
+_w.confirmSig = _confirmSig
+_w.clearSigCanvas = _clearSigCanvas
+_w.startTour = _startTour
+_w.endTour = _endTour
+_w.tourGo = _tourGo
 _w.saveSig = saveSig
 _w.wpChangeWeek = _wpChangeWeek
 _w.openWPModal = _openWPModal
