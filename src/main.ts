@@ -124,6 +124,22 @@ import {
   finishOnboarding as _finishOnboarding,
   onObRenderDashboard, onObApplyConfig, onObStartTour,
 } from './modules/onboarding'
+import {
+  loadNtSelects as _loadNtSelects, loadNtAuftrag as _loadNtAuftrag, ntPick as _ntPick,
+  ntHandleFotos as _ntHandleFotos, renderNtFotoGrid as _renderNtFotoGrid,
+  removeNtFoto as _removeNtFoto, uploadNtFotos as _uploadNtFotos,
+  previewFoto as _previewFoto, renderFotoGallery as _renderFotoGallery,
+  ntToggleRecording as _ntToggleRecording, ntStartGroqRec as _ntStartGroqRec,
+  ntStopGroqRec as _ntStopGroqRec, ntTranscribeGroq as _ntTranscribeGroq,
+  ntStartRec as _ntStartRec, ntStopRec as _ntStopRec,
+  analyzeSprachdoku as _analyzeSprachdoku,
+  ntAddBlock as _ntAddBlock, ntRemoveBlock as _ntRemoveBlock,
+  ntSelectBlockLeistung as _ntSelectBlockLeistung, ntUpdateGesamt as _ntUpdateGesamt,
+  saveNachterminStart as _saveNachterminStart, saveNachtermin as _saveNachtermin,
+  ntMatToggle as _ntMatToggle, ntMatFilter as _ntMatFilter, ntMatAdd as _ntMatAdd,
+  _renderNtMatUsed, ntMatSetMenge as _ntMatSetMenge, ntMatRemove as _ntMatRemove,
+  onNtRenderDashboard, onNtOpenSigModal,
+} from './modules/nachtermin'
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║               FIELDAPP — KONFIGURATION                       ║
@@ -529,7 +545,7 @@ function showPage(id){
   if(id==='auftraege') renderAuftraege();
   if(id==='wochenplan') renderWochenplan();
   if(id==='route'){ initRoute(); renderRoute(); renderFbHistorie(); }
-  if(id==='nachtermin') loadNtSelects();
+  if(id==='nachtermin') _loadNtSelects();
   if(id==='auswertung') _renderAuswertung();
   if(id==='rechnung'){ renderRechnung(); populateRechnungSelect(); }
   if(id==='einstellungen'){ renderEinstellungen(); initPushUI(); }
@@ -4191,6 +4207,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   onObApplyConfig(() => applyConfig())
   onObStartTour(() => _startTour())
 
+  // ── Callbacks für Nachtermin ──
+  onNtRenderDashboard(() => _renderDashboard())
+  onNtOpenSigModal((cb) => _openSigModal(cb))
+
   // Module initialisieren (registrieren Pages + Event-Listener)
   initKunden()
   initAuftraege()
@@ -6141,13 +6161,24 @@ _w.downloadAngebotPDF = _downloadAngebotPDF
 _w.addAgPosition = _addAgPosition
 _w.agCalcGesamt = _agCalcGesamt
 _w.sendMahnung = sendMahnung
-_w.ntAddBlock = ntAddBlock
-_w.ntRemoveBlock = ntRemoveBlock
-_w.loadNtAuftrag = loadNtAuftrag
-_w.saveNachtermin = saveNachtermin
-_w.startDiktat = startDiktat
-_w.stopDiktat = stopDiktat
-_w.analyzeNachtermin = analyzeNachtermin
+_w.ntAddBlock            = _ntAddBlock
+_w.ntRemoveBlock         = _ntRemoveBlock
+_w.loadNtAuftrag         = _loadNtAuftrag
+_w.saveNachtermin        = _saveNachtermin
+_w.saveNachterminStart   = _saveNachterminStart
+_w.ntToggleRecording     = _ntToggleRecording
+_w.analyzeSprachdoku     = _analyzeSprachdoku
+_w.ntPick                = _ntPick
+_w.ntHandleFotos         = _ntHandleFotos
+_w.removeNtFoto          = _removeNtFoto
+_w.previewFoto           = _previewFoto
+_w.renderFotoGallery     = _renderFotoGallery
+_w.ntUpdateGesamt        = _ntUpdateGesamt
+_w.ntMatToggle           = _ntMatToggle
+_w.ntMatFilter           = _ntMatFilter
+_w.ntMatAdd              = _ntMatAdd
+_w.ntMatSetMenge         = _ntMatSetMenge
+_w.ntMatRemove           = _ntMatRemove
 _w.generateRechnungPDF = generateRechnungPDF
 _w.downloadRechnungPDF = downloadRechnungPDF
 _w.saveConfig = saveConfig
@@ -6200,8 +6231,7 @@ _w.today = today               // utils.ts — Fallback
 _w.showToast = showToast       // utils.ts — Fallback
 // toggleMenu → bereits oben via _toggleMenu gesetzt
 _w.setChipExclusive = setChipExclusive
-_w.ntToggleMat = ntToggleMat
-_w.ntToggleBlock = ntToggleBlock
+// ntToggleMat + ntToggleBlock → jetzt in _w.ntMatToggle / nachtermin.ts
 _w.obNext = _obNext
 _w.obPrev = _obPrev
 _w.obBack = _obPrev
