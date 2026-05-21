@@ -41,6 +41,38 @@ import {
   renderMaList as _renderMaList, addMitarbeiter as _addMitarbeiter, removeMitarbeiter as _removeMitarbeiter,
   onRenderTeamSection, onRenderMaterialListe, onRenderChecklistTemplates,
 } from './modules/einstellungen'
+import {
+  initWochenplan, renderWochenplan as _renderWochenplan, wpChangeWeek as _wpChangeWeek,
+  openWPModal as _openWPModal, saveWPAuftrag as _saveWPAuftrag, deleteWPItem as _deleteWPItem,
+} from './modules/wochenplan'
+import {
+  initZeiterfassung, startZeiterfassung as _startZeiterfassung,
+  stopZeiterfassung as _stopZeiterfassung, cancelZeiterfassung as _cancelZeiterfassung,
+  renderTagesreport as _renderTagesreport, openZeiterfassungOverlay as _openZtOverlay,
+  onZtShowPage, onZtCloseDetail,
+} from './modules/zeiterfassung'
+import {
+  initSchnellerfassung, openSchnellerfassung as _openSchnellerfassung,
+  closeSchnellerfassung as _closeSchnellerfassung, seToggleRec as _seToggleRec,
+  seStartRec as _seStartRec, seStopRec as _seStopRec, seAnalysieren as _seAnalysieren,
+  seZeigeVorschau as _seZeigeVorschau, seKundeAnlegen as _seKundeAnlegen,
+  seAuftragAnlegen as _seAuftragAnlegen,
+} from './modules/schnellerfassung'
+import {
+  initKalender, renderKalMonat as _renderKalMonat, renderKalAgenda as _renderKalAgenda,
+  kalChangeMonth as _kalChangeMonth, setKalTab as _setKalTabMod,
+  onKalGotoAuftraege, onKalRenderAuftraege, onKalShowAuftragDetail,
+} from './modules/kalender'
+import {
+  initBarcode, openBarcodeScanner as _openBarcodeScanner,
+  closeBarcodeScanner as _closeBarcodeScanner, bcManualLookup as _bcManualLookup,
+} from './modules/barcode'
+import {
+  loadTeamData as _loadTeamData, createTeam as _createTeam, joinTeam as _joinTeam,
+  removeTeamMember as _removeTeamMember, leaveTeam as _leaveTeam,
+  copyInviteCode as _copyInviteCode, renderTeamSection as _renderTeamSection,
+  renderDashTeam as _renderDashTeam,
+} from './modules/team'
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║               FIELDAPP — KONFIGURATION                       ║
@@ -4064,15 +4096,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Callbacks registrieren (löst zirkuläre Imports auf)
   onKundenDataChange(() => renderDashboard())
   onAuftragDataChange(() => renderDashboard())
-  onStartZeiterfassung((id, label) => startZeiterfassung(id, label))
-  onOpenBarcodeScanner((id) => openBarcodeScanner(id))
+  onStartZeiterfassung((id, label) => _startZeiterfassung(id, label))
+  // onOpenBarcodeScanner: wird weiter unten per initBarcode-Modul überschrieben
+  onOpenBarcodeScanner((id) => _openBarcodeScanner(id))
   onRenderAuftragChecklist((id, cId) => renderAuftragChecklist(id, cId))
 
   // ── Callbacks für Dashboard ──
-  onDashRenderKalMonat(() => renderKalMonat())
-  onDashRenderKalAgenda(() => renderKalAgenda())
-  onDashRenderTeam(() => renderDashTeam())
-  onDashRenderTagesreport(() => renderTagesreport())
+  // renderKalMonat/Agenda → werden nach initKalender durch Modul-Callbacks überschrieben
+  onDashRenderKalMonat(() => _renderKalMonat())
+  onDashRenderKalAgenda(() => _renderKalAgenda())
+  onDashRenderTeam(() => _renderDashTeam())
+  onDashRenderTagesreport(() => _renderTagesreport())
   onDashGetRgStatus((r) => getRgStatus(r))
   onDashShowAuftragDetail((id) => _showAuftragDetail(id))
 
@@ -4081,9 +4115,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   onRechnungTriggerPush((e, uid, t, m) => triggerPush(e, uid, t, m))
 
   // ── Callbacks für Einstellungen ──
-  onRenderTeamSection(() => renderTeamSection())
+  onRenderTeamSection(() => _renderTeamSection())   // → team.ts Modul
   onRenderMaterialListe(() => renderMaterialListe())
   onRenderChecklistTemplates(() => renderChecklistTemplates())
+
+  // ── Callbacks für Zeiterfassung ──
+  onZtShowPage((page) => showPage(page))
+  onZtCloseDetail(() => closeDetail())
+
+  // ── Callbacks für Kalender ──
+  onKalGotoAuftraege(() => showPage('auftraege'))
+  onKalRenderAuftraege(() => renderAuftraege())
+  onKalShowAuftragDetail((id) => _showAuftragDetail(id))
 
   // Module initialisieren (registrieren Pages + Event-Listener)
   initKunden()
@@ -4091,6 +4134,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initDashboard()
   initRechnungen()
   initEinstellungen()
+  initWochenplan()
+  initZeiterfassung()
+  initSchnellerfassung()
+  initKalender()
+  initBarcode()
 
   // Statische Buttons verdrahten
   initStaticEventListeners({
@@ -5985,11 +6033,10 @@ _w.bezahltBestaetigen = bezahltBestaetigen
 // Fallbacks für rechnungen.ts Legacy-Delegation
 _w.downloadRechnungPDFDataLegacy = downloadRechnungPDFData
 _w.downloadZUGFeRDXmlLegacy = downloadZUGFeRDXml
-_w.setKalTab = setKalTab
-_w.kalChangeMonth = kalChangeMonth
-_w.renderKalMonat = renderKalMonat
-_w.renderKalAgenda = renderKalAgenda
-_w.kalDayClick = kalDayClick
+_w.setKalTab = _setKalTabMod
+_w.kalChangeMonth = _kalChangeMonth
+_w.renderKalMonat = _renderKalMonat
+_w.renderKalAgenda = _renderKalAgenda
 _w.initPushUI = initPushUI
 _w.togglePushSetting = togglePushSetting
 _w.clNewTemplate = clNewTemplate
@@ -6000,17 +6047,17 @@ _w.clCloseModal = clCloseModal
 _w.clAddItem = clAddItem
 _w.clRemoveItem = clRemoveItem
 _w.clToggleEntry = clToggleEntry
-_w.openBarcodeScanner = openBarcodeScanner
-_w.closeBarcodeScanner = closeBarcodeScanner
-_w.bcManualLookup = bcManualLookup
-_w.openZeiterfassungOverlay = openZeiterfassungOverlay
-_w.cancelZeiterfassung = cancelZeiterfassung
-_w.stopZeiterfassung = stopZeiterfassung
-_w.startZeiterfassung = startZeiterfassung
-_w.seToggleRec = seToggleRec
-_w.seAnalysieren = seAnalysieren
-_w.closeSchnellerfassung = closeSchnellerfassung
-_w.openBarcodeScanner = openBarcodeScanner
+_w.openBarcodeScanner = _openBarcodeScanner
+_w.closeBarcodeScanner = _closeBarcodeScanner
+_w.bcManualLookup = _bcManualLookup
+_w.openZeiterfassungOverlay = _openZtOverlay
+_w.cancelZeiterfassung = _cancelZeiterfassung
+_w.stopZeiterfassung = _stopZeiterfassung
+_w.startZeiterfassung = _startZeiterfassung
+_w.seToggleRec = _seToggleRec
+_w.seAnalysieren = _seAnalysieren
+_w.closeSchnellerfassung = _closeSchnellerfassung
+_w.openSchnellerfassung = _openSchnellerfassung
 _w.addManuellerStopp = addManuellerStopp
 _w.removeRoutenStopp = removeRoutenStopp
 _w.startNavigation = startNavigation
@@ -6039,8 +6086,13 @@ _w.matDelete = matDelete
 _w.matEdit = matEdit
 _w.importMaterialCSV = importMaterialCSV
 _w.importKundenCSV = importKundenCSV
-_w.removeTeamMember = removeTeamMember
-_w.leaveTeam = leaveTeam
+_w.removeTeamMember = _removeTeamMember
+_w.leaveTeam = _leaveTeam
+_w.createTeam = _createTeam
+_w.joinTeam = _joinTeam
+_w.copyInviteCode = _copyInviteCode
+_w.renderTeamSection = _renderTeamSection
+_w.renderDashTeam = _renderDashTeam
 _w.inviteTeamMember = inviteTeamMember
 _w.deleteAccount = deleteAccount
 _w.exportLexoffice = exportLexoffice
@@ -6050,9 +6102,11 @@ _w.openSigModal = openSigModal
 _w.closeSigModal = closeSigModal
 _w.clearSigCanvas = clearSigCanvas
 _w.saveSig = saveSig
-_w.wpChangeWeek = wpChangeWeek
-_w.openWPModal = openWPModal
-_w.saveWPAuftrag = saveWPAuftrag
+_w.wpChangeWeek = _wpChangeWeek
+_w.openWPModal = _openWPModal
+_w.saveWPAuftrag = _saveWPAuftrag
+_w.deleteWPItem = _deleteWPItem
+_w.renderWochenplan = _renderWochenplan
 _w.populateKundenSelect = populateKundenSelect
 _w.populateRechnungSelect = populateRechnungSelect
 _w.collectPositionen = collectPositionen
