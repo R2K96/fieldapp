@@ -103,8 +103,9 @@ async function sendMahnEmail(
   const kundeEmail = (r.kundeEmail as string) || null
   if (!kundeEmail) return false  // Kein E-Mail → kein Versand, aber kein Fehler
 
-  const absender    = firma.email || 'noreply@fieldapp.de'
-  const firmaName   = firma.name  || 'FieldApp'
+  const absender    = 'noreply@schnellr.app'   // verifizierte Absender-Domain
+  const replyTo     = firma.email || undefined  // Antworten gehen an die echte Firmen-Mail
+  const firmaName   = firma.name  || 'SchnellR'
   const rNummer     = (r.nummer as string) || (r.id as string)
   const betrag      = (r.betrag as number) || 0
   const gesamtFord  = betrag + zinsen
@@ -161,7 +162,8 @@ async function sendMahnEmail(
     method: 'POST',
     headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: `${firmaName} <${absender}>`,
+      from: `${firmaName} via SchnellR <${absender}>`,
+      reply_to: replyTo,
       to: [kundeEmail],
       subject: betreff,
       html
