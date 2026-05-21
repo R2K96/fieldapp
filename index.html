@@ -215,6 +215,21 @@
 
 <!-- ══ REACT APP ══ -->
 <script type="text/babel" data-presets="react">
+// ─── Responsive hook ────────────────────────────────────────────────────────
+const { useState: _useState, useEffect: _useEffect, useContext: _useContext, createContext: _createContext } = React;
+
+function useWindowWidth() {
+  const [w, setW] = _useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  _useEffect(() => {
+    const h = () => setW(window.innerWidth);
+    window.addEventListener('resize', h, { passive: true });
+    return () => window.removeEventListener('resize', h);
+  }, []);
+  return w;
+}
+
+const MobileCtx = _createContext(false);
+
 // ─── Brand constants ───────────────────────────────────────────────────────
 const BRAND = '#00c4a8';
 const BRAND_DEEP = '#00a890';
@@ -248,41 +263,50 @@ function LogoMark({ size = 32, bg = BRAND, fg = INK }) {
 
 // ─── NavBar ────────────────────────────────────────────────────────────────
 function NavBar() {
+  const isMobile = _useContext(MobileCtx);
+  const [menuOpen, setMenuOpen] = _useState(false);
+  const navLinks = [
+    { l: 'Funktionen', h: '#features' },
+    { l: 'Sicherheit', h: '#compliance' },
+    { l: 'Preise', h: '#pricing' },
+    { l: "So geht's", h: '#how' },
+  ];
   return (
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 50,
-      background: 'rgba(10,22,32,0.88)', backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid ' + APP_BORDER_SOFT,
-    }}>
-      <div style={{
-        maxWidth: 1440, margin: '0 auto',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '18px 64px',
-      }}>
+    <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(10,22,32,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid ' + APP_BORDER_SOFT }}>
+      <div style={{ maxWidth: 1440, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '14px 20px' : '18px 64px' }}>
         <a href="#top" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <LogoMark size={28} />
-          <span style={{ fontFamily: SANS, fontSize: 20, fontWeight: 700, letterSpacing: '-0.025em', color: APP_TEXT, lineHeight: 1 }}>
+          <LogoMark size={26} />
+          <span style={{ fontFamily: SANS, fontSize: isMobile ? 18 : 20, fontWeight: 700, letterSpacing: '-0.025em', color: APP_TEXT, lineHeight: 1 }}>
             schnell<span style={{ color: BRAND }}>R</span>
           </span>
         </a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          {[
-            { l: 'Funktionen', h: '#features' },
-            { l: 'Sicherheit', h: '#compliance' },
-            { l: 'Preise', h: '#pricing' },
-            { l: "So geht's", h: '#how' },
-          ].map(item => (
-            <a key={item.l} href={item.h} style={{ fontFamily: SANS, fontSize: 14, fontWeight: 500, color: APP_TEXT_DIM, textDecoration: 'none' }}>{item.l}</a>
+        {isMobile ? (
+          <button onClick={() => setMenuOpen(o => !o)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid ' + APP_BORDER, borderRadius: 8, color: APP_TEXT, width: 40, height: 40, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {menuOpen ? '✕' : '☰'}
+          </button>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+            {navLinks.map(item => (
+              <a key={item.l} href={item.h} style={{ fontFamily: SANS, fontSize: 14, fontWeight: 500, color: APP_TEXT_DIM, textDecoration: 'none' }}>{item.l}</a>
+            ))}
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <a href="/app" style={{ fontFamily: SANS, fontSize: 14, fontWeight: 500, color: APP_TEXT_DIM, textDecoration: 'none' }}>Anmelden</a>
+              <button onClick={() => window.openDemo()} style={{ background: BRAND, color: INK, border: 'none', padding: '10px 18px', borderRadius: 6, fontFamily: SANS, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Demo buchen</button>
+            </div>
+          </div>
+        )}
+      </div>
+      {isMobile && menuOpen && (
+        <div style={{ background: 'rgba(10,22,32,0.98)', borderTop: '1px solid ' + APP_BORDER_SOFT, padding: '12px 20px 20px' }} onClick={() => setMenuOpen(false)}>
+          {navLinks.map(item => (
+            <a key={item.l} href={item.h} style={{ display: 'block', fontFamily: SANS, fontSize: 16, fontWeight: 600, color: APP_TEXT, textDecoration: 'none', padding: '12px 0', borderBottom: '1px solid ' + APP_BORDER_SOFT }}>{item.l}</a>
           ))}
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <a href="/app" style={{ fontFamily: SANS, fontSize: 14, fontWeight: 500, color: APP_TEXT_DIM, textDecoration: 'none' }}>Anmelden</a>
-            <button onClick={() => window.openDemo()} style={{
-              background: BRAND, color: INK, border: 'none', padding: '10px 18px', borderRadius: 6,
-              fontFamily: SANS, fontSize: 14, fontWeight: 600, cursor: 'pointer',
-            }}>Demo buchen</button>
+          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+            <a href="/app" style={{ flex: 1, textAlign: 'center', fontFamily: SANS, fontSize: 14, fontWeight: 600, color: APP_TEXT_DIM, textDecoration: 'none', border: '1px solid ' + APP_BORDER, borderRadius: 8, padding: '12px 0', display: 'block' }}>Anmelden</a>
+            <button onClick={() => window.openDemo()} style={{ flex: 1, background: BRAND, color: INK, border: 'none', borderRadius: 8, fontFamily: SANS, fontSize: 14, fontWeight: 700, cursor: 'pointer', padding: '12px 0' }}>Demo buchen</button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -310,23 +334,25 @@ function CTA({ label, primary = true, size = 'lg', accent = BRAND, color = INK, 
 }
 
 function Section({ id, children, bg, py = 120, divider = true, glow }) {
+  const isMobile = _useContext(MobileCtx);
   return (
     <section id={id} style={{ position: 'relative', background: bg || APP_BG, borderTop: divider ? '1px solid ' + APP_BORDER_SOFT : 'none', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px)', backgroundSize: '64px 64px', pointerEvents: 'none' }} />
       {glow && <div style={{ position: 'absolute', top: glow.top, bottom: glow.bottom, left: glow.left, right: glow.right, width: glow.size || 500, height: glow.size || 500, borderRadius: '50%', background: `radial-gradient(circle, ${glow.color || BRAND_GLOW} 0%, transparent 70%)`, filter: 'blur(40px)', pointerEvents: 'none' }} />}
-      <div style={{ position: 'relative', maxWidth: 1440, margin: '0 auto', padding: `${py}px 64px` }}>{children}</div>
+      <div style={{ position: 'relative', maxWidth: 1440, margin: '0 auto', padding: isMobile ? `${Math.round(py*0.5)}px 20px` : `${py}px 64px` }}>{children}</div>
     </section>
   );
 }
 
 function SectionHead({ eyebrow, headline, italicTail, lead, align = 'left', maxLeadWidth = 640 }) {
+  const isMobile = _useContext(MobileCtx);
   return (
-    <div style={{ textAlign: align, marginBottom: 72 }}>
+    <div style={{ textAlign: isMobile ? 'center' : align, marginBottom: isMobile ? 36 : 72 }}>
       <div style={{ display: 'inline-flex' }}><Pill>{eyebrow}</Pill></div>
-      <h2 style={{ fontFamily: SANS, fontSize: 64, fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 1.02, margin: '24px 0 0', color: APP_TEXT, maxWidth: align === 'center' ? '100%' : 900 }}>
+      <h2 style={{ fontFamily: SANS, fontSize: isMobile ? 34 : 64, fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 1.1, margin: isMobile ? '16px 0 0' : '24px 0 0', color: APP_TEXT, maxWidth: align === 'center' ? '100%' : 900 }}>
         {headline}{italicTail && <> <span style={{ color: BRAND, fontStyle: 'italic', fontWeight: 600 }}>{italicTail}</span></>}
       </h2>
-      {lead && <p style={{ fontFamily: SANS, fontSize: 19, color: APP_TEXT_DIM, marginTop: 24, maxWidth: maxLeadWidth, lineHeight: 1.55, marginLeft: align === 'center' ? 'auto' : 0, marginRight: align === 'center' ? 'auto' : 0 }}>{lead}</p>}
+      {lead && <p style={{ fontFamily: SANS, fontSize: isMobile ? 15 : 19, color: APP_TEXT_DIM, marginTop: isMobile ? 14 : 24, maxWidth: maxLeadWidth, lineHeight: 1.55, marginLeft: 'auto', marginRight: 'auto' }}>{lead}</p>}
     </div>
   );
 }
@@ -386,25 +412,26 @@ function CheckIcon() {
 
 // ─── Hero ──────────────────────────────────────────────────────────────────
 function HeroSection() {
+  const isMobile = _useContext(MobileCtx);
   return (
     <section id="top" style={{ position: 'relative', background: APP_BG, overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '56px 56px', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,196,168,0.12) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
-      <div style={{ position: 'relative', maxWidth: 1440, margin: '0 auto', padding: '80px 64px 100px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: 64, alignItems: 'center' }}>
-          <div>
+      <div style={{ position: 'absolute', top: -100, right: isMobile ? -50 : -100, width: isMobile ? 300 : 500, height: isMobile ? 300 : 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,196,168,0.12) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', maxWidth: 1440, margin: '0 auto', padding: isMobile ? '48px 20px 56px' : '80px 64px 100px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 1fr', gap: isMobile ? 40 : 64, alignItems: 'center' }}>
+          <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
             <Pill><span style={{ width: 6, height: 6, background: BRAND, borderRadius: 99 }} /> Diktat-Nachdokumentation · 100 % offline-fähig</Pill>
-            <h1 style={{ fontFamily: SANS, fontSize: 96, fontWeight: 700, letterSpacing: '-0.045em', lineHeight: 0.92, margin: '28px 0 0', color: APP_TEXT }}>
+            <h1 style={{ fontFamily: SANS, fontSize: isMobile ? 52 : 96, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: isMobile ? 1.05 : 0.92, margin: isMobile ? '20px 0 0' : '28px 0 0', color: APP_TEXT }}>
               Reinsprechen.<br/>Feierabend.<br/><span style={{ color: BRAND, fontStyle: 'italic', fontWeight: 600 }}>Auch ohne Netz.</span>
             </h1>
-            <p style={{ fontFamily: SANS, fontSize: 19, color: APP_TEXT_DIM, marginTop: 28, maxWidth: 500, lineHeight: 1.5 }}>
+            <p style={{ fontFamily: SANS, fontSize: isMobile ? 15 : 19, color: APP_TEXT_DIM, marginTop: isMobile ? 18 : 28, maxWidth: isMobile ? '100%' : 500, lineHeight: 1.5, margin: isMobile ? '18px auto 0' : '28px 0 0' }}>
               Bericht aufs Band sprechen — fertig. SchnellR <span style={{ color: APP_TEXT }}>dokumentiert für Sie nach</span>. Im Keller, im Heizungsraum, im Funkloch — alles läuft offline weiter.
             </p>
-            <div style={{ display: 'flex', gap: 14, marginTop: 40, alignItems: 'center', flexWrap: 'wrap' }}>
-              <CTA label="Rückruf vereinbaren" onClick={(e) => { e.preventDefault(); window.openDemo(); }} />
-              <CTA label="30 Tage testen →" primary={false} color={APP_TEXT} href="/app" />
+            <div style={{ display: 'flex', gap: 12, marginTop: isMobile ? 28 : 40, alignItems: 'center', flexWrap: 'wrap', justifyContent: isMobile ? 'center' : 'flex-start' }}>
+              <CTA label="Rückruf vereinbaren" onClick={(e) => { e.preventDefault(); window.openDemo(); }} size={isMobile ? 'md' : 'lg'} />
+              <CTA label="30 Tage testen →" primary={false} color={APP_TEXT} href="/app" size={isMobile ? 'md' : 'lg'} />
             </div>
-            <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ marginTop: isMobile ? 24 : 32, display: 'flex', alignItems: 'center', gap: 14, justifyContent: isMobile ? 'center' : 'flex-start' }}>
               <div style={{ display: 'flex' }}>
                 {['#c4a888','#88a4a0','#a48898','#88a888'].map((c, i) => (
                   <div key={i} style={{ width: 28, height: 28, borderRadius: 99, background: c, border: '2px solid ' + APP_BG, marginLeft: i === 0 ? 0 : -8 }} />
@@ -416,7 +443,7 @@ function HeroSection() {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-            <PhoneMockup tilt={-4} scale={0.95} />
+            <PhoneMockup tilt={isMobile ? 0 : -4} scale={isMobile ? 0.82 : 0.95} />
             <div style={{ position: 'absolute', top: 30, right: -10, background: APP_BG_3, color: APP_TEXT, padding: '12px 16px', borderRadius: 10, transform: 'rotate(4deg)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', minWidth: 168 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ width: 8, height: 8, borderRadius: 99, background: ACCENT_RED, boxShadow: '0 0 8px ' + ACCENT_RED }} />
@@ -501,10 +528,11 @@ function FeaturesSection() {
     { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>, title: 'Kunden & Auftragserfassung', body: 'Stammdaten, Auftragshistorie, Fotos, Unterschriften, Notizen — alles an einem Ort. Abrufbar auch ohne Internet, direkt vor Ort.', tag: 'Offline-fähig' },
     { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/><path d="M3 17l9 4 9-4"/></svg>, title: 'Materiallisten & Katalog', body: 'Verbrauchte Materialien direkt am Auftrag erfassen. Eigenen Katalog hochladen, Preise hinterlegen, automatisch in Rechnungen übernehmen.', tag: 'CSV / Excel Import' },
   ];
+  const isMobile = _useContext(MobileCtx);
   return (
     <Section id="features" py={120}>
       <SectionHead eyebrow="Was SchnellR übernimmt" headline="Nicht irgendeine Software." italicTail="Ihre digitale rechte Hand." lead="Alles was Sie täglich aufhält — in einer App. Kein IT-Wissen nötig, keine Einarbeitung, kein extra Personal." />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? 12 : 20 }}>
         {features.map((f, i) => (
           <div key={i} style={{ background: f.usp ? 'linear-gradient(180deg, rgba(0,196,168,0.08) 0%, transparent 60%), ' + APP_BG_2 : APP_BG_2, border: f.usp ? '1px solid rgba(0,196,168,0.3)' : '1px solid ' + APP_BORDER, borderRadius: 14, padding: 32, display: 'flex', flexDirection: 'column', gap: 18, position: 'relative' }}>
             {f.usp && <div style={{ position: 'absolute', top: -1, right: 24, background: BRAND, color: INK, padding: '4px 10px', borderRadius: '0 0 6px 6px', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>★ Unser USP</div>}
@@ -535,11 +563,12 @@ function AudienceSection() {
     'Sie wollen abends Feierabend haben, nicht das Büro.',
     'Ihre Daten sollen in Deutschland bleiben, nicht in Kalifornien.',
   ];
+  const isMobile = _useContext(MobileCtx);
   return (
     <Section id="zielgruppe" py={120} glow={{ top: -200, right: -200, color: 'rgba(0,196,168,0.06)', size: 600 }}>
       <SectionHead eyebrow="Für wen ist SchnellR?" headline="Gemacht für den Außendienst." italicTail="Egal welche Branche." lead="Ob SHK, Elektro, IT-Service, Garten- und Landschaftsbau, Bau-Gewerke oder Facility Management — wer beim Kunden arbeitet statt am Schreibtisch, braucht andere Werkzeuge." maxLeadWidth={820} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 32, alignItems: 'start' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 24 : 32, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? 10 : 16 }}>
           {trades.map((t, i) => (
             <div key={i} style={{ background: t.primary ? `linear-gradient(180deg, rgba(0,196,168,0.06) 0%, ${APP_BG_2} 100%)` : APP_BG_2, border: '1px solid ' + (t.primary ? 'rgba(0,196,168,0.3)' : APP_BORDER), borderRadius: 12, padding: '24px 24px 22px', display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
               {t.primary && <div style={{ position: 'absolute', top: 16, right: 16, fontFamily: MONO, fontSize: 9, fontWeight: 600, color: BRAND, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'rgba(0,196,168,0.12)', padding: '3px 7px', borderRadius: 3, border: '1px solid rgba(0,196,168,0.25)' }}>Primär-Branche</div>}
@@ -678,11 +707,12 @@ function PricingSection() {
     { name: 'Team', tagline: 'Empfohlen für 2–5 Mitarbeiter', price: 99, caption: 'Für Betriebe mit Mitarbeitern — volle Übersicht über das ganze Team.', features: ['Bis zu 5 Nutzer','Alles aus Solo','Multi-User Login','Auslastungs-Dashboard','Umsatz je Mitarbeiter','Wochenplan für alle','Team-Kommunikation'], cta: '30 Tage kostenlos testen', ctaHref: '/app', highlight: true },
     { name: 'Business', tagline: 'Wachsende Betriebe', price: 179, caption: 'Für größere Teams — mit DATEV-Export und direktem Support.', features: ['Bis zu 15 Nutzer (+19 €/Nutzer)','Alles aus Team','DATEV & Lexoffice Export','E-Rechnung ZUGFeRD 2.1','API-Zugang','Priority Support','Onboarding-Call inklusive'], cta: 'Demo anfragen', ctaHref: '#contact' },
   ];
+  const isMobile = _useContext(MobileCtx);
   const eff = (p) => yearly ? Math.round(p * 10 / 12) : p;
   return (
     <Section id="pricing" py={120}>
       <SectionHead eyebrow="Preise" headline="Fair. Transparent." italicTail="Kündbar wann immer." lead="Alle Preise zzgl. MwSt. Monatlich kündbar. 30 Tage kostenlos testen — keine Kreditkarte nötig." align="center" maxLeadWidth={680} />
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 56 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: isMobile ? 28 : 56 }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: APP_BG_2, border: '1px solid ' + APP_BORDER, borderRadius: 10, padding: 4 }}>
           <button onClick={() => setYearly(false)} style={{ background: !yearly ? BRAND : 'transparent', color: !yearly ? INK : APP_TEXT_DIM, border: 'none', cursor: 'pointer', padding: '10px 20px', borderRadius: 7, fontFamily: SANS, fontSize: 14, fontWeight: 600, transition: 'all 0.15s' }}>Monatlich</button>
           <button onClick={() => setYearly(true)} style={{ background: yearly ? BRAND : 'transparent', color: yearly ? INK : APP_TEXT_DIM, border: 'none', cursor: 'pointer', padding: '10px 20px', borderRadius: 7, fontFamily: SANS, fontSize: 14, fontWeight: 600, transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -691,9 +721,9 @@ function PricingSection() {
           </button>
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? 14 : 20 }}>
         {plans.map((p, i) => (
-          <div key={i} style={{ background: APP_BG_2, border: p.highlight ? '1px solid ' + BRAND : '1px solid ' + APP_BORDER, borderRadius: 16, padding: '36px 32px 32px', position: 'relative', display: 'flex', flexDirection: 'column', ...(p.highlight && { boxShadow: '0 0 60px rgba(0,196,168,0.15)' }) }}>
+          <div key={i} style={{ background: APP_BG_2, border: p.highlight ? '1px solid ' + BRAND : '1px solid ' + APP_BORDER, borderRadius: 16, padding: isMobile ? '28px 24px 24px' : '36px 32px 32px', position: 'relative', display: 'flex', flexDirection: 'column', ...(p.highlight && { boxShadow: '0 0 60px rgba(0,196,168,0.15)' }) }}>
             {p.highlight && <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: BRAND, color: INK, padding: '5px 14px', borderRadius: 99, fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', boxShadow: '0 4px 14px rgba(0,196,168,0.4)' }}>★ Beliebtester Plan</div>}
             <div style={{ fontFamily: MONO, fontSize: 10.5, color: p.highlight ? BRAND : APP_TEXT_DIMMER, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{p.tagline}</div>
             <h3 style={{ fontFamily: SANS, fontSize: 32, fontWeight: 700, color: APP_TEXT, letterSpacing: '-0.03em', margin: '8px 0 0' }}>{p.name}</h3>
@@ -717,7 +747,7 @@ function PricingSection() {
           </div>
         ))}
       </div>
-      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
         <div style={{ background: APP_BG_2, border: '1px solid ' + APP_BORDER, borderRadius: 16, padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
           <div>
             <div style={{ fontFamily: SANS, fontSize: 20, fontWeight: 700, color: APP_TEXT, letterSpacing: '-0.02em' }}>Enterprise</div>
@@ -765,10 +795,11 @@ function FinalCtaSection() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────
 function FooterSection() {
+  const isMobile = _useContext(MobileCtx);
   return (
     <footer style={{ background: '#06101a', borderTop: '1px solid ' + APP_BORDER }}>
-      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '56px 64px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', gap: 48, paddingBottom: 48, borderBottom: '1px solid ' + APP_BORDER_SOFT }}>
+      <div style={{ maxWidth: 1440, margin: '0 auto', padding: isMobile ? '40px 20px 24px' : '56px 64px 32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr 1fr 1fr', gap: isMobile ? 28 : 48, paddingBottom: isMobile ? 28 : 48, borderBottom: '1px solid ' + APP_BORDER_SOFT }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <LogoMark size={32} />
@@ -808,8 +839,10 @@ function FooterSection() {
 
 // ─── App ──────────────────────────────────────────────────────────────────
 function App() {
+  const w = useWindowWidth();
+  const isMobile = w < 768;
   return (
-    <React.Fragment>
+    <MobileCtx.Provider value={isMobile}>
       <NavBar />
       <main>
         <div data-screen-label="01 Hero"><HeroSection /><StatsStrip /></div>
@@ -822,7 +855,7 @@ function App() {
         <div data-screen-label="08 Final CTA"><FinalCtaSection /></div>
       </main>
       <div data-screen-label="09 Footer"><FooterSection /></div>
-    </React.Fragment>
+    </MobileCtx.Provider>
   );
 }
 

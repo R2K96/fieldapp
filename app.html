@@ -206,7 +206,64 @@
     <span class="bnav-icon">⚙️</span>
     <span class="bnav-label">Einst.</span>
   </button>
-</div>
+</div><!-- end bottom-nav -->
+
+<!-- ════════════════════════════════════════════════════
+     MAIN AREA  (Desktop: Sidebar + Content side-by-side)
+═════════════════════════════════════════════════════ -->
+<div class="main-area">
+
+<!-- DESKTOP SIDEBAR (hidden on mobile via CSS) -->
+<nav class="desk-sidebar" id="deskSidebar">
+  <div class="desk-sidebar-logo">
+    <svg viewBox="0 0 32 32" width="22" height="22" style="flex-shrink:0;">
+      <rect x="0" y="0" width="32" height="32" rx="7" fill="#00c4a8"/>
+      <path d="M 9 7 L 9 25 M 9 7 L 18.5 7 A 5 5 0 0 1 18.5 17 L 9 17 M 15.5 17 L 22 25"
+            stroke="#0e1f1c" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+    </svg>
+    <span class="desk-sidebar-logo-name">schnell<span class="logo-r">R</span></span>
+  </div>
+  <div class="side-item active" data-perm="dashboard" onclick="showPage('dashboard');setDeskActive(this)">
+    <span class="side-item-icon">🏠</span> Dashboard
+  </div>
+  <div class="side-item" data-perm="kunden" onclick="showPage('kunden');setDeskActive(this)">
+    <span class="side-item-icon">👥</span> Kunden
+  </div>
+  <div class="side-item" data-perm="auftraege" onclick="showPage('auftraege');setDeskActive(this)">
+    <span class="side-item-icon">📋</span> Aufträge
+  </div>
+  <div class="side-item" data-perm="wochenplan" onclick="showPage('wochenplan');setDeskActive(this)">
+    <span class="side-item-icon">📅</span> Wochenplan
+  </div>
+  <div class="side-item" data-perm="route" onclick="showPage('route');setDeskActive(this)">
+    <span class="side-item-icon">🗺</span> Route
+  </div>
+  <div class="side-item" data-perm="rechnungen" onclick="showPage('rechnung');setDeskActive(this)">
+    <span class="side-item-icon">🧾</span> Rechnungen
+  </div>
+  <div class="side-item" data-perm="angebote" onclick="showPage('angebote');setDeskActive(this)">
+    <span class="side-item-icon">📄</span> Angebote
+  </div>
+  <div class="side-item" data-perm="nachtermin" onclick="showPage('nachtermin');setDeskActive(this)">
+    <span class="side-item-icon">🎙</span> Diktat
+  </div>
+  <div class="side-item" data-perm="zeiterfassung" onclick="showPage('zeiterfassung');setDeskActive(this)">
+    <span class="side-item-icon">⏱</span> Zeiten
+  </div>
+  <div class="side-item" data-perm="auswertung" onclick="showPage('auswertung');setDeskActive(this)">
+    <span class="side-item-icon">📊</span> Auswertung
+  </div>
+  <div class="side-item" data-perm="export" onclick="showPage('export');setDeskActive(this)">
+    <span class="side-item-icon">📤</span> Export
+  </div>
+  <div class="desk-sidebar-spacer"></div>
+  <div class="side-item" data-admin-only onclick="showPage('einstellungen');setDeskActive(this)">
+    <span class="side-item-icon">⚙️</span> Einstellungen
+  </div>
+</nav>
+
+<!-- PAGES CONTENT WRAPPER -->
+<div style="flex:1;min-width:0;">
 
 <div class="page active" id="page-dashboard">
   <div style="margin-bottom:12px;">
@@ -1256,6 +1313,18 @@
     </div>
   </div>
 </div>
+
+</div><!-- end pages content wrapper -->
+</div><!-- end main-area -->
+
+<script>
+// Desktop Sidebar: aktiven Eintrag setzen
+function setDeskActive(el) {
+  document.querySelectorAll('.desk-sidebar .side-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
