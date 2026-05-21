@@ -93,6 +93,27 @@ import {
   signOut as _signOut, applyAuthUser as _applyAuthUser, showAuthMsg as _showAuthMsg,
   onAuthSuccess, onAuthSignOut, onAuthApplyUser,
 } from './modules/auth'
+import {
+  exportAllesDaten as _exportAllesDaten,
+  exportLexofficeCSV as _exportLexoffice,
+  exportDATEVCSV as _exportDATEV,
+} from './modules/export'
+import {
+  initAngebote, renderAngebote as _renderAngebote,
+  openAngebotModal as _openAngebotModal, saveAngebot as _saveAngebot,
+  agSetStatus as _agSetStatus, agAkzeptieren as _agAkzeptieren,
+  downloadAngebotPDF as _downloadAngebotPDF, addAgPosition as _addAgPosition,
+  agCalcGesamt as _agCalcGesamt,
+  onAgRenderDashboard,
+} from './modules/angebote'
+import {
+  startOnboarding as _startOnboarding, renderObStep as _renderObStep,
+  selectBranch as _selectBranch, obNext as _obNext, obPrev as _obPrev,
+  obSaveFirma as _obSaveFirma, obAddMa as _obAddMa, obRemoveMa as _obRemoveMa,
+  obSaveMa as _obSaveMa, obSaveKunde as _obSaveKunde,
+  finishOnboarding as _finishOnboarding,
+  onObRenderDashboard, onObApplyConfig, onObStartTour,
+} from './modules/onboarding'
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║               FIELDAPP — KONFIGURATION                       ║
@@ -502,7 +523,7 @@ function showPage(id){
   if(id==='auswertung') renderAuswertung();
   if(id==='rechnung'){ renderRechnung(); populateRechnungSelect(); }
   if(id==='einstellungen'){ renderEinstellungen(); initPushUI(); }
-  if(id==='angebote'){ renderAngebote(); }
+  if(id==='angebote'){ _renderAngebote(); }
 }
 
 // ════════════════════════════════
@@ -4148,6 +4169,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   onKalRenderAuftraege(() => renderAuftraege())
   onKalShowAuftragDetail((id) => _showAuftragDetail(id))
 
+  // ── Callbacks für Angebote ──
+  onAgRenderDashboard(() => _renderDashboard())
+
+  // ── Callbacks für Onboarding ──
+  onObRenderDashboard(() => _renderDashboard())
+  onObApplyConfig(() => applyConfig())
+  onObStartTour(() => startTour())
+
   // Module initialisieren (registrieren Pages + Event-Listener)
   initKunden()
   initAuftraege()
@@ -4162,12 +4191,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   initChecklist()
   initPush()
   initAuth()
+  initAngebote()
 
   // Statische Buttons verdrahten
   initStaticEventListeners({
-    showPage, signOut: _signOut, startTour, startOnboarding, openSchnellerfassung: _openSchnellerfassung,
+    showPage, signOut: _signOut, startTour, startOnboarding: _startOnboarding, openSchnellerfassung: _openSchnellerfassung,
     openModal, dismissInstallBanner, triggerInstall, recoverySetPassword: _recoverySetPassword,
-    finishOnboarding, authSubmit: _authSubmit, authToggleMode: _authToggleMode, authForgot: _authForgot, authShowLogin: _authShowLogin,
+    finishOnboarding: _finishOnboarding, authSubmit: _authSubmit, authToggleMode: _authToggleMode, authForgot: _authForgot, authShowLogin: _authShowLogin,
     tourGo, endTour, initRoute, renderRoute,
   })
 
@@ -6049,7 +6079,7 @@ _w.removeMitarbeiter   = _removeMitarbeiter
 _w.getRgStatus         = getRgStatus
 
 // ── Noch in main.ts (Phase 2c) ──
-_w.renderAngebote  = renderAngebote
+_w.renderAngebote  = _renderAngebote
 _w.renderAuswertung = renderAuswertung
 _w.saveRechnungData = saveRechnungData
 _w.bezahltBestaetigen = bezahltBestaetigen
@@ -6089,10 +6119,13 @@ _w.startNavigation = startNavigation
 _w.initRoute = initRoute
 _w.renderRoute = renderRoute
 _w.clearRoute = clearRoute
-_w.saveAngebot = saveAngebot
-_w.angebotAkzeptieren = angebotAkzeptieren
-_w.deleteAngebot = deleteAngebot
-_w.angebotAlsGesendetMarkieren = angebotAlsGesendetMarkieren
+_w.saveAngebot = _saveAngebot
+_w.openAngebotModal = _openAngebotModal
+_w.agSetStatus = _agSetStatus
+_w.agAkzeptieren = _agAkzeptieren
+_w.downloadAngebotPDF = _downloadAngebotPDF
+_w.addAgPosition = _addAgPosition
+_w.agCalcGesamt = _agCalcGesamt
 _w.sendMahnung = sendMahnung
 _w.ntAddBlock = ntAddBlock
 _w.ntRemoveBlock = ntRemoveBlock
@@ -6125,8 +6158,9 @@ _w.authSubmit = _authSubmit
 _w.authToggleMode = _authToggleMode
 _w.authForgot = _authForgot
 _w.authShowLogin = _authShowLogin
-_w.exportLexoffice = exportLexoffice
-_w.exportDATEV = exportDATEV
+_w.exportAllesDaten = _exportAllesDaten
+_w.exportLexoffice = _exportLexoffice
+_w.exportDATEV = _exportDATEV
 _w.exportZugferd = exportZugferd
 _w.openSigModal = openSigModal
 _w.closeSigModal = closeSigModal
@@ -6149,7 +6183,15 @@ _w.showToast = showToast       // utils.ts — Fallback
 _w.setChipExclusive = setChipExclusive
 _w.ntToggleMat = ntToggleMat
 _w.ntToggleBlock = ntToggleBlock
-_w.obNext = obNext
-_w.obBack = obBack
-_w.startOnboarding = startOnboarding
+_w.obNext = _obNext
+_w.obPrev = _obPrev
+_w.obBack = _obPrev
+_w.startOnboarding = _startOnboarding
+_w.finishOnboarding = _finishOnboarding
+_w.selectBranch = _selectBranch
+_w.obSaveFirma = _obSaveFirma
+_w.obAddMa = _obAddMa
+_w.obRemoveMa = _obRemoveMa
+_w.obSaveMa = _obSaveMa
+_w.obSaveKunde = _obSaveKunde
 _w.recoverySetPassword = _recoverySetPassword
