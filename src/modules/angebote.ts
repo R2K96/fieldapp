@@ -5,8 +5,7 @@
 
 import { DB } from '../lib/db'
 import { uid, today, fmtDate, showToast } from '../lib/utils'
-import { openModal, closeModal } from './ui'
-import { populateKundenSelect } from './kunden'
+import { openModal, closeModal, populateKundenSelect } from './ui'
 
 // ── Modul-State ──────────────────────────────────────────────────
 let _agPositionen: any[] = []
