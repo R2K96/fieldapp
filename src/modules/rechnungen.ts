@@ -3,7 +3,7 @@
 // Vollständiger Rechnung-Flow: Positionen-UI, Material-Picker,
 // Speichern, PDF (html2pdf), ZUGFeRD-XML, Mahnwesen.
 
-import { DB } from '../lib/db'
+import { DB, supabase } from '../lib/db'
 import { uid, today, fmtDate, showToast } from '../lib/utils'
 import { registerPage, showConfirm } from './ui'
 import { generateEN16931Xml, downloadZUGFeRDPdf } from '../lib/zugferd'
@@ -515,8 +515,7 @@ export function bezahltBestaetigen() {
     const bt = document.getElementById('rBestaetigungText')
     if (bt) bt.innerHTML = '<strong>' + r.kundeName + '</strong> hat ' + r.betrag.toFixed(2).replace('.', ',') + '€ bezahlt.'
     goRStep(3)
-    const sb = (window as any)._supabase
-    sb?.auth.getUser().then(({ data: { user } }: any) => {
+    supabase.auth.getUser().then(({ data: { user } }: any) => {
       if (user) _triggerPush('rechnung_bezahlt', user.id, 'Rechnung bezahlt',
         r.kundeName + ' · ' + r.betrag.toFixed(2).replace('.', ',') + ' €')
     })
@@ -555,50 +554,9 @@ export function downloadRechnungPDFData(id: string) {
   const CONFIG = getCfg()
   const r = DB.rechnungen().find((r: any) => r.id === id)
   if (!r) { showToast('Rechnung nicht gefunden'); return }
-  const pos    = r.positionen || []
-  const posHTML= pos.length === 1
-    ? '<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px;"><span style="font-weight:700;">' + pos[0].leistung + '</span><span style="color:#7a9088;">' + pos[0].abrMin + ' Min.</span></div>'
-      + '<div style="font-size:11px;color:#4a5550;line-height:1.55;">' + (pos[0].beschr || pos[0].leistung) + '</div>'
-    : pos.map((p: any) =>
-        '<div style="padding:5px 0;border-bottom:1px solid #e4e0d8;font-size:11px;"><strong>' + p.leistung + '</strong> · ' + p.abrMin + ' Min. · ' + p.betrag.toFixed(2).replace('.', ',') + '€' + (p.beschr ? ' — ' + p.beschr : '') + '</div>'
-      ).join('')
-  const dt  = r.datum ? new Date(r.datum + 'T12:00:00').toLocaleDateString('de-DE') : '-'
-  const f   = CONFIG.firma || {}
-  const fuss= f.name + ' · ' + f.adresse + ' · ' + f.telefon + ' · ' + f.email + '<br>' + (CONFIG.abrechnung?.rechnungsFusszeile || '')
-  const html = `<div style="background:white;padding:24px 28px;font-family:Arial,sans-serif;color:#1a1f1c;max-width:680px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #00c4a8;">
-      <div>
-        <div style="font-size:24px;font-weight:700;color:#1a1f1c;">${f.name || ''}</div>
-        <div style="font-size:11px;color:#7a9088;font-style:italic;">${f.tagline || ''}</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:10px;color:#7a9088;font-weight:700;text-transform:uppercase;">Rechnung</div>
-        <div style="font-size:15px;font-weight:700;color:#00c4a8;">${r.nummer || '-'}</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;font-size:12px;">
-      <div>
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-bottom:3px;">Empfänger</div>
-        <div style="font-weight:600;">${r.kundeName || '-'}</div>
-        ${r.kundeAdresse ? '<div style="font-size:11px;color:#7a9088;margin-top:2px;">' + r.kundeAdresse + '</div>' : ''}
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-bottom:3px;">Datum</div>
-        <div style="font-weight:600;">${dt}</div>
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-top:5px;margin-bottom:3px;">Mitarbeiter</div>
-        <div>${r.ma || '-'}</div>
-      </div>
-    </div>
-    <div style="background:#f7f6f2;border-radius:8px;padding:12px 14px;margin-bottom:14px;">${posHTML}</div>
-    ${r.diktat ? '<div style="background:#f0faf5;border-radius:8px;padding:10px 13px;margin-bottom:14px;border-left:3px solid #00c4a8;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#7a9088;margin-bottom:4px;">Dokumentation / Notizen</div><div style="font-size:11px;color:#3a5048;line-height:1.6;">' + r.diktat + '</div></div>' : ''}
-    <div style="background:#00c4a8;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div style="font-size:11px;color:rgba(13,21,32,0.75);">Gesamt (netto, §19 UStG)</div>
-      <div style="font-size:22px;font-weight:700;color:#0d1520;">${r.betrag.toFixed(2).replace('.', ',')} €</div>
-    </div>
-    <div style="font-size:10px;color:#9aada6;line-height:1.6;">${fuss}</div>
-  </div>`
+  const f       = CONFIG.firma || {}
   const wrapper = document.createElement('div')
-  wrapper.innerHTML = html
+  wrapper.innerHTML = _buildInvoiceHtml(r, { ...f, rechnungsFusszeile: CONFIG.abrechnung?.rechnungsFusszeile })
   document.body.appendChild(wrapper)
   showToast('PDF wird erstellt…')
   ;(window as any).html2pdf().set(_pdfOpts('Rechnung_' + (r.nummer || id) + '.pdf')).from(wrapper.firstChild).save()
@@ -630,132 +588,31 @@ export function resetRModal() {
   addPosition()
 }
 
-// ── ZUGFeRD XML ──────────────────────────────────────────────────
-export function generateZUGFeRDXml(r: any): string {
-  const CONFIG = getCfg()
-  const f      = CONFIG.firma || {}
-  const fmt    = (d: string) => d ? d.replace(/-/g, '') : new Date().toISOString().split('T')[0].replace(/-/g, '')
-  const faelligFmt = r.faellig_am
-    ? r.faellig_am.replace(/-/g, '')
-    : new Date(new Date(r.datum + 'T12:00:00').getTime() + FAELLIGKEIT_TAGE * 86400000)
-        .toISOString().split('T')[0].replace(/-/g, '')
-  const betrag = r.betrag.toFixed(2)
-  const esc    = (s: string) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<rsm:CrossIndustryInvoice
-  xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
-  xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
-  xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <rsm:ExchangedDocumentContext>
-    <ram:GuidelineSpecifiedDocumentContextParameter>
-      <ram:ID>urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2p0:minimum</ram:ID>
-    </ram:GuidelineSpecifiedDocumentContextParameter>
-  </rsm:ExchangedDocumentContext>
-  <rsm:ExchangedDocument>
-    <ram:ID>${esc(r.nummer || r.id)}</ram:ID>
-    <ram:TypeCode>380</ram:TypeCode>
-    <ram:IssueDateTime><udt:DateTimeString format="102">${fmt(r.datum)}</udt:DateTimeString></ram:IssueDateTime>
-  </rsm:ExchangedDocument>
-  <rsm:SupplyChainTradeTransaction>
-    <ram:ApplicableHeaderTradeAgreement>
-      <ram:SellerTradeParty>
-        <ram:Name>${esc(f.name)}</ram:Name>
-        <ram:PostalTradeAddress>
-          <ram:LineOne>${esc(f.adresse)}</ram:LineOne>
-          <ram:CountryID>DE</ram:CountryID>
-        </ram:PostalTradeAddress>
-        <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">${f.email || ''}</ram:URIID>
-        </ram:URIUniversalCommunication>
-      </ram:SellerTradeParty>
-      <ram:BuyerTradeParty>
-        <ram:Name>${esc(r.kundeName)}</ram:Name>
-        <ram:PostalTradeAddress>
-          <ram:LineOne>${esc(r.kundeAdresse)}</ram:LineOne>
-          <ram:CountryID>DE</ram:CountryID>
-        </ram:PostalTradeAddress>
-      </ram:BuyerTradeParty>
-    </ram:ApplicableHeaderTradeAgreement>
-    <ram:ApplicableHeaderTradeDelivery/>
-    <ram:ApplicableHeaderTradeSettlement>
-      <ram:PaymentReference>${esc(r.nummer || r.id)}</ram:PaymentReference>
-      <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
-      ${f.iban ? `<ram:SpecifiedTradeSettlementPaymentMeans>
-        <ram:TypeCode>58</ram:TypeCode>
-        <ram:PayeePartyCreditorFinancialAccount>
-          <ram:IBANID>${f.iban.replace(/\s/g, '')}</ram:IBANID>
-        </ram:PayeePartyCreditorFinancialAccount>
-      </ram:SpecifiedTradeSettlementPaymentMeans>` : ''}
-      <ram:ApplicableTradeTax>
-        <ram:CalculatedAmount>0.00</ram:CalculatedAmount>
-        <ram:TypeCode>VAT</ram:TypeCode>
-        <ram:ExemptionReason>Umsatzsteuerbefreiung gemäß §19 UStG</ram:ExemptionReason>
-        <ram:BasisAmount>${betrag}</ram:BasisAmount>
-        <ram:CategoryCode>E</ram:CategoryCode>
-        <ram:RateApplicablePercent>0</ram:RateApplicablePercent>
-      </ram:ApplicableTradeTax>
-      <ram:SpecifiedTradePaymentTerms>
-        <ram:DueDateDateTime><udt:DateTimeString format="102">${faelligFmt}</udt:DateTimeString></ram:DueDateDateTime>
-      </ram:SpecifiedTradePaymentTerms>
-      <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-        <ram:LineTotalAmount>${betrag}</ram:LineTotalAmount>
-        <ram:TaxBasisTotalAmount>${betrag}</ram:TaxBasisTotalAmount>
-        <ram:TaxTotalAmount currencyID="EUR">0.00</ram:TaxTotalAmount>
-        <ram:GrandTotalAmount>${betrag}</ram:GrandTotalAmount>
-        <ram:DuePayableAmount>${betrag}</ram:DuePayableAmount>
-      </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-    </ram:ApplicableHeaderTradeSettlement>
-  </rsm:SupplyChainTradeTransaction>
-</rsm:CrossIndustryInvoice>`
-}
-
-export function downloadZUGFeRDXml(id: string) {
-  const r = DB.rechnungen().find((r: any) => r.id === id)
-  if (!r) { showToast('Rechnung nicht gefunden'); return }
-  const xml  = generateZUGFeRDXml(r)
-  const blob = new Blob([xml], { type: 'application/xml' })
-  const url  = URL.createObjectURL(blob)
-  const a    = document.createElement('a')
-  a.href = url; a.download = (r.nummer || r.id) + '_ZUGFeRD.xml'; a.click()
-  URL.revokeObjectURL(url)
-  showToast('📋 ZUGFeRD-XML heruntergeladen')
-}
-
-// ── ZUGFeRD 2.1 / EN 16931 PDF (vollständig eingebettetes XML) ───
-export async function downloadZUGFeRDPdfById(id: string) {
-  const CONFIG = getCfg()
-  const r = DB.rechnungen().find((r: any) => r.id === id)
-  if (!r) { showToast('Rechnung nicht gefunden'); return }
-
-  showToast('⏳ ZUGFeRD PDF wird erstellt…')
-
-  // Rechnung mit Firmadaten anreichern
-  const rMitFirma = {
-    ...r,
-    firma: CONFIG.firma || {},
-  }
-
-  // Gleichen HTML-Wrapper wie downloadRechnungPDFData verwenden
+// ── Gemeinsame HTML-Rechnungsvorlage ────────────────────────────
+// Genutzt von: downloadRechnungPDFData UND downloadZUGFeRDPdfById
+// Verhindert Duplikat-Code und stellt visuelle Konsistenz sicher.
+function _buildInvoiceHtml(r: any, f: any, isZugferd = false): string {
   const pos     = r.positionen || []
   const posHTML = pos.length === 1
-    ? '<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px;"><span style="font-weight:700;">'
-        + pos[0].leistung + '</span><span style="color:#7a9088;">' + pos[0].abrMin + ' Min.</span></div>'
-      + '<div style="font-size:11px;color:#4a5550;line-height:1.55;">' + (pos[0].beschr || pos[0].leistung) + '</div>'
+    ? `<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <span style="font-weight:700;">${pos[0].leistung}</span>
+        <span style="color:#7a9088;">${pos[0].abrMin || ''} Min.</span>
+       </div>
+       <div style="font-size:11px;color:#4a5550;line-height:1.55;">${pos[0].beschr || pos[0].leistung}</div>`
     : pos.map((p: any) =>
-        '<div style="padding:5px 0;border-bottom:1px solid #e4e0d8;font-size:11px;"><strong>'
-          + p.leistung + '</strong> · ' + p.abrMin + ' Min. · '
-          + (p.betrag || 0).toFixed(2).replace('.', ',') + '€'
-          + (p.beschr ? ' — ' + p.beschr : '') + '</div>'
+        `<div style="padding:5px 0;border-bottom:1px solid #e4e0d8;font-size:11px;">
+          <strong>${p.leistung}</strong> · ${p.abrMin || ''} Min. · ${(p.betrag || 0).toFixed(2).replace('.', ',')}€${p.beschr ? ' — ' + p.beschr : ''}
+         </div>`
       ).join('')
+  const matRows = (r.materialien || []).map((m: any) =>
+    `<div style="padding:4px 0;font-size:11px;color:#4a5550;">${m.bezeichnung} · ${m.menge} ${m.einheit || 'Stk'} · ${((m.vkPreis || 0) * (m.menge || 1)).toFixed(2).replace('.', ',')}€</div>`
+  ).join('')
 
-  const dt  = r.datum ? new Date(r.datum + 'T12:00:00').toLocaleDateString('de-DE') : '-'
-  const f   = CONFIG.firma || {}
-  const fuss= f.name + ' · ' + f.adresse + ' · ' + f.telefon + ' · ' + f.email
-              + '<br>' + (CONFIG.abrechnung?.rechnungsFusszeile || '')
+  const dt   = r.datum ? new Date(r.datum + 'T12:00:00').toLocaleDateString('de-DE') : '-'
+  const fuss = (f.name || '') + ' · ' + (f.adresse || '') + ' · ' + (f.telefon || '') + ' · ' + (f.email || '')
+              + (f.rechnungsFusszeile ? '<br>' + f.rechnungsFusszeile : '')
 
-  const html = `<div style="background:white;padding:24px 28px;font-family:Arial,sans-serif;color:#1a1f1c;max-width:680px;">
+  return `<div style="background:white;padding:24px 28px;font-family:Arial,sans-serif;color:#1a1f1c;max-width:680px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #00c4a8;">
       <div>
         <div style="font-size:24px;font-weight:700;color:#1a1f1c;">${f.name || ''}</div>
@@ -770,7 +627,7 @@ export async function downloadZUGFeRDPdfById(id: string) {
       <div>
         <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-bottom:3px;">Empfänger</div>
         <div style="font-weight:600;">${r.kundeName || '-'}</div>
-        ${r.kundeAdresse ? '<div style="font-size:11px;color:#7a9088;margin-top:2px;">' + r.kundeAdresse + '</div>' : ''}
+        ${r.kundeAdresse ? `<div style="font-size:11px;color:#7a9088;margin-top:2px;">${r.kundeAdresse}</div>` : ''}
       </div>
       <div style="text-align:right;">
         <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#7a9088;margin-bottom:3px;">Datum</div>
@@ -779,20 +636,80 @@ export async function downloadZUGFeRDPdfById(id: string) {
         <div>${r.ma || '-'}</div>
       </div>
     </div>
-    <div style="background:#f7f6f2;border-radius:8px;padding:12px 14px;margin-bottom:14px;">${posHTML}</div>
-    ${r.diktat ? '<div style="background:#f0faf5;border-radius:8px;padding:10px 13px;margin-bottom:14px;border-left:3px solid #00c4a8;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#7a9088;margin-bottom:4px;">Dokumentation</div><div style="font-size:11px;color:#3a5048;line-height:1.6;">' + r.diktat + '</div></div>' : ''}
+    <div style="background:#f7f6f2;border-radius:8px;padding:12px 14px;margin-bottom:${matRows ? '8px' : '14px'};">${posHTML}</div>
+    ${matRows ? `<div style="background:#f3f3f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#7a9088;margin-bottom:5px;">Material</div>${matRows}</div>` : ''}
+    ${r.diktat ? `<div style="background:#f0faf5;border-radius:8px;padding:10px 13px;margin-bottom:14px;border-left:3px solid #00c4a8;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#7a9088;margin-bottom:4px;">Dokumentation / Notizen</div><div style="font-size:11px;color:#3a5048;line-height:1.6;">${r.diktat}</div></div>` : ''}
     <div style="background:#00c4a8;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <div style="font-size:11px;color:rgba(13,21,32,0.75);">Gesamt (netto, §19 UStG)</div>
       <div style="font-size:22px;font-weight:700;color:#0d1520;">${r.betrag.toFixed(2).replace('.', ',')} €</div>
     </div>
-    <div style="background:#f0faf5;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:10px;color:#3a5048;border:1px solid rgba(0,196,168,0.2);">
-      <strong>ZUGFeRD 2.1 / Factur-X EN 16931</strong> — Diese Rechnung enthält ein eingebettetes XML-Dokument gemäß EU-Norm EN 16931.
-    </div>
+    ${isZugferd ? `<div style="background:#f0faf5;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:10px;color:#3a5048;border:1px solid rgba(0,196,168,0.2);"><strong>ZUGFeRD 2.1 / Factur-X EN 16931</strong> — Diese Rechnung enthält ein eingebettetes XML-Dokument gemäß EU-Norm EN 16931.</div>` : ''}
     <div style="font-size:10px;color:#9aada6;line-height:1.6;">${fuss}</div>
   </div>`
+}
+
+// ── ZUGFeRD XML (EN 16931, delegiert an zugferd.ts) ─────────────
+// Warum kein eigenes XML mehr hier? generateEN16931Xml in zugferd.ts
+// ist vollständig konform: Zeilenpositionen, Steuernr., PLZ, BIC, etc.
+// Das Minimum-Profil hier wäre gesetzlich ausreichend, aber EN 16931
+// ist die Pflicht ab 2025 (E-Rechnungs-VO) und schon implementiert.
+export function generateZUGFeRDXml(r: any): string {
+  const CONFIG = getCfg()
+  return generateEN16931Xml({
+    ...r,
+    firma: CONFIG.firma || {},
+    // Positionen korrekt auf ZUGFeRD-Format mappen
+    positionen: _toZugferdPositionen(r),
+  })
+}
+
+export function downloadZUGFeRDXml(id: string) {
+  const r = DB.rechnungen().find((r: any) => r.id === id)
+  if (!r) { showToast('Rechnung nicht gefunden'); return }
+  const xml  = generateZUGFeRDXml(r)
+  const blob = new Blob([xml], { type: 'application/xml' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url; a.download = (r.nummer || r.id) + '_ZUGFeRD.xml'; a.click()
+  URL.revokeObjectURL(url)
+  showToast('📋 ZUGFeRD-XML heruntergeladen')
+}
+
+// Konvertiert interne Positionen + Materialien → ZUGFeRDPosition[]
+// Wichtig: 'gesamt' im internen Format = Minuten, NICHT Geld!
+// ZUGFeRD braucht monetäre Werte → verwende 'betrag'.
+function _toZugferdPositionen(r: any): any[] {
+  const dienstleistungen = (r.positionen || []).map((p: any) => ({
+    bezeichnung: p.beschr ? `${p.leistung} (${p.abrMin || p.ort || 0} Min.)` : p.leistung,
+    leistung:    p.leistung,
+    menge:       1,
+    einheit:     'Stk',
+    einzelpreis: p.betrag || 0,
+    gesamt:      p.betrag || 0,
+  }))
+  const materialien = (r.materialien || []).map((m: any) => ({
+    bezeichnung: m.bezeichnung,
+    menge:       m.menge || 1,
+    einheit:     m.einheit || 'Stk',
+    einzelpreis: m.vkPreis || 0,
+    gesamt:      (m.vkPreis || 0) * (m.menge || 1),
+  }))
+  return [...dienstleistungen, ...materialien]
+}
+
+// ── ZUGFeRD 2.1 / EN 16931 PDF (mit eingebettetem XML) ──────────
+export async function downloadZUGFeRDPdfById(id: string) {
+  const CONFIG = getCfg()
+  const r = DB.rechnungen().find((r: any) => r.id === id)
+  if (!r) { showToast('Rechnung nicht gefunden'); return }
+
+  showToast('⏳ ZUGFeRD PDF wird erstellt…')
+
+  const f         = CONFIG.firma || {}
+  const rMitFirma = { ...r, firma: f, positionen: _toZugferdPositionen(r) }
 
   const wrapper = document.createElement('div')
-  wrapper.innerHTML = html
+  wrapper.innerHTML = _buildInvoiceHtml(r, { ...f, rechnungsFusszeile: CONFIG.abrechnung?.rechnungsFusszeile }, true)
   document.body.appendChild(wrapper)
 
   try {
@@ -807,10 +724,10 @@ export async function downloadZUGFeRDPdfById(id: string) {
 }
 
 // ── Aliase für Legacy-Window-Exports ─────────────────────────────
-export const sendMahnung    = mahnungErstellen
+export const sendMahnung         = mahnungErstellen
 export const generateRechnungPDF = downloadRechnungPDFModal
 export const downloadRechnungPDF = downloadRechnungPDFData
-export const exportZugferd  = downloadZUGFeRDPdfById
+export const exportZugferd       = downloadZUGFeRDPdfById
 
 // ── Render ───────────────────────────────────────────────────────
 export function renderRechnung() {
@@ -892,8 +809,7 @@ export function markBezahlt(id: string) {
   rechnungen[i].bezahlt = true; rechnungen[i].zahlung = 'Nachtraglich'
   DB.saveRechnungen(rechnungen); renderRechnung(); _onDataChange()
   showToast('✓ Als bezahlt markiert!')
-  const sb = (window as any)._supabase
-  sb?.auth.getUser().then(({ data: { user } }: any) => {
+  supabase.auth.getUser().then(({ data: { user } }: any) => {
     if (user) _triggerPush('rechnung_bezahlt', user.id, 'Rechnung bezahlt',
       `${rechnungen[i].kundeName || 'Kunde'} · ${(rechnungen[i].betrag || 0).toFixed(2).replace('.', ',')} €`)
   })

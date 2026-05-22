@@ -49,36 +49,10 @@
   --topbar-h:  52px;
 }
 
-/* ════════════════════════════════════════════════════
-   LIGHT MODE  (System-Preference)
-════════════════════════════════════════════════════ */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg:      #f0f4f8;
-    --bg2:     #ffffff;
-    --bg3:     #e8eef4;
-    --card:    #ffffff;
-    --card2:   #f6f8fb;
-    --surface: rgba(0,0,0,0.03);
-
-    --border:  rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.14);
-
-    --text:  #0f1e2a;
-    --text1: #0f1e2a;
-    --text2: #4a6278;
-    --text3: #8aa4be;
-
-    --teal-dim:   rgba(0,196,168,0.1);
-    --gold-dim:   rgba(240,165,0,0.1);
-    --red-dim:    rgba(255,95,95,0.1);
-    --green-dim:  rgba(61,214,140,0.1);
-    --blue-dim:   rgba(90,171,255,0.1);
-    --purple-dim: rgba(185,124,245,0.1);
-
-    --sh: 0 4px 24px rgba(0,0,0,0.1);
-  }
-}
+/* Light-Mode-Override entfernt — App ist immer Dark.
+   color-scheme: dark verhindert, dass der Browser
+   native Elemente (Inputs, Scrollbars) hell rendert. */
+:root { color-scheme: dark; }
 
 /* ════════════════════════════════════════════════════
    RESET & BASE
