@@ -98,6 +98,7 @@ import {
   onAuthSuccess, onAuthSignOut, onAuthApplyUser,
 } from './modules/auth'
 import {
+  initExport,
   exportAllesDaten as _exportAllesDaten,
   exportLexofficeCSV as _exportLexoffice,
   exportDATEVCSV as _exportDATEV,
@@ -1885,6 +1886,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initEinstellungen()
   initWochenplan()
   initZeiterfassung()
+  initExport()
   initSchnellerfassung()
   initKalender()
   initBarcode()

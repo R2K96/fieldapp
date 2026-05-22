@@ -5,6 +5,17 @@
 
 import { DB } from '../lib/db'
 import { today, showToast } from '../lib/utils'
+import { registerPage } from './ui'
+
+// ── Initialisierung ──────────────────────────────────────────────
+export function initExport() {
+  registerPage('export', renderExportPage)
+}
+
+function renderExportPage() {
+  // Die Export-Seite ist rein statisch (nur Buttons) — kein Render nötig.
+  // Placeholder für zukünftige dynamische Inhalte (z.B. letzte Exports).
+}
 
 // ── Hilfsfunktion ─────────────────────────────────────────────────
 function _downloadCSV(rows: any[][] | null, filename: string, rawContent?: string) {

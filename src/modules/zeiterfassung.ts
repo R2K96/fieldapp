@@ -21,7 +21,7 @@ export function onZtCloseDetail(fn: () => void)            { _onCloseDetail = fn
 
 // ── Initialisierung ──────────────────────────────────────────────
 export function initZeiterfassung() {
-  registerPage('zeiterfassung', () => renderTagesreport())
+  registerPage('zeiterfassung', () => renderZeiterfassungPage())
 
   document.getElementById('btnStopZt')?.addEventListener('click', stopZeiterfassung)
   document.getElementById('btnCancelZt')?.addEventListener('click', cancelZeiterfassung)
@@ -176,4 +176,60 @@ export function renderTagesreport() {
       ${rows}
     </div>`
   }).join('')
+}
+
+// ── Zeiterfassung-Seite rendern ──────────────────────────────────
+// Wird aufgerufen wenn showPage('zeiterfassung') navigiert.
+// Füllt beide Container in #page-zeiterfassung.
+export function renderZeiterfassungPage() {
+  const alle = DB.zeiterfassung()
+  const tagHeute = today()
+
+  // Tagesreport-Container
+  const pageEl = document.getElementById('ztPageReport')
+  if (pageEl) {
+    const heute = alle.filter((z: any) => z.datum === tagHeute)
+    if (!heute.length) {
+      pageEl.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px;">Heute noch keine Zeiten erfasst.</div>'
+    } else {
+      const byMa: Record<string, any[]> = {}
+      heute.forEach((z: any) => { if (!byMa[z.ma]) byMa[z.ma] = []; byMa[z.ma].push(z) })
+      pageEl.innerHTML = Object.entries(byMa).map(([ma, zeiten]) => {
+        const gesamt = (zeiten as any[]).reduce((s: number, z: any) => s + z.dauerMin, 0)
+        const rows = (zeiten as any[]).map(z =>
+          `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text2);">${z.auftrag || '–'}</span>
+            <span style="font-weight:600;color:var(--teal);">${z.dauerMin} Min.</span>
+          </div>`
+        ).join('')
+        return `<div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:12px;font-weight:700;">👤 ${ma}</span>
+            <span style="font-size:12px;font-weight:700;color:var(--teal);">Gesamt: ${gesamt} Min. (${(gesamt/60).toFixed(1)}h)</span>
+          </div>${rows}</div>`
+      }).join('')
+    }
+  }
+
+  // Alle Einträge (letzte 30)
+  const allEl = document.getElementById('ztPageAll')
+  if (allEl) {
+    const sorted = [...alle].sort((a: any, b: any) => b.datum.localeCompare(a.datum)).slice(0, 30)
+    if (!sorted.length) {
+      allEl.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px;">Keine Zeiteinträge vorhanden.</div>'
+    } else {
+      allEl.innerHTML = sorted.map((z: any) =>
+        `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:600;">${z.auftrag || '–'}</div>
+            <div style="color:var(--text3);">${z.datum} · 👤 ${z.ma || '–'}</div>
+          </div>
+          <span style="font-weight:700;color:var(--teal);">${z.dauerMin} Min.</span>
+        </div>`
+      ).join('')
+    }
+  }
+
+  // Auch Dashboard-Tagesreport mitaktualisieren
+  renderTagesreport()
 }

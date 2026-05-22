@@ -174,6 +174,7 @@
   <div class="side-item" id="smenu-route" data-perm="route" onclick="showPage('route');toggleMenu()"><span class="side-item-icon">🗺</span>Tagesroute</div>
   <div class="side-item" id="smenu-angebote" data-perm="angebote" onclick="showPage('angebote');toggleMenu()"><span class="side-item-icon">📄</span>Angebote</div>
   <div class="side-item" id="smenu-auswertung" data-perm="auswertung" onclick="showPage('auswertung');toggleMenu()"><span class="side-item-icon">📈</span>Auswertung</div>
+  <div class="side-item" id="smenu-zeiterfassung" data-perm="zeiterfassung" onclick="showPage('zeiterfassung');toggleMenu()"><span class="side-item-icon">⏱</span>Zeiten</div>
   <div class="side-item" id="smenu-export" data-perm="export" onclick="showPage('export');toggleMenu()"><span class="side-item-icon">📤</span>Export</div>
   <div style="height:1px;background:var(--border);margin:10px 0;"></div>
   <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);padding:4px 10px;"><span id="appRegion">Region</span></div>
@@ -1311,6 +1312,42 @@
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--teal);margin-bottom:8px;">Erkannte Daten</div>
       <div id="sePreviewContent"></div>
     </div>
+  </div>
+</div>
+
+<!-- ── ZEITERFASSUNG PAGE ──────────────────────────────────────── -->
+<div class="page" id="page-zeiterfassung">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div class="section-title">⏱ Zeiterfassung</div>
+    <button onclick="openZeiterfassungOverlay()" class="btn btn-primary" style="font-size:12px;padding:6px 14px;">+ Zeit starten</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Tagesreport — Heute</div>
+    <div id="ztPageReport"><div class="tbl-empty">Heute noch keine Zeiten erfasst.</div></div>
+  </div>
+  <div class="card" style="margin-top:12px;">
+    <div class="card-title">Alle Einträge</div>
+    <div id="ztPageAll"><div class="tbl-empty">Keine Zeiteinträge vorhanden.</div></div>
+  </div>
+</div>
+
+<!-- ── EXPORT PAGE ────────────────────────────────────────────── -->
+<div class="page" id="page-export">
+  <div class="section-title" style="margin-bottom:14px;">📤 Daten-Export</div>
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">Excel-Gesamtexport</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Alle Kunden, Aufträge, Rechnungen und Zeiten als .xlsx</div>
+    <button onclick="exportAllesDaten()" class="btn btn-primary" style="width:100%;">⬇ Excel exportieren</button>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">Lexoffice CSV</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Rechnungen im Lexoffice-Format für den direkten Import</div>
+    <button onclick="exportLexoffice()" class="btn btn-ghost" style="width:100%;">⬇ Lexoffice CSV</button>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">DATEV CSV</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Buchungsdaten im DATEV-Format für den Steuerberater</div>
+    <button onclick="exportDATEV()" class="btn btn-ghost" style="width:100%;">⬇ DATEV CSV</button>
   </div>
 </div>
 
