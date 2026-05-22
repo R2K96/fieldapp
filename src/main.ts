@@ -1870,8 +1870,31 @@ document.addEventListener('DOMContentLoaded', () => {
   _initRoute()
   initSigCanvas()
   initSwipeNavigation()
-  initStaticEventListeners()
-  initSearchDelegation()
+  initStaticEventListeners({
+    showPage:             _showPage,
+    signOut:              _signOut,
+    startTour:            _startTour,
+    startOnboarding:      _startOnboarding,
+    openSchnellerfassung: _openSchnellerfassung,
+    openModal:            _openModal,
+    dismissInstallBanner: dismissInstallBanner,
+    triggerInstall:       triggerInstall,
+    recoverySetPassword:  _recoverySetPassword,
+    finishOnboarding:     _finishOnboarding,
+    authSubmit:           _authSubmit,
+    authToggleMode:       _authToggleMode,
+    authForgot:           _authForgot,
+    authShowLogin:        _authShowLogin,
+    tourGo:               _tourGo,
+    endTour:              _endTour,
+    initRoute:            _initRoute,
+    renderRoute:          _renderRoute,
+  })
+  initSearchDelegation(
+    () => _renderKunden(),
+    (id: string) => _showAuftragDetail(id),
+    () => _renderRechnung(),
+  )
 
   // ── 4. Auth-Callbacks registrieren (VOR initAuth, damit Session-Restore greift) ──
 
