@@ -389,9 +389,10 @@ const DB = {
     const tables = ['kunden','auftraege','docs','wochenplan','rechnungen','fahrtenbuch','einstellungen','zeiterfassung','materialien','angebote'];
     const cacheKeys = ['kunden','auftraege','docs','wp','rechnungen','fahrtenbuch','einstellungen','zeiterfassung','materialien','angebote'];
     const results = await Promise.all(
-      tables.map(t => _sbNew.from(t).select('data').order('created_at'))
+      tables.map(t => _sbNew.from(t).select('data'))
     );
     results.forEach((res, i) => {
+      if (res.error) console.warn('[DB.init]', tables[i], res.error.message);
       this._cache[cacheKeys[i]] = (res.data || []).map(row => row.data);
     });
   },
@@ -546,7 +547,7 @@ function toggleMenu(){
 }
 // Desktop-Sidebar: aktiven Nav-Eintrag setzen
 function setDeskActive(el: Element) {
-  document.querySelectorAll('.desk-sidenav .side-item').forEach(i => i.classList.remove('active'))
+  document.querySelectorAll('.desk-sidebar .side-item').forEach(i => i.classList.remove('active'))
   el.classList.add('active')
 }
 let _currentPage = 'dashboard';
@@ -1316,7 +1317,7 @@ function doImport() {
     + '<strong>' + updated + ' aktualisiert</strong>'
     + (skipped ? ' · ' + skipped + ' übersprungen' : '');
 
-  renderKunden();
+  _renderKunden();
   renderDashboard();
 }
 
@@ -1932,11 +1933,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Nach erfolgreichem Login/Session-Restore: Daten laden + Dashboard rendern
   onAuthSuccess(async () => {
-    await _libDB.init()
-    // Lokales DB (für main.ts-Code wie globale Suche) zeigt auf denselben Cache
-    DB._cache = _libDB._cache
-    _applyEinstellungenFromDB()
-    _renderDashboard()
+    try {
+      await _libDB.init()
+      // Lokales DB (für main.ts-Code wie globale Suche) zeigt auf denselben Cache
+      DB._cache = _libDB._cache
+      console.log('[Auth] DB geladen – Kunden:', _libDB._cache.kunden.length,
+                  '| Aufträge:', _libDB._cache.auftraege.length)
+      _applyEinstellungenFromDB()
+      _renderDashboard()
+    } catch(e) {
+      console.error('[Auth] Fehler beim Daten laden:', e)
+    }
   })
 
   // Beim Logout: UIDs zurücksetzen

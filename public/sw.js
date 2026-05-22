@@ -1,5 +1,5 @@
 // FieldApp Service Worker — Offline + Sync
-const CACHE = 'schnellr-v19';
+const CACHE = 'schnellr-v21';
 const SHELL = [
   './app.html',
   './manifest.json',

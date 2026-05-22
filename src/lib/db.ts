@@ -117,8 +117,15 @@ export const DB = {
   async init() {
     const tables    = ['kunden','auftraege','docs','wochenplan','rechnungen','fahrtenbuch','einstellungen','zeiterfassung','materialien','angebote']
     const cacheKeys = ['kunden','auftraege','docs','wp','rechnungen','fahrtenbuch','einstellungen','zeiterfassung','materialien','angebote']
-    const results = await Promise.all(tables.map(t => supabase.from(t).select('data').order('created_at')))
+    // order('created_at') nur wenn die Spalte existiert — daher weggelassen.
+    // Supabase-Fehler pro Tabelle einzeln loggen, nie komplett stumm schlucken.
+    const results = await Promise.all(
+      tables.map(t => supabase.from(t).select('data'))
+    )
     results.forEach((res, i) => {
+      if (res.error) {
+        console.warn(`[DB.init] Tabelle "${tables[i]}" Fehler:`, res.error.message)
+      }
       this._cache[cacheKeys[i]] = (res.data || []).map((row: any) => row.data)
     })
   },
