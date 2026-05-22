@@ -1,10 +1,9 @@
 // @ts-nocheck — Phase 1 Migration: Types werden schrittweise hinzugefügt
 /* eslint-disable */
 import './styles/app.css'
-import { createClient } from '@supabase/supabase-js'
 
 // ── Phase-2-Module ──────────────────────────────────────────────
-import { DB, OfflineQueue, updateOfflineBadge, setAccessToken, supabase as _sbNew } from './lib/db'
+import { DB as _libDB, OfflineQueue, updateOfflineBadge, setAccessToken, getAccessToken, supabase as _sbNew } from './lib/db'
 import { showToast as _showToast, uid as _uid, today as _today, fmtDate as _fmtDate } from './lib/utils'
 import {
   showPage as _showPage, registerPage, registerModalOpen, openModal as _openModal,
@@ -368,11 +367,10 @@ window.addEventListener('online', async () => {
 });
 window.addEventListener('offline', () => updateOfflineBadge());
 
-// ── SUPABASE CLIENT ────────────────────────────────────────────
+// ── SUPABASE CONFIG ────────────────────────────────────────────
 const SUPA_URL = 'https://bpgrqvxspcpkzdvoiyfj.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwZ3JxdnhzcGNwa3pkdm9peWZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODY0MDMsImV4cCI6MjA5NDQ2MjQwM30.qsD_ZK-XAca1hrhD74Fq9UoTlKZ0cWdNtf8FpdAiuP8';
-const _sb = createClient(SUPA_URL, SUPA_KEY);
-let _accessToken = null; // wird bei Login gesetzt, macht _headers() synchron
+// Kein zweiter createClient-Aufruf hier — _sbNew aus lib/db.ts ist der Singleton
 
 // ── DATABASE (Supabase + In-Memory Cache) ──────────────────────
 // Reads: synchronous from cache → alle Render-Funktionen bleiben unverändert
@@ -386,7 +384,7 @@ const DB = {
     const tables = ['kunden','auftraege','docs','wochenplan','rechnungen','fahrtenbuch','einstellungen','zeiterfassung','materialien','angebote'];
     const cacheKeys = ['kunden','auftraege','docs','wp','rechnungen','fahrtenbuch','einstellungen','zeiterfassung','materialien','angebote'];
     const results = await Promise.all(
-      tables.map(t => _sb.from(t).select('data').order('created_at'))
+      tables.map(t => _sbNew.from(t).select('data').order('created_at'))
     );
     results.forEach((res, i) => {
       this._cache[cacheKeys[i]] = (res.data || []).map(row => row.data);
@@ -406,7 +404,7 @@ const DB = {
   _headers() {
     return {
       'apikey': SUPA_KEY,
-      'Authorization': `Bearer ${_accessToken || SUPA_KEY}`,
+      'Authorization': `Bearer ${getAccessToken() || SUPA_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': 'resolution=merge-duplicates,return=minimal'
     };
@@ -485,7 +483,7 @@ const DB = {
     const path = `${this._uid}/${refType}_${refId}_${uid()}.${ext}`;
     const res = await fetch(`${SUPA_URL}/storage/v1/object/fieldapp-fotos/${path}`, {
       method: 'POST',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${_accessToken||SUPA_KEY}`, 'Content-Type': file.type },
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${getAccessToken()||SUPA_KEY}`, 'Content-Type': file.type },
       body: file
     });
     if (!res.ok) { console.error('[Storage] Upload fehlgeschlagen', await res.text()); return null; }
@@ -497,7 +495,7 @@ const DB = {
     if (!path) return;
     await fetch(`${SUPA_URL}/storage/v1/object/fieldapp-fotos/${path}`, {
       method: 'DELETE',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${_accessToken||SUPA_KEY}` }
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${getAccessToken()||SUPA_KEY}` }
     });
   },
 };
@@ -1704,7 +1702,8 @@ _w.agAkzeptieren = _agAkzeptieren
 _w.downloadAngebotPDF = _downloadAngebotPDF
 _w.addAgPosition = _addAgPosition
 _w.agCalcGesamt = _agCalcGesamt
-_w.sendMahnung = sendMahnung
+_w.sendMahnung = _mahnungErstellen
+_w.closeModalBg = closeModalBg
 _w.ntAddBlock            = _ntAddBlock
 _w.ntRemoveBlock         = _ntRemoveBlock
 _w.loadNtAuftrag         = _loadNtAuftrag
@@ -1790,3 +1789,113 @@ _w.obRemoveMa = _obRemoveMa
 _w.obSaveMa = _obSaveMa
 _w.obSaveKunde = _obSaveKunde
 _w.recoverySetPassword = _recoverySetPassword
+
+// ════════════════════════════════════════════════════════════
+// INITIALISIERUNG — DOMContentLoaded
+// Hier wird alles verdrahtet und gestartet. War vorher nie
+// aufgerufen → alle Module blieben uninitialisiert.
+// ════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ── 1. Basis-Config anwenden (Farben, Texte, Leistungs-Chips) ──
+  applyConfig()
+
+  // ── 2. Cross-Modul-Callbacks verdrahten ──
+
+  // Dashboard braucht: Kalender-Render, Team, Zeiterfassung, RG-Status, Auftrags-Detail
+  onDashRenderKalMonat(_renderKalMonat)
+  onDashRenderKalAgenda(_renderKalAgenda)
+  onDashRenderTeam(_renderDashTeam)
+  onDashRenderTagesreport(_renderTagesreport)
+  onDashGetRgStatus(getRgStatus)
+  onDashShowAuftragDetail(_showAuftragDetail)
+
+  // Auftraege → Dashboard re-rendern, Zeiterfassung starten, Barcode öffnen, Checklist rendern
+  onAuftragDataChange(_renderDashboard)
+  onStartZeiterfassung(_startZeiterfassung)
+  onOpenBarcodeScanner(_openBarcodeScanner)
+  onRenderAuftragChecklist(_renderAuftragChecklist)
+
+  // Kunden → Dashboard
+  onKundenDataChange(_renderDashboard)
+
+  // Rechnungen → Dashboard + Push
+  onRechnungDataChange(_renderDashboard)
+  onRechnungTriggerPush(_triggerPush)
+
+  // Kalender ↔ Auftraege
+  onKalGotoAuftraege(() => _showPage('auftraege'))
+  onKalRenderAuftraege(_renderAuftraege)
+  onKalShowAuftragDetail(_showAuftragDetail)
+
+  // Zeiterfassung → Navigation
+  onZtShowPage(_showPage)
+  onZtCloseDetail(closeDetailPanel)
+
+  // Nachtermin → Dashboard + Signatur
+  onNtRenderDashboard(_renderDashboard)
+  onNtOpenSigModal(_openSigModal)
+
+  // Onboarding → Dashboard, Config, Tour
+  onObRenderDashboard(_renderDashboard)
+  onObApplyConfig(applyConfig)
+  onObStartTour(_startTour)
+
+  // Tour → Navigation + Menü
+  onTourShowPage(_showPage)
+  onTourToggleMenu(_toggleMenu)
+
+  // Angebote → Dashboard
+  onAgRenderDashboard(_renderDashboard)
+
+  // Einstellungen → Team, Materialliste, Checklisten
+  onRenderTeamSection(_renderTeamSection)
+  onRenderMaterialListe(renderMaterialListe)
+  onRenderChecklistTemplates(_renderChecklistTemplates)
+
+  // ── 3. Alle Module initialisieren (Seiten registrieren, Event Listener setzen) ──
+  initKunden()
+  initAuftraege()
+  initDashboard()
+  initRechnungen()
+  initEinstellungen()
+  initWochenplan()
+  initZeiterfassung()
+  initSchnellerfassung()
+  initKalender()
+  initBarcode()
+  initChecklist()
+  initPush()
+  initAngebote()
+  _initRoute()
+  initSigCanvas()
+  initSwipeNavigation()
+  initStaticEventListeners()
+  initSearchDelegation()
+
+  // ── 4. Auth-Callbacks registrieren (VOR initAuth, damit Session-Restore greift) ──
+
+  // Beim Login: UID in beide DB-Objekte schreiben
+  onAuthApplyUser(async (user) => {
+    _libDB._uid = user.id
+    DB._uid     = user.id
+  })
+
+  // Nach erfolgreichem Login/Session-Restore: Daten laden + Dashboard rendern
+  onAuthSuccess(async () => {
+    await _libDB.init()
+    // Lokales DB (für main.ts-Code wie globale Suche) zeigt auf denselben Cache
+    DB._cache = _libDB._cache
+    _applyEinstellungenFromDB()
+    _renderDashboard()
+  })
+
+  // Beim Logout: UIDs zurücksetzen
+  onAuthSignOut(() => {
+    _libDB._uid = null
+    DB._uid     = null
+  })
+
+  // ── 5. Auth starten — prüft bestehende Session + setzt onAuthStateChange-Listener ──
+  initAuth()
+})
