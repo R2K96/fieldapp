@@ -34,11 +34,15 @@ import {
   markBezahlt as _markBezahlt, mahnungErstellen as _mahnungErstellen,
   populateRechnungSelect as _populateRechnungSelect, nextRNr as _nextRNr,
   onRechnungDataChange, onRechnungTriggerPush,
+  rgMatToggle as _rgMatToggle, goRStep as _goRStep,
+  showZahlungDetails as _showZahlungDetails, offenLassen as _offenLassen,
+  downloadRechnungPDFModal as _downloadRechnungPDFModal,
 } from './modules/rechnungen'
 import {
   initEinstellungen, renderEinstellungen as _renderEinstellungen,
   saveEinstellungen as _saveEinstellungen, applyEinstellungenFromDB as _applyEinstellungenFromDB,
   renderMaList as _renderMaList, addMitarbeiter as _addMitarbeiter, removeMitarbeiter as _removeMitarbeiter,
+  removeLogo as _removeLogo,
   onRenderTeamSection, onRenderMaterialListe, onRenderChecklistTemplates,
 } from './modules/einstellungen'
 import {
@@ -538,6 +542,11 @@ function modalChip(el, key){
 function toggleMenu(){
   document.getElementById('sideOverlay').classList.toggle('open');
   document.getElementById('sideMenu').classList.toggle('open');
+}
+// Desktop-Sidebar: aktiven Nav-Eintrag setzen
+function setDeskActive(el: Element) {
+  document.querySelectorAll('.desk-sidenav .side-item').forEach(i => i.classList.remove('active'))
+  el.classList.add('active')
 }
 let _currentPage = 'dashboard';
 function showPage(id){
@@ -1789,6 +1798,21 @@ _w.obRemoveMa = _obRemoveMa
 _w.obSaveMa = _obSaveMa
 _w.obSaveKunde = _obSaveKunde
 _w.recoverySetPassword = _recoverySetPassword
+_w.setNewPassword      = _recoverySetPassword   // alias (alter onclick-Name in HTML)
+
+// ── Fehlende window-Exports (Button-Audit Fix) ──────────────
+_w.dismissInstallBanner   = dismissInstallBanner
+_w.triggerInstall         = triggerInstall
+_w.doImport               = doImport
+_w.modalChip              = modalChip
+_w.matManualSave          = matManualSave
+_w.rgMatToggle            = _rgMatToggle
+_w.goRStep                = _goRStep
+_w.showZahlungDetails     = _showZahlungDetails
+_w.offenLassen            = _offenLassen
+_w.downloadRechnungPDFModal = _downloadRechnungPDFModal
+_w.removeLogo             = _removeLogo
+_w.setDeskActive          = setDeskActive
 
 // ════════════════════════════════════════════════════════════
 // INITIALISIERUNG — DOMContentLoaded
